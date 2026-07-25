@@ -1,11 +1,10 @@
 package br.com.intelifiscal.database.schema;
 
+import java.util.List;
+
 /**
- * Responsável pela criação da tabela de controle de versão
+ * Responsável pela definição da tabela de controle de versão
  * do banco de dados.
- *
- * Esta tabela registra a versão atual do schema,
- * permitindo futuras migrações.
  *
  * @author José Roberto Bizaio
  */
@@ -13,27 +12,35 @@ public final class TblVersaoBancoSchema {
 
     public static final String TABLE_NAME = "tblVersaoBanco";
 
+    private static final String CREATE_TABLE = """
+            CREATE TABLE IF NOT EXISTS tblVersaoBanco (
+            
+                id INTEGER PRIMARY KEY,
+                
+                versao INTEGER NOT NULL,
+                
+                data_atualizacao TEXT NOT NULL
+                
+            );
+            """;
+
     private TblVersaoBancoSchema() {
     }
 
     /**
-     * Retorna o SQL responsável pela criação da tabela.
+     * Retorna a definição completa do schema.
      *
-     * @return SQL CREATE TABLE.
+     * @return definição do schema.
      */
-    public static String getSql() {
+    public static SchemaDefinition getSchema() {
 
-        return """
-                CREATE TABLE IF NOT EXISTS tblVersaoBanco (
-                
-                    id INTEGER PRIMARY KEY,
-                    
-                    versao INTEGER NOT NULL,
-                    
-                    data_atualizacao TEXT NOT NULL
-                    
-                );
-                """;
+        return new SchemaDefinition(
+                TABLE_NAME,
+                List.of(
+                        CREATE_TABLE
+                )
+        );
+
     }
 
 }

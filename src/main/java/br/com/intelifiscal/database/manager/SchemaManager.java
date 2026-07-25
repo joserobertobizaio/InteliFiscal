@@ -2,6 +2,7 @@ package br.com.intelifiscal.database.manager;
 
 import br.com.intelifiscal.database.schema.SchemaDefinition;
 import br.com.intelifiscal.database.schema.TblVersaoBancoSchema;
+import br.com.intelifiscal.database.schema.TblEstabelecimentoSchema;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,16 +33,12 @@ public final class SchemaManager {
 
         List<SchemaDefinition> schemas = new ArrayList<>();
 
-        schemas.add(
-                new SchemaDefinition(
-                        TblVersaoBancoSchema.TABLE_NAME,
-                        List.of(
-                                TblVersaoBancoSchema.getSql()
-                        )
-                )
-        );
+        schemas.add(TblVersaoBancoSchema.getSchema());
+
+        schemas.add(TblEstabelecimentoSchema.getSchema());
 
         return Collections.unmodifiableList(schemas);
+
     }
 
 }
