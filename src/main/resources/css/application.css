@@ -1,0 +1,19 @@
+/*
+ * ==========================================================
+ * InteliFiscal
+ * Tema padrão da aplicação
+ * ==========================================================
+ */
+
+@import "topbar.css";
+@import "sidebar.css";
+
+/* ---------- Root ---------- */
+
+.root {
+
+    -fx-background-color: #F5F5F5;
+
+    -fx-font-family: "Segoe UI";
+
+}

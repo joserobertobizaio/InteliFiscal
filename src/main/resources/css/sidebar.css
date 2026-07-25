@@ -1,0 +1,67 @@
+/******************************************************************************
+ * SIDEBAR
+ ******************************************************************************/
+
+.sidebar {
+
+    -fx-background-color: white;
+
+    -fx-border-color: #E5E7EB;
+
+    -fx-border-width: 0 1 0 0;
+
+    -fx-padding: 18;
+
+    -fx-spacing: 6;
+
+}
+
+/******************************************************************************
+ * TÍTULO
+ ******************************************************************************/
+
+.sidebar-title {
+
+    -fx-font-size: 11px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #2563EB;
+
+    -fx-padding: 0 0 12 0;
+
+}
+
+/******************************************************************************
+ * ITENS DO MENU
+ ******************************************************************************/
+
+.sidebar-item {
+
+    -fx-background-color: transparent;
+
+    -fx-background-radius: 8;
+
+    -fx-padding: 10 12 10 12;
+
+    -fx-cursor: hand;
+
+    -fx-alignment: CENTER_LEFT;
+
+}
+
+.sidebar-item:hover {
+
+    -fx-background-color: #EFF6FF;
+
+}
+
+.sidebar-item-text {
+
+    -fx-font-size: 13px;
+
+    -fx-font-weight: 600;
+
+    -fx-text-fill: #1F2937;
+
+}
