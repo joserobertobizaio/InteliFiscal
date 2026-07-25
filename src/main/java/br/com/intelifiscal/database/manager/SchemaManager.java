@@ -35,7 +35,9 @@ public final class SchemaManager {
         schemas.add(
                 new SchemaDefinition(
                         TblVersaoBancoSchema.TABLE_NAME,
-                        TblVersaoBancoSchema.getSql()
+                        List.of(
+                                TblVersaoBancoSchema.getSql()
+                        )
                 )
         );
 

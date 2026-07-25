@@ -36,24 +36,25 @@ public final class DatabaseVersionManager {
 
         for (SchemaDefinition schema : schemas) {
 
-            SqlExecutor.execute(connection, schema.sql());
+            for (String sql : schema.scripts()) {
 
+                SqlExecutor.execute(connection, sql);
+
+            }
+
+            // Primeira versão do sistema.
+            //
+            // Fluxo futuro:
+            //
+            // 1 - Verificar existência da tabela tblVersaoBanco.
+            // 2 - Caso não exista:
+            //      - criar tabela;
+            //      - criar demais tabelas;
+            //      - registrar versão 1.
+            //
+            // 3 - Caso exista:
+            //      - verificar versão atual.
+            //      - executar migrações necessárias.
         }
-
-        // Primeira versão do sistema.
-        //
-        // Fluxo futuro:
-        //
-        // 1 - Verificar existência da tabela tblVersaoBanco.
-        // 2 - Caso não exista:
-        //      - criar tabela;
-        //      - criar demais tabelas;
-        //      - registrar versão 1.
-        //
-        // 3 - Caso exista:
-        //      - verificar versão atual.
-        //      - executar migrações necessárias.
-
     }
-
 }
