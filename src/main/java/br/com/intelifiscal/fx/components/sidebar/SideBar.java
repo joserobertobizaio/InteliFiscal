@@ -3,6 +3,7 @@ package br.com.intelifiscal.fx.components.sidebar;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.components.common.icons.AppIcon;
 import br.com.intelifiscal.fx.components.common.icons.IconType;
+import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -13,6 +14,8 @@ import javafx.scene.control.Label;
  * Menu lateral da aplicação.
  */
 public class SideBar extends VBox {
+
+    private Consumer<ScreenType> onScreenSelected;
 
     public SideBar() {
         initialize();
@@ -82,11 +85,25 @@ public class SideBar extends VBox {
             case CONFIGURACOES -> IconType.CONFIGURACOES;
         };
 
-        return new SidebarItem(
+        SidebarItem item = new SidebarItem(
                 screenType,
                 new AppIcon(iconType),
                 text
         );
+
+        item.setOnAction(selectedScreen -> {
+
+            if (onScreenSelected != null) {
+                onScreenSelected.accept(selectedScreen);
+            }
+
+        });
+
+        return item;
+    }
+
+    public void setOnScreenSelected(Consumer<ScreenType> onScreenSelected) {
+        this.onScreenSelected = onScreenSelected;
     }
 
 }
