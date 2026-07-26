@@ -23,12 +23,13 @@
 .sidebar-title {
 
     -fx-font-size: 11px;
-
     -fx-font-weight: bold;
 
     -fx-text-fill: #2563EB;
 
     -fx-padding: 0 0 12 0;
+
+    -fx-letter-spacing: 1px;
 
 }
 

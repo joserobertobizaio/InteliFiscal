@@ -1,6 +1,8 @@
 package br.com.intelifiscal.fx.components.sidebar;
 
 import br.com.intelifiscal.fx.navigation.ScreenType;
+import br.com.intelifiscal.fx.components.common.icons.AppIcon;
+import br.com.intelifiscal.fx.components.common.icons.IconType;
 import javafx.geometry.Insets;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -20,10 +22,14 @@ public class SideBar extends VBox {
 
         getStyleClass().add("sidebar");
 
-        setSpacing(10);
+        setSpacing(14);
         setPadding(new Insets(20));
 
-        Label title = new Label("MENU");
+        setPrefWidth(225);
+        setMinWidth(225);
+        setMaxWidth(225);
+
+        Label title = new Label("MENU PRINCIPAL");
         title.getStyleClass().add("sidebar-title");
 
         getChildren().add(title);
@@ -57,12 +63,30 @@ public class SideBar extends VBox {
 
     private SidebarItem createItem(ScreenType screenType, String text) {
 
-        Region iconPlaceholder = new Region();
-        iconPlaceholder.setPrefSize(18, 18);
-        iconPlaceholder.setMinSize(18, 18);
-        iconPlaceholder.setMaxSize(18, 18);
+        IconType iconType = switch (screenType) {
 
-        return new SidebarItem(screenType, iconPlaceholder, text);
+            case DASHBOARD -> IconType.DASHBOARD;
+
+            case ESTABELECIMENTO -> IconType.ESTABELECIMENTO;
+
+            case IMPORTACAO_XML -> IconType.IMPORTACAO_XML;
+
+            case COMPRAS -> IconType.COMPRAS;
+
+            case VENDAS -> IconType.VENDAS;
+
+            case PRODUTOS -> IconType.PRODUTOS;
+
+            case RELATORIOS -> IconType.RELATORIOS;
+
+            case CONFIGURACOES -> IconType.CONFIGURACOES;
+        };
+
+        return new SidebarItem(
+                screenType,
+                new AppIcon(iconType),
+                text
+        );
     }
 
 }
