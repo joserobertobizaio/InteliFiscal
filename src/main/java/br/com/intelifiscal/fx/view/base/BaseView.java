@@ -1,6 +1,7 @@
 package br.com.intelifiscal.fx.view.base;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -9,6 +10,8 @@ import javafx.scene.layout.VBox;
 public class BaseView extends BorderPane {
 
     private final VBox header = new VBox(5);
+
+    private final VBox content = new VBox();
 
     private final Label lblTitulo = new Label();
 
@@ -36,12 +39,21 @@ public class BaseView extends BorderPane {
 
         header.setPadding(new Insets(20));
 
+        content.setPadding(new Insets(15, 20, 20, 20));
+
+        content.setFillWidth(true);
+
+        content.setAlignment(Pos.TOP_CENTER);
+
         setTop(header);
+
+        setCenter(content);
     }
 
     protected void setContent(Node node) {
 
-        setCenter(node);
+        content.getChildren().setAll(node);
+
     }
 
 }

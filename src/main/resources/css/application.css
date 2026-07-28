@@ -17,3 +17,51 @@
     -fx-font-family: "Segoe UI";
 
 }
+
+/* ==========================================================
+ * Card
+ * ========================================================== */
+
+.card {
+
+    -fx-background-color: white;
+
+    -fx-background-radius: 12;
+
+    -fx-border-color: #E3E3E3;
+
+    -fx-border-radius: 12;
+
+    -fx-border-width: 1;
+
+}
+
+/* ==========================================================
+ * Dashboard
+ * ========================================================== */
+
+.dashboard-icon {
+
+    -fx-font-size: 42px;
+
+}
+
+.dashboard-title {
+
+    -fx-font-size: 22px;
+
+    -fx-font-weight: bold;
+
+}
+
+.dashboard-description {
+
+    -fx-font-size: 14px;
+
+    -fx-text-fill: #666666;
+
+    -fx-alignment: center;
+
+    -fx-text-alignment: center;
+
+}
