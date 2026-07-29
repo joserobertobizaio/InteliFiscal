@@ -19,5 +19,13 @@ public enum IconType {
 
     RELATORIOS,
 
-    CONFIGURACOES
+    CONFIGURACOES,
+
+    NOVO,
+
+    SALVAR,
+
+    EXCLUIR,
+
+    FECHAR
 }

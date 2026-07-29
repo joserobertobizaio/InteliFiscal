@@ -12,7 +12,7 @@
 
 .root {
 
-    -fx-background-color: #F5F5F5;
+    -fx-background-color: #F2F7FF;
 
     -fx-font-family: "Segoe UI";
 
@@ -22,18 +22,26 @@
  * Card
  * ========================================================== */
 
-.card {
+.card{
 
-    -fx-background-color: white;
+    -fx-background-color:white;
 
-    -fx-background-radius: 12;
+    -fx-background-radius:16;
 
-    -fx-border-color: #E3E3E3;
+    -fx-border-radius:16;
 
-    -fx-border-radius: 12;
+    -fx-border-color:#E4E8EE;
 
-    -fx-border-width: 1;
+    -fx-border-width:1;
 
+    -fx-effect:dropshadow(
+            gaussian,
+            rgba(0,0,0,0.08),
+            18,
+            0.18,
+            0,
+            3
+    );
 }
 
 /* ==========================================================
@@ -64,4 +72,205 @@
 
     -fx-text-alignment: center;
 
+}
+
+/* ==========================================================
+   SECTION TITLE
+   ========================================================== */
+
+.section-title {
+
+    -fx-font-size: 17px;
+
+    -fx-font-weight: bold;
+
+    -fx-text-fill: #1F3B67;
+
+}
+
+.section-title .separator .line {
+
+    -fx-border-color: #D6E3F5;
+
+    -fx-border-width: 1;
+
+}
+
+/* ==========================================================
+   CRUD BUTTON BAR
+   ========================================================== */
+
+.crud-novo,
+.crud-salvar,
+.crud-excluir,
+.crud-fechar{
+
+    -fx-background-radius:8;
+    -fx-border-radius:8;
+
+    -fx-font-size:13px;
+    -fx-font-weight:bold;
+
+    -fx-text-fill:white;
+
+    -fx-cursor:hand;
+
+    -fx-padding:8 18 8 18;
+
+    -fx-background-insets:0;
+}
+
+/* NOVO */
+
+.crud-novo{
+
+    -fx-background-color:#2F80ED;
+}
+
+.crud-novo:hover{
+
+    -fx-background-color:#1C6DD0;
+}
+
+/* SALVAR */
+
+.crud-salvar{
+
+    -fx-background-color:#27AE60;
+}
+
+.crud-salvar:hover{
+
+    -fx-background-color:#219653;
+}
+
+/* EXCLUIR */
+
+.crud-excluir{
+
+    -fx-background-color:#EB5757;
+}
+
+.crud-excluir:hover{
+
+    -fx-background-color:#D64545;
+}
+
+/* FECHAR */
+
+.crud-fechar{
+
+    -fx-background-color:#6C757D;
+}
+
+.crud-fechar:hover{
+
+    -fx-background-color:#5A6268;
+}
+
+/* ==========================================================
+   TEXTFIELD
+   ========================================================== */
+
+.text-field {
+
+    -fx-background-color: white;
+
+    -fx-background-radius: 8;
+
+    -fx-border-radius: 8;
+
+    -fx-border-color: #D6DEE8;
+
+    -fx-border-width: 1;
+
+    -fx-padding: 8 12 8 12;
+
+    -fx-font-size: 13px;
+
+    -fx-pref-height: 38px;
+
+    -fx-background-insets: 0;
+}
+
+.text-field:focused {
+
+    -fx-border-color: #2F80ED;
+
+    -fx-border-width: 2;
+
+    -fx-background-color: white;
+}
+
+/* ==========================================================
+   COMBOBOX
+   ========================================================== */
+
+.combo-box {
+
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    -fx-border-color: #D6DEE8;
+    -fx-border-width: 1;
+
+    -fx-font-size: 13px;
+
+    -fx-padding: 2 8 2 8;
+}
+
+.combo-box:hover {
+
+    -fx-border-color: #2F80ED;
+}
+
+.combo-box .list-cell {
+
+    -fx-background-color: white;
+
+    -fx-text-fill: #2C3E50;
+}
+
+.combo-box .arrow-button {
+
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+
+    -fx-background-color: #5F6B7A;
+}
+
+/* ==========================================================
+   BOTÃO NOVA EMPRESA
+   ========================================================== */
+
+.btn-nova-empresa{
+
+    -fx-background-color:#2F80ED;
+
+    -fx-text-fill:white;
+
+    -fx-font-size:13px;
+
+    -fx-font-weight:bold;
+
+    -fx-background-radius:8;
+
+    -fx-border-radius:8;
+
+    -fx-cursor:hand;
+
+    -fx-padding:6 14 6 14;
+}
+
+.btn-nova-empresa:hover{
+
+    -fx-background-color:#1C6DD0;
+}
+
+.btn-nova-empresa:pressed{
+
+    -fx-background-color:#1759AE;
 }

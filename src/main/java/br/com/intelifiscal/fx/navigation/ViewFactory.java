@@ -1,6 +1,7 @@
 package br.com.intelifiscal.fx.navigation;
 
 import br.com.intelifiscal.fx.view.dashboard.DashboardView;
+import br.com.intelifiscal.fx.view.estabelecimento.EstabelecimentoView;
 import javafx.scene.Node;
 
 /**
@@ -16,6 +17,8 @@ public final class ViewFactory {
         return switch (screenType) {
 
             case DASHBOARD -> new DashboardView();
+
+            case ESTABELECIMENTO -> new EstabelecimentoView();
 
             default ->
                     throw new IllegalArgumentException(

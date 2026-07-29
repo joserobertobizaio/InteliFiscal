@@ -37,6 +37,14 @@ public class AppIcon extends FontIcon {
             case RELATORIOS -> FontAwesomeSolid.CHART_BAR;
 
             case CONFIGURACOES -> FontAwesomeSolid.COG;
+
+            case NOVO -> FontAwesomeSolid.PLUS;
+
+            case SALVAR -> FontAwesomeSolid.SAVE;
+
+            case EXCLUIR -> FontAwesomeSolid.TRASH;
+
+            case FECHAR -> FontAwesomeSolid.TIMES;
         };
     }
 }
