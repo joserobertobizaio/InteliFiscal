@@ -35,6 +35,8 @@ public class EstabelecimentoView extends BaseView {
 
     private final ComboBox<String> cbEmpresa = new ComboBox<>();
 
+    private final CrudButtonBar crudButtonBar = new CrudButtonBar();
+
     private final Button btNovaEmpresa =
             new Button(
                     "Nova Empresa",
@@ -183,9 +185,6 @@ public class EstabelecimentoView extends BaseView {
         SectionTitle secContato =
                 new SectionTitle("Contato");
 
-        CrudButtonBar crudButtonBar =
-                new CrudButtonBar();
-
         //---------------------------------------------
         // CONTEÚDO
         //---------------------------------------------
@@ -239,5 +238,65 @@ public class EstabelecimentoView extends BaseView {
         scrollPane.setPannable(true);
 
         setContent(scrollPane);
+    }
+
+    public CrudButtonBar getCrudButtonBar() {
+        return crudButtonBar;
+    }
+
+    public TextField getTxtCnpj() {
+        return txtCnpj;
+    }
+
+    public TextField getTxtInscricaoEstadual() {
+        return txtInscricaoEstadual;
+    }
+
+    public TextField getTxtRazaoSocial() {
+        return txtRazaoSocial;
+    }
+
+    public TextField getTxtNomeFantasia() {
+        return txtNomeFantasia;
+    }
+
+    public TextField getTxtCep() {
+        return txtCep;
+    }
+
+    public TextField getTxtUf() {
+        return txtUf;
+    }
+
+    public TextField getTxtCidade() {
+        return txtCidade;
+    }
+
+    public TextField getTxtBairro() {
+        return txtBairro;
+    }
+
+    public TextField getTxtEndereco() {
+        return txtEndereco;
+    }
+
+    public TextField getTxtNumero() {
+        return txtNumero;
+    }
+
+    public TextField getTxtTelefone() {
+        return txtTelefone;
+    }
+
+    public TextField getTxtEmail() {
+        return txtEmail;
+    }
+
+    public ComboBox<String> getCbEmpresa() {
+        return cbEmpresa;
+    }
+
+    public Button getBtNovaEmpresa() {
+        return btNovaEmpresa;
     }
 }

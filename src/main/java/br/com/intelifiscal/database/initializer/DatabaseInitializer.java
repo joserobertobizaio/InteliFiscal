@@ -1,6 +1,7 @@
 package br.com.intelifiscal.database.initializer;
 
 import br.com.intelifiscal.database.connection.DatabaseConnection;
+import br.com.intelifiscal.database.version.DatabaseVersionManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -36,7 +37,8 @@ public final class DatabaseInitializer {
             //
             // Exemplo futuro:
             //
-            // DatabaseVersionManager.initialize(connection);
+
+            DatabaseVersionManager.initialize(connection);
 
         } catch (SQLException e) {
 
