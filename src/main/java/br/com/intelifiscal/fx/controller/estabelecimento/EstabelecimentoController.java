@@ -3,6 +3,8 @@ package br.com.intelifiscal.fx.controller.estabelecimento;
 import br.com.intelifiscal.fx.view.estabelecimento.EstabelecimentoView;
 import br.com.intelifiscal.service.MinhaEmpresaService;
 import br.com.intelifiscal.entity.MinhaEmpresa;
+import br.com.intelifiscal.util.Mascara;
+import br.com.intelifiscal.util.Mensagem;
 import java.time.LocalDateTime;
 
 public class EstabelecimentoController {
@@ -32,7 +34,9 @@ public class EstabelecimentoController {
 
         service.buscarEmpresa().ifPresent(empresa -> {
 
-            view.getTxtCnpj().setText(empresa.getCnpj());
+            view.getTxtCnpj().setText(
+                    Mascara.formatarCnpj(empresa.getCnpj())
+            );
             view.getTxtInscricaoEstadual().setText(empresa.getInscricaoEstadual());
             view.getTxtRazaoSocial().setText(empresa.getRazaoSocial());
             view.getTxtNomeFantasia().setText(empresa.getNomeFantasia());
@@ -53,9 +57,30 @@ public class EstabelecimentoController {
 
     private void salvar() {
 
+        if (view.getTxtCnpj().getText().trim().isEmpty()) {
+
+            Mensagem.aviso("Informe o CNPJ da empresa.");
+            view.getTxtCnpj().requestFocus();
+            return;
+
+        }
+
+        if (view.getTxtRazaoSocial().getText().trim().isEmpty()) {
+
+            Mensagem.aviso("Informe a Razão Social da empresa.");
+            view.getTxtRazaoSocial().requestFocus();
+            return;
+
+        }
+
         MinhaEmpresa empresa = new MinhaEmpresa();
 
-        empresa.setCnpj(view.getTxtCnpj().getText().trim());
+        String cnpj = view.getTxtCnpj()
+                .getText()
+                .replaceAll("[^A-Za-z0-9]", "")
+                .toUpperCase();
+
+        empresa.setCnpj(cnpj);
         empresa.setInscricaoEstadual(view.getTxtInscricaoEstadual().getText().trim());
         empresa.setRazaoSocial(view.getTxtRazaoSocial().getText().trim());
         empresa.setNomeFantasia(view.getTxtNomeFantasia().getText().trim());
@@ -78,6 +103,8 @@ public class EstabelecimentoController {
         empresa.setDataAtualizacao(agora);
 
         service.salvar(empresa);
+
+        Mensagem.sucesso("Dados da empresa salvos com sucesso.");
 
     }
 

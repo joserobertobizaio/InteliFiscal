@@ -6,6 +6,7 @@ import br.com.intelifiscal.fx.components.common.SectionTitle;
 import br.com.intelifiscal.fx.components.common.icons.AppIcon;
 import br.com.intelifiscal.fx.components.common.icons.IconType;
 import br.com.intelifiscal.fx.view.base.BaseView;
+import br.com.intelifiscal.util.Mascara;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -171,6 +172,13 @@ public class EstabelecimentoView extends BaseView {
 
         txtTelefone.setPrefWidth(220);
         txtEmail.setPrefWidth(420);
+
+        //---------------------------------------------
+        // MÁSCARAS
+        //---------------------------------------------
+
+        Mascara.aplicarCnpjAlfanumerico(txtCnpj);
+        Mascara.aplicarCep(txtCep);
 
         //---------------------------------------------
         // SEÇÕES
