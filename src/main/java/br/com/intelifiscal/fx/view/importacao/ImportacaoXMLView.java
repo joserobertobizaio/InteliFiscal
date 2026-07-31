@@ -1,0 +1,107 @@
+package br.com.intelifiscal.fx.view.importacao;
+
+import br.com.intelifiscal.fx.components.common.Card;
+import br.com.intelifiscal.fx.components.common.ImportButtonBar;
+import br.com.intelifiscal.fx.components.common.SectionTitle;
+import br.com.intelifiscal.fx.view.base.BaseView;
+import br.com.intelifiscal.fx.components.common.ImportacaoTable;
+import javafx.geometry.Insets;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.control.ScrollPane;
+import br.com.intelifiscal.fx.components.common.ImportacaoResumo;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+
+
+public class ImportacaoXMLView extends BaseView {
+
+    private final ImportButtonBar buttonBar = new ImportButtonBar();
+
+    private final ImportacaoTable tabela = new ImportacaoTable();
+
+    private final ImportacaoResumo resumo = new ImportacaoResumo();
+
+    private final ProgressBar progressBar = new ProgressBar(0);
+
+    private final TextArea txtLog = new TextArea();
+
+    public ImportacaoXMLView() {
+
+        super(
+                "Importação XML",
+                "Importação de Notas Fiscais Eletrônicas de Compra e Venda"
+        );
+
+        initialize();
+    }
+
+    private void initialize() {
+
+        progressBar.setPrefWidth(Double.MAX_VALUE);
+
+        txtLog.setEditable(false);
+        txtLog.setPrefRowCount(4);
+
+        BorderPane layout = new BorderPane();
+
+        layout.setPadding(new Insets(20));
+
+        layout.setTop(buttonBar);
+
+        VBox rodape = new VBox(10);
+
+        rodape.getChildren().addAll(
+
+                new SectionTitle("Resumo da Importação"),
+                resumo,
+
+                new SectionTitle("Progresso"),
+                progressBar,
+
+                new SectionTitle("Log da Importação"),
+                txtLog
+
+        );
+
+        VBox centro = new VBox(8);
+
+        centro.getChildren().addAll(
+
+                new SectionTitle("Arquivos Selecionados"),
+                tabela
+
+        );
+
+        tabela.setPrefHeight(280);
+
+        layout.setCenter(centro);
+
+        layout.setBottom(rodape);
+
+        Card card = new Card(layout);
+
+        card.setWidthPercentage(0.92);
+        card.setMaxContentWidth(1100);
+
+        setContent(card);
+    }
+
+    public ImportButtonBar getButtonBar() {
+        return buttonBar;
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    public TextArea getTxtLog() {
+        return txtLog;
+    }
+
+    public ImportacaoTable getTabela() {
+        return tabela;
+    }
+
+    public ImportacaoResumo getResumo() {return resumo;}
+}

@@ -4,6 +4,7 @@ import br.com.intelifiscal.fx.view.dashboard.DashboardView;
 import br.com.intelifiscal.fx.view.estabelecimento.EstabelecimentoView;
 import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoController;
 import javafx.scene.Node;
+import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
 
 /**
  * Responsável por criar as Views da aplicação.
@@ -26,10 +27,11 @@ public final class ViewFactory {
                 new EstabelecimentoController(view);
 
                 yield view;
-
             }
 
-                default ->
+            case IMPORTACAO_XML -> new ImportacaoXMLView();
+
+            default ->
                     throw new IllegalArgumentException(
                             "View não implementada para: " + screenType
                     );
