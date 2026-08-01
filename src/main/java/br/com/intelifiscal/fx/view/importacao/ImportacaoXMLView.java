@@ -84,7 +84,20 @@ public class ImportacaoXMLView extends BaseView {
         card.setWidthPercentage(0.92);
         card.setMaxContentWidth(1100);
 
-        setContent(card);
+        ScrollPane scroll = new ScrollPane(card);
+
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(false);
+
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        scroll.setStyle(
+                "-fx-background-color:transparent;" +
+                        "-fx-background:transparent;"
+        );
+
+        setContent(scroll);
     }
 
     public ImportButtonBar getButtonBar() {

@@ -60,6 +60,11 @@ public class ImportacaoTable extends TableView<ImportacaoXmlItem> {
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         setPlaceholder(new Label("Nenhum XML selecionado."));
+
+        setFixedCellSize(28);
+
+        setPrefHeight(300);
+
     }
 
 }
