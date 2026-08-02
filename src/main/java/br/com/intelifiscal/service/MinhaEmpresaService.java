@@ -16,6 +16,14 @@ import java.util.Optional;
  */
 public class MinhaEmpresaService {
 
+    public boolean ehMinhaEmpresa(String cnpj) {
+
+        return buscarEmpresa()
+                .map(emp -> emp.getCnpj().equals(cnpj))
+                .orElse(false);
+
+    }
+
     private final MinhaEmpresaRepository repository;
 
     /**

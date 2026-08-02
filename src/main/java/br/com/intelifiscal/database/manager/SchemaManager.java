@@ -3,6 +3,7 @@ package br.com.intelifiscal.database.manager;
 import br.com.intelifiscal.database.schema.SchemaDefinition;
 import br.com.intelifiscal.database.schema.TblVersaoBancoSchema;
 import br.com.intelifiscal.database.schema.TblMinhaEmpresaSchema;
+import br.com.intelifiscal.database.schema.TblNFeSchema;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,8 @@ public final class SchemaManager {
         schemas.add(TblVersaoBancoSchema.getSchema());
 
         schemas.add(TblMinhaEmpresaSchema.getSchema());
+
+        schemas.add(TblNFeSchema.getSchema());
 
         return Collections.unmodifiableList(schemas);
 

@@ -28,8 +28,7 @@ public class ImportacaoXMLView extends BaseView {
 
     public ImportacaoXMLView() {
 
-        super(
-                "Importação XML",
+        super(  "Importação XML",
                 "Importação de Notas Fiscais Eletrônicas de Compra e Venda"
         );
 
@@ -45,16 +44,19 @@ public class ImportacaoXMLView extends BaseView {
 
         BorderPane layout = new BorderPane();
 
-        layout.setPadding(new Insets(20));
+        layout.setPadding(new Insets(2,20,20,20));
 
         layout.setTop(buttonBar);
 
-        VBox rodape = new VBox(10);
+        VBox centro = new VBox(12);
 
-        rodape.getChildren().addAll(
+        centro.getChildren().addAll(
+
+                new SectionTitle("Arquivos Selecionados"),
+                tabela,
 
                 new SectionTitle("Resumo da Importação"),
-                resumo,
+               //resumo,
 
                 new SectionTitle("Progresso"),
                 progressBar,
@@ -64,20 +66,9 @@ public class ImportacaoXMLView extends BaseView {
 
         );
 
-        VBox centro = new VBox(8);
-
-        centro.getChildren().addAll(
-
-                new SectionTitle("Arquivos Selecionados"),
-                tabela
-
-        );
-
-        tabela.setPrefHeight(280);
+        tabela.setPrefHeight(220);
 
         layout.setCenter(centro);
-
-        layout.setBottom(rodape);
 
         Card card = new Card(layout);
 

@@ -44,7 +44,7 @@ public class Card extends StackPane {
 
         getStyleClass().add("card");
 
-        setPadding(new Insets(30));
+        setPadding(new Insets(20));
 
         setMaxWidth(Region.USE_PREF_SIZE);
 
