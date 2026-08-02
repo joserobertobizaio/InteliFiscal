@@ -8,6 +8,10 @@ import br.com.intelifiscal.dto.xml.XmlNFeDTO;
 import br.com.intelifiscal.service.xml.XmlNFeReader;
 import br.com.intelifiscal.service.MinhaEmpresaService;
 
+import javafx.stage.DirectoryChooser;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
 
@@ -59,6 +63,10 @@ public class ImportacaoXMLController {
         view.getButtonBar()
                 .getBtImportar()
                 .setOnAction(e -> importar());
+
+        view.getButtonBar()
+                .getBtSelecionarPasta()
+                .setOnAction(e -> selecionarPasta());
     }
 
     private void selecionarXml() {
@@ -173,6 +181,115 @@ public class ImportacaoXMLController {
 
     }
 
+    private void selecionarPasta() {
+
+        DirectoryChooser chooser = new DirectoryChooser();
+
+        chooser.setTitle("Selecionar Pasta com XMLs");
+
+        Window window = view.getScene().getWindow();
+
+        File pasta = chooser.showDialog(window);
+
+        if (pasta == null) {
+            return;
+        }
+
+        File[] arquivos = pasta.listFiles((dir, nome) ->
+                nome.toLowerCase().endsWith(".xml"));
+
+        if (arquivos == null || arquivos.length == 0) {
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+            alert.setTitle("Selecionar Pasta");
+
+            alert.setHeaderText(null);
+
+            alert.setContentText(
+                    "Nenhum arquivo XML encontrado na pasta selecionada."
+            );
+
+            alert.showAndWait();
+
+            return;
+        }
+
+        Arrays.sort(arquivos, Comparator.comparing(File::getName));
+
+        view.getTabela().getItems().clear();
+
+        xmls.clear();
+
+        view.getProgressBar().setProgress(0);
+
+        view.getTxtLog().clear();
+
+        for (File arquivo : arquivos) {
+
+            try {
+
+                XmlNFeDTO dto = reader.ler(arquivo);
+
+                xmls.add(dto);
+
+                var item = new br.com.intelifiscal.fx.view.importacao.model.ImportacaoXmlItem();
+
+                item.arquivoProperty().set(dto.getArquivo());
+
+                item.numeroNotaProperty().set(dto.getNumero());
+
+                item.serieProperty().set(dto.getSerie());
+
+                item.emitenteProperty().set(dto.getRazaoSocialEmitente());
+
+                item.destinatarioProperty().set(dto.getRazaoSocialDestinatario());
+
+                item.emissaoProperty().set(
+                        XmlUtil.formatarData(dto.getDataEmissao())
+                );
+
+                item.valorProperty().set(
+                        XmlUtil.formatarValor(dto.getValorTotal())
+                );
+
+                String tipo = minhaEmpresaService.ehMinhaEmpresa(dto.getCnpjEmitente())
+                        ? "Venda"
+                        : "Compra";
+
+                item.tipoProperty().set(tipo);
+
+                item.situacaoProperty().set("Lido");
+
+                view.getTabela().getItems().add(item);
+
+            } catch (Exception ex) {
+
+                view.getTxtLog().appendText(
+                        "XML ignorado: "
+                                + arquivo.getName()
+                                + "\nMotivo: "
+                                + ex.getMessage()
+                                + "\n\n"
+                );
+            }
+        }
+
+        view.getTxtLog().appendText(
+                "Pasta selecionada:\n"
+                        + pasta.getAbsolutePath()
+                        + "\n\n"
+        );
+
+        view.getTxtLog().appendText(
+                "XMLs válidos carregados: "
+                        + xmls.size()
+                        + "\n"
+        );
+
+        System.out.println("Itens na tabela: " + view.getTabela().getItems().size());
+    }
+
     private void remover() {
 
         if (xmls.isEmpty()) {
@@ -221,10 +338,7 @@ public class ImportacaoXMLController {
         }
 
         view.getProgressBar().setProgress(0);
-
-        view.getTxtLog().appendText(
-                "Iniciando importação...\n"
-        );
+        view.getTxtLog().appendText("Iniciando importação...\n");
 
         int importadas = 0;
         int ignoradas = 0;
@@ -232,67 +346,129 @@ public class ImportacaoXMLController {
 
         for (XmlNFeDTO dto : xmls) {
 
-            if (nfeService.existe(dto.getChave())) {
+            try {
+
+                //==========================
+                // Validação do XML
+                //==========================
+
+                if (dto == null) {
+
+                    ignoradas++;
+
+                    view.getTxtLog().appendText(
+                            "XML ignorado: objeto nulo.\n"
+                    );
+
+                    continue;
+                }
+
+                if (dto.getChave() == null || dto.getChave().isBlank()) {
+
+                    ignoradas++;
+
+                    view.getTxtLog().appendText(
+                            "XML ignorado: chave inexistente.\n"
+                    );
+
+                    continue;
+                }
+
+                if (dto.getNumero() == null) {
+
+                    ignoradas++;
+
+                    view.getTxtLog().appendText(
+                            "XML ignorado: número inexistente.\n"
+                    );
+
+                    continue;
+                }
+
+                //==========================
+                // NF já existe
+                //==========================
+
+                if (nfeService.existe(dto.getChave())) {
+
+                    ignoradas++;
+
+                    view.getTxtLog().appendText(
+                            "NF " + dto.getNumero() + " já existe.\n"
+                    );
+
+                    continue;
+                }
+
+                //==========================
+                // Monta entidade
+                //==========================
+
+                NFe nfe = new NFe();
+
+                nfe.setChave(dto.getChave());
+                nfe.setNumero(dto.getNumero());
+                nfe.setSerie(dto.getSerie());
+                nfe.setModelo("55");
+                nfe.setDataEmissao(dto.getDataEmissao());
+                nfe.setCnpjEmitente(dto.getCnpjEmitente());
+                nfe.setEmitente(dto.getRazaoSocialEmitente());
+                nfe.setCnpjDestinatario(dto.getCnpjDestinatario());
+                nfe.setDestinatario(dto.getRazaoSocialDestinatario());
+                nfe.setValorTotal(dto.getValorTotal());
+
+                if (minhaEmpresaService.ehMinhaEmpresa(dto.getCnpjEmitente())) {
+                    nfe.setTipo("Venda");
+                } else {
+                    nfe.setTipo("Compra");
+                }
+
+                nfe.setSituacao("Importado");
+                nfe.setDataImportacao(LocalDateTime.now());
+
+                System.out.println("-----------------------------------");
+                System.out.println("Arquivo : " + dto.getArquivo());
+                System.out.println("Chave   : " + dto.getChave());
+                System.out.println("Número  : " + dto.getNumero());
+
+                nfeService.salvar(nfe);
+
+                importadas++;
+
+                view.getTxtLog().appendText(
+                        "NF " + dto.getNumero() + " importada.\n"
+                );
+
+            } catch (Exception ex) {
 
                 ignoradas++;
 
-                view.getProgressBar().setProgress(
-                        (double) (importadas + ignoradas) / total
+                view.getTxtLog().appendText(
+                        "Erro ao importar XML: "
+                                + dto.getArquivo()
+                                + "\n"
                 );
 
                 view.getTxtLog().appendText(
-                        "NF " + dto.getNumero()
-                                + " já existe.\n"
+                        ex.getMessage() + "\n"
                 );
 
-                continue;
+                ex.printStackTrace();
             }
-
-            NFe nfe = new NFe();
-
-            nfe.setChave(dto.getChave());
-            nfe.setNumero(dto.getNumero());
-            nfe.setSerie(dto.getSerie());
-            nfe.setModelo("55");
-            nfe.setDataEmissao(dto.getDataEmissao());
-            nfe.setCnpjEmitente(dto.getCnpjEmitente());
-            nfe.setEmitente(dto.getRazaoSocialEmitente());
-            nfe.setCnpjDestinatario(dto.getCnpjDestinatario());
-            nfe.setDestinatario(dto.getRazaoSocialDestinatario());
-            nfe.setValorTotal(dto.getValorTotal());
-
-            if (minhaEmpresaService.ehMinhaEmpresa(dto.getCnpjEmitente())) {
-                nfe.setTipo("Venda");
-            } else {
-                nfe.setTipo("Compra");
-            }
-
-            nfe.setSituacao("Importado");
-            nfe.setDataImportacao(LocalDateTime.now());
-
-            System.out.println("Chave: " + dto.getChave());
-            System.out.println("Número: " + dto.getNumero());
-
-            nfeService.salvar(nfe);
-
-            importadas++;
 
             view.getProgressBar().setProgress(
                     (double) (importadas + ignoradas) / total
-            );
-
-            view.getTxtLog().appendText(
-                    "NF " + dto.getNumero()
-                            + " importada.\n"
             );
         }
 
         view.getProgressBar().setProgress(1.0);
 
         view.getTxtLog().appendText(
+
                 "\nImportação concluída.\n" +
                         "Importadas: " + importadas + "\n" +
                         "Ignoradas: " + ignoradas + "\n"
+
         );
 
         ButtonType btNovoLote = new ButtonType("Novo Lote");
@@ -304,9 +480,11 @@ public class ImportacaoXMLController {
         alert.setHeaderText("Importação realizada com sucesso!");
 
         alert.setContentText(
+
                 "Notas importadas: " + importadas +
                         "\nNotas ignoradas: " + ignoradas +
                         "\n\nO que deseja fazer?"
+
         );
 
         alert.getButtonTypes().setAll(
@@ -327,8 +505,8 @@ public class ImportacaoXMLController {
                 view.getTabela().getItems().clear();
                 view.getTxtLog().clear();
                 view.getProgressBar().setProgress(0);
-                xmls.clear();
 
+                xmls.clear();
             }
         }
     }

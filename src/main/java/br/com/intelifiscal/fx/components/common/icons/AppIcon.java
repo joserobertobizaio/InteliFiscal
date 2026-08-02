@@ -40,6 +40,8 @@ public class AppIcon extends FontIcon {
 
             case NOVO -> FontAwesomeSolid.PLUS;
 
+            case EDITAR -> FontAwesomeSolid.PENCIL_ALT;
+
             case SALVAR -> FontAwesomeSolid.SAVE;
 
             case EXCLUIR -> FontAwesomeSolid.TRASH;

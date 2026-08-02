@@ -28,6 +28,10 @@ public class EstabelecimentoController {
                 .getBtSalvar()
                 .setOnAction(event -> salvar());
 
+        view.getCrudButtonBar()
+                .getBtNovo()
+                .setOnAction(event -> habilitarEdicao());
+
     }
 
     private void carregarEmpresa() {
@@ -51,8 +55,47 @@ public class EstabelecimentoController {
             view.getTxtTelefone().setText(empresa.getTelefone());
             view.getTxtEmail().setText(empresa.getEmail());
 
+            bloquearEdicao();
         });
 
+    }
+
+    private void habilitarEdicao() {
+
+        view.getTxtCnpj().setEditable(true);
+        view.getTxtInscricaoEstadual().setEditable(true);
+        view.getTxtRazaoSocial().setEditable(true);
+        view.getTxtNomeFantasia().setEditable(true);
+
+        view.getTxtCep().setEditable(true);
+        view.getTxtUf().setEditable(true);
+        view.getTxtCidade().setEditable(true);
+        view.getTxtBairro().setEditable(true);
+        view.getTxtEndereco().setEditable(true);
+        view.getTxtNumero().setEditable(true);
+
+        view.getTxtTelefone().setEditable(true);
+        view.getTxtEmail().setEditable(true);
+
+        view.getTxtRazaoSocial().requestFocus();
+    }
+
+    private void bloquearEdicao() {
+
+        view.getTxtCnpj().setEditable(false);
+        view.getTxtInscricaoEstadual().setEditable(false);
+        view.getTxtRazaoSocial().setEditable(false);
+        view.getTxtNomeFantasia().setEditable(false);
+
+        view.getTxtCep().setEditable(false);
+        view.getTxtUf().setEditable(false);
+        view.getTxtCidade().setEditable(false);
+        view.getTxtBairro().setEditable(false);
+        view.getTxtEndereco().setEditable(false);
+        view.getTxtNumero().setEditable(false);
+
+        view.getTxtTelefone().setEditable(false);
+        view.getTxtEmail().setEditable(false);
     }
 
     private void salvar() {
@@ -103,6 +146,8 @@ public class EstabelecimentoController {
         empresa.setDataAtualizacao(agora);
 
         service.salvar(empresa);
+
+        bloquearEdicao();
 
         Mensagem.sucesso("Dados da empresa salvos com sucesso.");
 

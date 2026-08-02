@@ -10,7 +10,7 @@ import javafx.scene.layout.HBox;
 public class CrudButtonBar extends HBox {
 
     private final Button btNovo =
-            new Button("Novo", new AppIcon(IconType.NOVO));
+            new Button("Editar", new AppIcon(IconType.EDITAR));
 
     private final Button btSalvar =
             new Button("Salvar", new AppIcon(IconType.SALVAR));

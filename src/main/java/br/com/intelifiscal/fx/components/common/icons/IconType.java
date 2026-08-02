@@ -23,6 +23,8 @@ public enum IconType {
 
     NOVO,
 
+    EDITAR,
+
     SALVAR,
 
     EXCLUIR,
