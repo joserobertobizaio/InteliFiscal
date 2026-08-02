@@ -53,4 +53,19 @@ public class ImportacaoResumo extends GridPane {
     public void setErros(int valor) {
         lblErros.setText(String.valueOf(valor));
     }
+
+    public void limpar() {
+
+        setXml(0);
+
+        setCompras(0);
+
+        setVendas(0);
+
+        setDuplicados(0);
+
+        setErros(0);
+
+    }
+
 }

@@ -53,9 +53,12 @@ public class ImportacaoXMLController {
                 .setOnAction(e -> selecionarXml());
 
         view.getButtonBar()
+                .getBtRemover()
+                .setOnAction(e -> remover());
+
+        view.getButtonBar()
                 .getBtImportar()
                 .setOnAction(e -> importar());
-
     }
 
     private void selecionarXml() {
@@ -167,6 +170,42 @@ public class ImportacaoXMLController {
         );
 
         System.out.println("Itens na tabela: " + view.getTabela().getItems().size());
+
+    }
+
+    private void remover() {
+
+        if (xmls.isEmpty()) {
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+            alert.setTitle("Remover");
+
+            alert.setHeaderText(null);
+
+            alert.setContentText(
+                    "Não existem arquivos carregados."
+            );
+
+            alert.showAndWait();
+
+            return;
+
+        }
+
+        view.getTabela().getItems().clear();
+
+        xmls.clear();
+
+        view.getTxtLog().clear();
+
+        view.getProgressBar().setProgress(0);
+
+        view.getResumo().limpar();
+
+        view.getTxtLog().appendText(
+                "Lista de arquivos removida.\n"
+        );
 
     }
 

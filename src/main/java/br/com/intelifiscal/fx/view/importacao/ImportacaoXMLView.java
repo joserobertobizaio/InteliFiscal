@@ -73,7 +73,7 @@ public class ImportacaoXMLView extends BaseView {
         Card card = new Card(layout);
 
         card.setWidthPercentage(0.92);
-        card.setMaxContentWidth(1100);
+        card.setMaxContentWidth(1200);
 
         ScrollPane scroll = new ScrollPane(card);
 
