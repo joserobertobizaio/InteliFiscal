@@ -3,6 +3,7 @@ package br.com.intelifiscal.service;
 import br.com.intelifiscal.entity.MinhaEmpresa;
 import br.com.intelifiscal.repository.MinhaEmpresaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,14 +17,6 @@ import java.util.Optional;
  */
 public class MinhaEmpresaService {
 
-    public boolean ehMinhaEmpresa(String cnpj) {
-
-        return buscarEmpresa()
-                .map(emp -> emp.getCnpj().equals(cnpj))
-                .orElse(false);
-
-    }
-
     private final MinhaEmpresaRepository repository;
 
     /**
@@ -36,57 +29,75 @@ public class MinhaEmpresaService {
     }
 
     /**
-     * Verifica se existe empresa cadastrada.
-     *
-     * @return true caso exista.
+     * Verifica se o CNPJ informado pertence a uma das empresas
+     * cadastradas no sistema.
      */
-    public boolean existeEmpresa() {
+    public boolean ehMinhaEmpresa(String cnpj) {
 
-        throw new UnsupportedOperationException(
-                "Método ainda não implementado."
-        );
+        return buscarEmpresa()
+                .map(emp -> emp.getCnpj().equals(cnpj))
+                .orElse(false);
 
     }
 
     /**
-     * Retorna a empresa cadastrada.
-     *
-     * @return empresa cadastrada.
+     * Verifica se existe empresa cadastrada.
      */
+    public boolean existeEmpresa() {
 
+        return repository.existeEmpresa();
+
+    }
+
+    /**
+     * Retorna a primeira empresa cadastrada.
+     * (Mantido por compatibilidade com o restante do sistema.)
+     */
     public Optional<MinhaEmpresa> buscarEmpresa() {
 
         return repository.buscar();
 
     }
 
-    /**
-     * Salva ou atualiza a empresa.
-     *
-     * @param empresa empresa a ser persistida.
-     */
-    public void salvar(MinhaEmpresa empresa) {
+    public Optional<MinhaEmpresa> buscarPorId(Long id) {
 
-        if (repository.existeEmpresa()) {
-
-            repository.atualizar(empresa);
-
-        } else {
-
-            repository.salvar(empresa);
-
-        }
+        return repository.buscarPorId(id);
 
     }
 
     /**
-     * Remove a empresa cadastrada.
+     * Retorna todas as empresas cadastradas.
      */
-    public void excluir() {
+    public List<MinhaEmpresa> buscarTodas() {
 
-        throw new UnsupportedOperationException(
-                "Método ainda não implementado."
-        );
+        return repository.buscarTodas();
+
+    }
+
+    /**
+     * Insere uma nova empresa.
+     */
+    public void salvar(MinhaEmpresa empresa) {
+
+        repository.salvar(empresa);
+
+    }
+
+    /**
+     * Atualiza uma empresa existente.
+     */
+    public void atualizar(MinhaEmpresa empresa) {
+
+        repository.atualizar(empresa);
+
+    }
+
+    /**
+     * Exclui a empresa.
+     */
+    public void excluir(Long id) {
+
+        repository.excluir(id);
 
     }
 

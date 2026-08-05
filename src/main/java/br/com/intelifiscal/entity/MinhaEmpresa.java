@@ -173,4 +173,22 @@ public class MinhaEmpresa {
     public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
         this.dataAtualizacao = dataAtualizacao;
     }
+
+    @Override
+    public String toString() {
+
+        if (cnpj == null || cnpj.length() < 12) {
+            return razaoSocial;
+        }
+
+        String estabelecimento = cnpj.substring(8, 12);
+
+        if ("0001".equals(estabelecimento)) {
+            return "🏢 Matriz (0001)";
+        }
+
+        return "🏢 Filial " + Integer.parseInt(estabelecimento)
+                + " (" + estabelecimento + ")";
+    }
+
 }

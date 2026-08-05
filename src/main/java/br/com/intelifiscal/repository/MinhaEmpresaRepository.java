@@ -3,6 +3,9 @@ package br.com.intelifiscal.repository;
 import br.com.intelifiscal.database.connection.DatabaseConnection;
 import br.com.intelifiscal.entity.MinhaEmpresa;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -98,6 +101,133 @@ public class MinhaEmpresaRepository {
 
     }
 
+    public Optional<MinhaEmpresa> buscarPorId(Long id) {
+
+        final String sql = """
+            SELECT *
+              FROM tblMinhaEmpresa
+             WHERE id = ?
+            """;
+
+        try (var connection = DatabaseConnection.getConnection();
+             var statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+
+            try (var resultSet = statement.executeQuery()) {
+
+                if (!resultSet.next()) {
+                    return Optional.empty();
+                }
+
+                MinhaEmpresa empresa = new MinhaEmpresa();
+
+                empresa.setId(resultSet.getLong("id"));
+                empresa.setCnpj(resultSet.getString("cnpj"));
+                empresa.setRazaoSocial(resultSet.getString("razao_social"));
+                empresa.setNomeFantasia(resultSet.getString("nome_fantasia"));
+                empresa.setInscricaoEstadual(resultSet.getString("inscricao_estadual"));
+                empresa.setCep(resultSet.getString("cep"));
+                empresa.setUf(resultSet.getString("uf"));
+                empresa.setCidade(resultSet.getString("cidade"));
+                empresa.setBairro(resultSet.getString("bairro"));
+                empresa.setEndereco(resultSet.getString("endereco"));
+                empresa.setNumero(resultSet.getString("numero"));
+                empresa.setTelefone(resultSet.getString("telefone"));
+                empresa.setEmail(resultSet.getString("email"));
+                empresa.setAtivo(resultSet.getInt("ativo") == 1);
+
+                empresa.setDataCadastro(
+                        java.time.LocalDateTime.parse(
+                                resultSet.getString("data_cadastro")
+                        )
+                );
+
+                empresa.setDataAtualizacao(
+                        java.time.LocalDateTime.parse(
+                                resultSet.getString("data_atualizacao")
+                        )
+                );
+
+                return Optional.of(empresa);
+
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao buscar empresa por id.",
+                    e
+            );
+
+        }
+
+    }
+
+    public List<MinhaEmpresa> buscarTodas() {
+
+        final String sql = """
+            SELECT *
+                FROM tblMinhaEmpresa
+            ORDER BY
+                SUBSTR(cnpj, LENGTH(cnpj) - 3, 4),
+                id
+            """;
+
+        List<MinhaEmpresa> empresas = new ArrayList<>();
+
+        try (var connection = DatabaseConnection.getConnection();
+             var statement = connection.prepareStatement(sql);
+             var resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+
+                MinhaEmpresa empresa = new MinhaEmpresa();
+
+                empresa.setId(resultSet.getLong("id"));
+                empresa.setCnpj(resultSet.getString("cnpj"));
+                empresa.setRazaoSocial(resultSet.getString("razao_social"));
+                empresa.setNomeFantasia(resultSet.getString("nome_fantasia"));
+                empresa.setInscricaoEstadual(resultSet.getString("inscricao_estadual"));
+                empresa.setCep(resultSet.getString("cep"));
+                empresa.setUf(resultSet.getString("uf"));
+                empresa.setCidade(resultSet.getString("cidade"));
+                empresa.setBairro(resultSet.getString("bairro"));
+                empresa.setEndereco(resultSet.getString("endereco"));
+                empresa.setNumero(resultSet.getString("numero"));
+                empresa.setTelefone(resultSet.getString("telefone"));
+                empresa.setEmail(resultSet.getString("email"));
+                empresa.setAtivo(resultSet.getInt("ativo") == 1);
+
+                empresa.setDataCadastro(
+                        java.time.LocalDateTime.parse(
+                                resultSet.getString("data_cadastro")
+                        )
+                );
+
+                empresa.setDataAtualizacao(
+                        java.time.LocalDateTime.parse(
+                                resultSet.getString("data_atualizacao")
+                        )
+                );
+
+                empresas.add(empresa);
+
+            }
+
+            return empresas;
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao buscar empresas.",
+                    e
+            );
+
+        }
+
+    }
+
     public void salvar(MinhaEmpresa empresa) {
 
         System.out.println("====================================");
@@ -171,26 +301,23 @@ public class MinhaEmpresaRepository {
         System.out.println("Razão Social..: " + empresa.getRazaoSocial());
 
         final String sql = """
-                UPDATE tblMinhaEmpresa
-                   SET cnpj = ?,
-                       razao_social = ?,
-                       nome_fantasia = ?,
-                       inscricao_estadual = ?,
-                       cep = ?,
-                       uf = ?,
-                       cidade = ?,
-                       bairro = ?,
-                       endereco = ?,
-                       numero = ?,
-                       telefone = ?,
-                       email = ?,
-                       ativo = ?,
-                       data_atualizacao = ?
-                 WHERE id = (
-                        SELECT MIN(id)
-                        FROM tblMinhaEmpresa
-                 )
-                """;
+        UPDATE tblMinhaEmpresa
+           SET cnpj = ?,
+               razao_social = ?,
+               nome_fantasia = ?,
+               inscricao_estadual = ?,
+               cep = ?,
+               uf = ?,
+               cidade = ?,
+               bairro = ?,
+               endereco = ?,
+               numero = ?,
+               telefone = ?,
+               email = ?,
+               ativo = ?,
+               data_atualizacao = ?
+         WHERE id = ?
+        """;
 
         try (var connection = DatabaseConnection.getConnection();
              var statement = connection.prepareStatement(sql)) {
@@ -209,6 +336,7 @@ public class MinhaEmpresaRepository {
             statement.setString(12, empresa.getEmail());
             statement.setInt(13, empresa.isAtivo() ? 1 : 0);
             statement.setString(14, empresa.getDataAtualizacao().toString());
+            statement.setLong(15, empresa.getId());
 
             int linhas = statement.executeUpdate();
 
@@ -229,12 +357,34 @@ public class MinhaEmpresaRepository {
 
     }
 
-    public void excluir() {
+    public void excluir(Long id) {
 
-        throw new UnsupportedOperationException(
-                "Método ainda não implementado."
-        );
+        final String sql = """
+        DELETE FROM tblMinhaEmpresa
+         WHERE id = ?
+        """;
+
+        try (var connection = DatabaseConnection.getConnection();
+             var statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, id);
+
+            int linhas = statement.executeUpdate();
+
+            System.out.println("====================================");
+            System.out.println(">>> DELETE executado.");
+            System.out.println(">>> ID.............: " + id);
+            System.out.println(">>> Linhas afetadas: " + linhas);
+            System.out.println("====================================");
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao excluir a empresa.",
+                    e
+            );
+
+        }
 
     }
-
 }

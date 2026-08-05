@@ -1,5 +1,6 @@
 package br.com.intelifiscal.fx.view.estabelecimento;
 
+import br.com.intelifiscal.entity.MinhaEmpresa;
 import br.com.intelifiscal.fx.components.common.Card;
 import br.com.intelifiscal.fx.components.common.CrudButtonBar;
 import br.com.intelifiscal.fx.components.common.SectionTitle;
@@ -34,7 +35,9 @@ public class EstabelecimentoView extends BaseView {
     private final TextField txtTelefone = new TextField();
     private final TextField txtEmail = new TextField();
 
-    private final ComboBox<String> cbEmpresa = new ComboBox<>();
+    private final ComboBox<MinhaEmpresa> cbEmpresa = new ComboBox<>();
+
+    private ScrollPane scrollPane;
 
     private final CrudButtonBar crudButtonBar = new CrudButtonBar();
 
@@ -71,10 +74,6 @@ public class EstabelecimentoView extends BaseView {
         Label lblEmpresa = new Label("Empresa");
 
         cbEmpresa.setPrefWidth(340);
-
-        cbEmpresa.getItems().add("Matriz");
-
-        cbEmpresa.getSelectionModel().selectFirst();
 
         HBox barraEmpresa = new HBox(12);
 
@@ -180,6 +179,8 @@ public class EstabelecimentoView extends BaseView {
         Mascara.aplicarCnpjAlfanumerico(txtCnpj);
         Mascara.aplicarCep(txtCep);
 
+        configurarMaiusculas();
+
         //---------------------------------------------
         // SEÇÕES
         //---------------------------------------------
@@ -239,13 +240,74 @@ public class EstabelecimentoView extends BaseView {
         // SCROLL
         //---------------------------------------------
 
-        ScrollPane scrollPane = new ScrollPane(painel);
+        scrollPane = new ScrollPane(painel);
 
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(false);
         scrollPane.setPannable(true);
 
         setContent(scrollPane);
+    }
+
+    private void configurarMaiusculas() {
+
+        deixarMaiusculo(txtRazaoSocial);
+        deixarMaiusculo(txtNomeFantasia);
+        deixarMaiusculo(txtCidade);
+        deixarMaiusculo(txtBairro);
+        deixarMaiusculo(txtEndereco);
+        deixarMaiusculo(txtUf);
+
+        deixarMinusculo(txtEmail);
+
+    }
+
+    private void deixarMaiusculo(TextField campo) {
+
+        campo.textProperty().addListener((obs, antigo, novo) -> {
+
+            if (novo == null) {
+                return;
+            }
+
+            String texto = novo.toUpperCase();
+
+            if (!novo.equals(texto)) {
+
+                int posicao = campo.getCaretPosition();
+
+                campo.setText(texto);
+
+                campo.positionCaret(posicao);
+
+            }
+
+        });
+
+    }
+
+    private void deixarMinusculo(TextField campo) {
+
+        campo.textProperty().addListener((obs, antigo, novo) -> {
+
+            if (novo == null) {
+                return;
+            }
+
+            String texto = novo.toLowerCase();
+
+            if (!novo.equals(texto)) {
+
+                int posicao = campo.getCaretPosition();
+
+                campo.setText(texto);
+
+                campo.positionCaret(posicao);
+
+            }
+
+        });
+
     }
 
     public CrudButtonBar getCrudButtonBar() {
@@ -300,11 +362,16 @@ public class EstabelecimentoView extends BaseView {
         return txtEmail;
     }
 
-    public ComboBox<String> getCbEmpresa() {
+    public ComboBox<MinhaEmpresa> getCbEmpresa() {
         return cbEmpresa;
     }
 
     public Button getBtNovaEmpresa() {
         return btNovaEmpresa;
     }
+
+    public ScrollPane getScrollPane() {
+        return scrollPane;
+    }
+
 }
