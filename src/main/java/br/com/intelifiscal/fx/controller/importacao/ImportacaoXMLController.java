@@ -71,6 +71,24 @@ public class ImportacaoXMLController {
 
     private void selecionarXml() {
 
+        if (minhaEmpresaService.buscarTodas().isEmpty()) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+
+            alert.setTitle("Importação XML");
+
+            alert.setHeaderText("Nenhum estabelecimento cadastrado.");
+
+            alert.setContentText(
+                    "Acesse -> Estabelecimento, e cadastre pelo menos um estabelecimento antes de importar XMLs."
+            );
+
+            alert.showAndWait();
+
+            return;
+        }
+
+
         FileChooser chooser = new FileChooser();
 
         chooser.setTitle("Selecionar Arquivos XML");
@@ -182,6 +200,23 @@ public class ImportacaoXMLController {
     }
 
     private void selecionarPasta() {
+
+        if (minhaEmpresaService.buscarTodas().isEmpty()) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+
+            alert.setTitle("Importação XML");
+
+            alert.setHeaderText("Nenhum estabelecimento cadastrado.");
+
+            alert.setContentText(
+                    "Acesse -> Estabelecimento, e cadastre pelo menos um estabelecimento antes de importar XMLs."
+            );
+
+            alert.showAndWait();
+
+            return;
+        }
 
         DirectoryChooser chooser = new DirectoryChooser();
 
