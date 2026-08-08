@@ -1,5 +1,8 @@
 package br.com.intelifiscal.fx.controller.importacao;
 
+import br.com.intelifiscal.service.xml.XmlNFeItemReader;
+import br.com.intelifiscal.service.nfeitem.NFeItemService;
+import br.com.intelifiscal.dto.nfeitem.NFeItemDTO;
 import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
 import br.com.intelifiscal.util.XmlUtil;
 import javafx.stage.FileChooser;
@@ -7,7 +10,6 @@ import javafx.stage.Window;
 import br.com.intelifiscal.dto.xml.XmlNFeDTO;
 import br.com.intelifiscal.service.xml.XmlNFeReader;
 import br.com.intelifiscal.service.MinhaEmpresaService;
-
 import javafx.stage.DirectoryChooser;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,11 +36,17 @@ public class ImportacaoXMLController {
 
     private final XmlNFeReader reader = new XmlNFeReader();
 
+    private final XmlNFeItemReader itemReader =
+            new XmlNFeItemReader();
+
     private final MinhaEmpresaService minhaEmpresaService =
             new MinhaEmpresaService();
 
     private final NFeService nfeService =
             new NFeService();
+
+    private final NFeItemService nfeItemService =
+            new NFeItemService();
 
     private final List<XmlNFeDTO> xmls =
             new ArrayList<>();
@@ -210,7 +218,8 @@ public class ImportacaoXMLController {
             alert.setHeaderText("Nenhum estabelecimento cadastrado.");
 
             alert.setContentText(
-                    "Acesse -> Estabelecimento, e cadastre pelo menos um estabelecimento antes de importar XMLs."
+                    "Acesse -> Estabelecimento, e cadastre o estabelecimento " +
+                            "que tenha o mesmo CNPJ das notas de vendas antes de importar os XMLs."
             );
 
             alert.showAndWait();
@@ -466,7 +475,49 @@ public class ImportacaoXMLController {
                 System.out.println("Chave   : " + dto.getChave());
                 System.out.println("Número  : " + dto.getNumero());
 
-                nfeService.salvar(nfe);
+                Integer idNFe =
+                        nfeService.salvar(nfe);
+
+                List<NFeItemDTO> itens =
+                        itemReader.ler(dto.getArquivoXml());
+
+                for (NFeItemDTO item : itens) {
+
+                    item.setIdNfe(idNFe);
+
+                    item.setDataImportacao(LocalDateTime.now());
+
+                    nfeItemService.salvar(item);
+
+                }
+
+                System.out.println();
+                System.out.println("====================================");
+                System.out.println("NF " + dto.getNumero());
+                System.out.println("Quantidade de itens: " + itens.size());
+
+                for (NFeItemDTO item : itens) {
+
+                    System.out.println("------------------------------------");
+
+                    System.out.println("Item.............: " + item.getNumeroItem());
+
+                    System.out.println("Código...........: " + item.getCodigoProduto());
+
+                    System.out.println("Descrição........: " + item.getDescricao());
+
+                    System.out.println("NCM..............: " + item.getNcm());
+
+                    System.out.println("CFOP.............: " + item.getCfop());
+
+                    System.out.println("Unidade..........: " + item.getUnidade());
+
+                }
+
+                System.out.println("====================================");
+                System.out.println();
+
+
 
                 importadas++;
 

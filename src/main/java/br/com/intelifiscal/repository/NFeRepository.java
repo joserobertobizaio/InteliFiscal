@@ -3,13 +3,11 @@ package br.com.intelifiscal.repository;
 import br.com.intelifiscal.database.connection.DatabaseConnection;
 import br.com.intelifiscal.entity.NFe;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class NFeRepository {
 
-    public void salvar(NFe nfe) {
+    public Integer salvar(NFe nfe) {
 
         String sql = """
         INSERT INTO tblNFe
@@ -35,11 +33,16 @@ public class NFeRepository {
         """;
 
         try (
-                Connection connection =
+
+                Connection conn =
                         DatabaseConnection.getConnection();
 
                 PreparedStatement ps =
-                        connection.prepareStatement(sql)
+                        conn.prepareStatement(
+                                sql,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
+
         ) {
 
             ps.setString(1, nfe.getChave());
@@ -80,6 +83,18 @@ public class NFeRepository {
             );
 
             ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+            }
+
+            throw new RuntimeException(
+                    "Não foi possível recuperar o ID da NF-e."
+            );
 
         } catch (SQLException e) {
 

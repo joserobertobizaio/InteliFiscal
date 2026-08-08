@@ -8,9 +8,9 @@ public class NFeService {
     private final NFeRepository repository =
             new NFeRepository();
 
-    public void salvar(NFe nfe) {
+    public Integer salvar(NFe nfe) {
 
-        repository.salvar(nfe);
+        return repository.salvar(nfe);
 
     }
 
