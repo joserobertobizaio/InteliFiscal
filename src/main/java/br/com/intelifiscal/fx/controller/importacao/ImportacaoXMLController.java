@@ -5,6 +5,9 @@ import br.com.intelifiscal.service.nfeitem.NFeItemService;
 import br.com.intelifiscal.dto.nfeitem.NFeItemDTO;
 import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
 import br.com.intelifiscal.util.XmlUtil;
+
+import br.com.intelifiscal.dto.produto.ProdutoDTO;
+import br.com.intelifiscal.service.produto.ProdutoService;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import br.com.intelifiscal.dto.xml.XmlNFeDTO;
@@ -47,6 +50,9 @@ public class ImportacaoXMLController {
 
     private final NFeItemService nfeItemService =
             new NFeItemService();
+
+    private final ProdutoService produtoService =
+            new ProdutoService();
 
     private final List<XmlNFeDTO> xmls =
             new ArrayList<>();
@@ -487,8 +493,46 @@ public class ImportacaoXMLController {
 
                     item.setDataImportacao(LocalDateTime.now());
 
+                    // Salva o item da NF-e
                     nfeItemService.salvar(item);
 
+                    // ==========================
+                    // Cadastro do produto
+                    // ==========================
+
+                    ProdutoDTO produto = new ProdutoDTO();
+
+                    produto.setCodigoProduto(
+                            item.getCodigoProduto()
+                    );
+
+                    produto.setCodigoBarras(
+                            item.getCodigoBarras()
+                    );
+
+                    produto.setDescricao(
+                            item.getDescricao()
+                    );
+
+                    produto.setNcm(
+                            item.getNcm()
+                    );
+
+                    produto.setCest(
+                            item.getCest()
+                    );
+
+                    produto.setUnidade(
+                            item.getUnidade()
+                    );
+
+                    produto.setDataCadastro(
+                            LocalDateTime.now()
+                    );
+
+                    produto.setAtivo(true);
+
+                    produtoService.salvarSeNaoExistir(produto);
                 }
 
                 System.out.println();

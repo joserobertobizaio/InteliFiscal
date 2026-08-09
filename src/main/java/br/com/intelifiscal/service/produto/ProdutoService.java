@@ -1,0 +1,155 @@
+package br.com.intelifiscal.service.produto;
+
+import br.com.intelifiscal.dto.produto.ProdutoDTO;
+import br.com.intelifiscal.dto.produto.ProdutoHistoricoDTO;
+import br.com.intelifiscal.repository.nfeitem.NFeItemRepository;
+import br.com.intelifiscal.repository.produto.ProdutoRepository;
+
+import java.util.List;
+
+public class ProdutoService {
+
+    private final ProdutoRepository repository =
+            new ProdutoRepository();
+
+    private final NFeItemRepository nfeItemRepository =
+            new NFeItemRepository();
+
+    public void salvar(ProdutoDTO produto) {
+
+        validar(produto);
+
+        repository.salvar(produto);
+    }
+
+
+    public void atualizar(ProdutoDTO produto) {
+
+        validar(produto);
+
+        if (produto.getId() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "Produto inválido para atualização."
+            );
+        }
+
+        repository.atualizar(produto);
+    }
+
+
+    public void excluir(int id) {
+
+        if (id <= 0) {
+
+            throw new IllegalArgumentException(
+                    "Produto inválido para exclusão."
+            );
+        }
+
+        repository.excluir(id);
+    }
+
+
+    public ProdutoDTO buscarPorCodigoProduto(
+            String codigoProduto) {
+
+        if (codigoProduto == null
+                || codigoProduto.isBlank()) {
+
+            return null;
+        }
+
+        return repository.buscarPorCodigoProduto(
+                codigoProduto
+        );
+    }
+
+
+    public ProdutoDTO buscarPorCodigoBarras(
+            String codigoBarras) {
+
+        if (codigoBarras == null
+                || codigoBarras.isBlank()) {
+
+            return null;
+        }
+
+        return repository.buscarPorCodigoBarras(
+                codigoBarras
+        );
+    }
+
+
+    public List<ProdutoDTO> listarTodos() {
+
+        return repository.listarTodos();
+    }
+
+
+    public void salvarSeNaoExistir(
+            ProdutoDTO produto) {
+
+        if (produto == null) {
+            return;
+        }
+
+        if (produto.getCodigoProduto() == null
+                || produto.getCodigoProduto().isBlank()) {
+
+            return;
+        }
+
+        ProdutoDTO existente =
+                repository.buscarPorCodigoProduto(
+                        produto.getCodigoProduto()
+                );
+
+        if (existente != null) {
+            return;
+        }
+
+        repository.salvar(produto);
+    }
+
+
+    private void validar(ProdutoDTO produto) {
+
+        if (produto == null) {
+
+            throw new IllegalArgumentException(
+                    "Produto não informado."
+            );
+        }
+
+        if (produto.getCodigoProduto() == null
+                || produto.getCodigoProduto().isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Código do produto é obrigatório."
+            );
+        }
+
+        if (produto.getDescricao() == null
+                || produto.getDescricao().isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Descrição do produto é obrigatória."
+            );
+        }
+    }
+
+    public List<ProdutoHistoricoDTO> listarHistoricoPorCodigoProduto(
+            String codigoProduto) {
+
+        if (codigoProduto == null
+                || codigoProduto.isBlank()) {
+
+            return List.of();
+        }
+
+        return nfeItemRepository.listarHistoricoPorCodigoProduto(
+                codigoProduto
+        );
+    }
+}

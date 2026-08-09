@@ -3,8 +3,12 @@ package br.com.intelifiscal.fx.navigation;
 import br.com.intelifiscal.fx.view.dashboard.DashboardView;
 import br.com.intelifiscal.fx.view.estabelecimento.EstabelecimentoView;
 import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoController;
+import br.com.intelifiscal.fx.controller.produto.ProdutoController;
+import br.com.intelifiscal.fx.view.produto.ProdutoView;
+
 import javafx.scene.Node;
 import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
+import br.com.intelifiscal.fx.view.produto.ProdutoView;
 import br.com.intelifiscal.fx.controller.importacao.ImportacaoXMLController;
 
 /**
@@ -38,6 +42,16 @@ public final class ViewFactory {
 
                 yield view;
 
+            }
+
+            case PRODUTOS -> {
+
+                ProdutoView view =
+                        new ProdutoView();
+
+                new ProdutoController(view);
+
+                yield view;
             }
 
             default ->
