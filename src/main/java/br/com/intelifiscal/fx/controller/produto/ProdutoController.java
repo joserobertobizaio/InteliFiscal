@@ -283,14 +283,9 @@ public class ProdutoController {
         });
     }
 
-
     //==================================================
     // POSICIONA DESCRIÇÃO NO SCROLL
     //==================================================
-
-    //==================================================
-// POSICIONA DESCRIÇÃO NO SCROLL
-//==================================================
 
     private void posicionarDescricao() {
 
@@ -547,6 +542,12 @@ public class ProdutoController {
 
             produtoSelecionado = null;
 
+            // Limpa o histórico do produto excluído
+
+            view.getTabelaHistorico()
+                    .getItems()
+                    .clear();
+
             limparFormulario();
 
             bloquearFormulario();
@@ -719,7 +720,7 @@ public class ProdutoController {
         view.getCrudButtonBar()
                 .getBtExcluir()
                 .setDisable(
-                        !produtoSelecionado
+                        !produtoSelecionado || editando
                 );
 
 
