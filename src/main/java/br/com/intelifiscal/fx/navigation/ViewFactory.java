@@ -5,10 +5,11 @@ import br.com.intelifiscal.fx.view.estabelecimento.EstabelecimentoView;
 import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoController;
 import br.com.intelifiscal.fx.controller.produto.ProdutoController;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
+import br.com.intelifiscal.fx.view.venda.VendaView;
+import br.com.intelifiscal.fx.controller.venda.VendaController;
 
 import javafx.scene.Node;
 import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
-import br.com.intelifiscal.fx.view.produto.ProdutoView;
 import br.com.intelifiscal.fx.controller.importacao.ImportacaoXMLController;
 
 /**
@@ -50,6 +51,16 @@ public final class ViewFactory {
                         new ProdutoView();
 
                 new ProdutoController(view);
+
+                yield view;
+            }
+
+            case VENDAS -> {
+
+                VendaView view =
+                        new VendaView();
+
+                new VendaController(view);
 
                 yield view;
             }

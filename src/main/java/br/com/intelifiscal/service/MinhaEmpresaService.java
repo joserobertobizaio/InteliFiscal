@@ -34,10 +34,17 @@ public class MinhaEmpresaService {
      */
     public boolean ehMinhaEmpresa(String cnpj) {
 
-        return buscarEmpresa()
-                .map(emp -> emp.getCnpj().equals(cnpj))
-                .orElse(false);
+        if (cnpj == null || cnpj.isBlank()) {
+            return false;
+        }
 
+        return buscarTodas()
+                .stream()
+                .anyMatch(
+                        empresa ->
+                                empresa.getCnpj() != null
+                                        && empresa.getCnpj().equals(cnpj)
+                );
     }
 
     /**
