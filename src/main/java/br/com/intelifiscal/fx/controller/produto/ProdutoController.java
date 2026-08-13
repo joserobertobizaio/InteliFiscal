@@ -6,15 +6,16 @@ import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 import br.com.intelifiscal.service.produto.ProdutoService;
-import javafx.scene.control.ScrollPane;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.Alert;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class ProdutoController {
@@ -31,6 +32,11 @@ public class ProdutoController {
 
     private boolean modoEdicao = false;
 
+
+    //==================================================
+    // CONSTRUTOR
+    //==================================================
+
     public ProdutoController(ProdutoView view) {
 
         this.view = view;
@@ -39,6 +45,8 @@ public class ProdutoController {
 
         configurarEventos();
 
+        configurarPeriodoInicial();
+
         carregarProdutos();
 
         bloquearFormulario();
@@ -46,6 +54,38 @@ public class ProdutoController {
         atualizarEstadoBotoes();
     }
 
+
+    //==================================================
+    // PERÍODO INICIAL
+    //==================================================
+
+    private void configurarPeriodoInicial() {
+
+        LocalDate hoje =
+                LocalDate.now();
+
+        view.getCmbPeriodo()
+                .setValue(
+                        "Últimos 12 meses"
+                );
+
+        view.getDtInicio()
+                .setValue(
+                        hoje.minusMonths(12)
+                );
+
+        view.getDtFim()
+                .setValue(
+                        hoje
+                );
+
+        view.atualizarControlesPeriodo();
+    }
+
+
+    //==================================================
+    // CONFIGURA TABELA
+    //==================================================
 
     private void configurarTabela() {
 
@@ -93,32 +133,44 @@ public class ProdutoController {
 
 
         colCodigo.setCellValueFactory(
-                new PropertyValueFactory<>("codigoProduto")
+                new PropertyValueFactory<>(
+                        "codigoProduto"
+                )
         );
 
         colCodigoBarras.setCellValueFactory(
-                new PropertyValueFactory<>("codigoBarras")
+                new PropertyValueFactory<>(
+                        "codigoBarras"
+                )
         );
 
         colDescricao.setCellValueFactory(
-                new PropertyValueFactory<>("descricao")
+                new PropertyValueFactory<>(
+                        "descricao"
+                )
         );
 
         colNcm.setCellValueFactory(
-                new PropertyValueFactory<>("ncm")
+                new PropertyValueFactory<>(
+                        "ncm"
+                )
         );
 
         colCest.setCellValueFactory(
-                new PropertyValueFactory<>("cest")
+                new PropertyValueFactory<>(
+                        "cest"
+                )
         );
 
         colUnidade.setCellValueFactory(
-                new PropertyValueFactory<>("unidade")
+                new PropertyValueFactory<>(
+                        "unidade"
+                )
         );
 
 
         //---------------------------------------------
-        // ATIVO → SIM / NÃO
+        // ATIVO
         //---------------------------------------------
 
         colAtivo.setCellValueFactory(
@@ -136,7 +188,15 @@ public class ProdutoController {
     }
 
 
+    //==================================================
+    // EVENTOS
+    //==================================================
+
     private void configurarEventos() {
+
+        //---------------------------------------------
+        // SELEÇÃO DO PRODUTO
+        //---------------------------------------------
 
         view.getTabelaProdutos()
                 .getSelectionModel()
@@ -147,6 +207,10 @@ public class ProdutoController {
                 );
 
 
+        //---------------------------------------------
+        // PESQUISA
+        //---------------------------------------------
+
         view.getTxtPesquisa()
                 .textProperty()
                 .addListener(
@@ -154,6 +218,10 @@ public class ProdutoController {
                                 pesquisar(novo)
                 );
 
+
+        //---------------------------------------------
+        // BOTÕES
+        //---------------------------------------------
 
         view.getCrudButtonBar()
                 .getBtNovo()
@@ -170,33 +238,269 @@ public class ProdutoController {
 
 
         view.getCrudButtonBar()
-                .getBtExcluir()
-                .setOnAction(
-                        event -> excluir()
-                );
-
-
-        view.getCrudButtonBar()
                 .getBtFechar()
                 .setOnAction(
                         event -> fechar()
                 );
+
+
+        //---------------------------------------------
+        // PERÍODO
+        //---------------------------------------------
+
+        view.getCmbPeriodo()
+                .setOnAction(
+                        event -> alterarPeriodo()
+                );
+
+
+        //---------------------------------------------
+        // CONSULTAR HISTÓRICO
+        //---------------------------------------------
+
+        view.getBtConsultarHistorico()
+                .setOnAction(
+                        event -> consultarHistorico()
+                );
     }
 
-    private void carregarProdutos() {
 
-        List<ProdutoDTO> lista =
-                service.listarTodos();
+    //==================================================
+    // ALTERA PERÍODO
+    //==================================================
 
-        produtos.setAll(lista);
+    private void alterarPeriodo() {
+
+        String periodo =
+                view.getCmbPeriodo()
+                        .getValue();
+
+
+        if (periodo == null) {
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // DESDE O INÍCIO
+        //---------------------------------------------
+
+        if ("Desde o início".equals(periodo)) {
+
+            view.atualizarControlesPeriodo();
+
+            consultarHistorico();
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // PERSONALIZADO
+        //---------------------------------------------
+
+        if ("Período personalizado".equals(periodo)) {
+
+            view.atualizarControlesPeriodo();
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // PERÍODOS PRÉ-DEFINIDOS
+        //---------------------------------------------
+
+        LocalDate hoje =
+                LocalDate.now();
+
+
+        switch (periodo) {
+
+            case "Últimos 30 dias" -> {
+
+                view.getDtInicio()
+                        .setValue(
+                                hoje.minusDays(30)
+                        );
+            }
+
+
+            case "Últimos 90 dias" -> {
+
+                view.getDtInicio()
+                        .setValue(
+                                hoje.minusDays(90)
+                        );
+            }
+
+
+            case "Últimos 6 meses" -> {
+
+                view.getDtInicio()
+                        .setValue(
+                                hoje.minusMonths(6)
+                        );
+            }
+
+
+            case "Últimos 12 meses" -> {
+
+                view.getDtInicio()
+                        .setValue(
+                                hoje.minusMonths(12)
+                        );
+            }
+
+
+            case "Últimos 24 meses" -> {
+
+                view.getDtInicio()
+                        .setValue(
+                                hoje.minusMonths(24)
+                        );
+            }
+        }
+
+
+        view.getDtFim()
+                .setValue(hoje);
+
+
+        view.atualizarControlesPeriodo();
+
+
+        //---------------------------------------------
+        // CONSULTA AUTOMÁTICA
+        //---------------------------------------------
+
+        consultarHistorico();
+    }
+
+
+    //==================================================
+    // CONSULTA HISTÓRICO
+    //==================================================
+
+    private void consultarHistorico() {
+
+        if (produtoSelecionado == null) {
+
+            return;
+        }
+
+
+        String periodo =
+                view.getCmbPeriodo()
+                        .getValue();
+
+
+        //---------------------------------------------
+        // DESDE O INÍCIO
+        //---------------------------------------------
+
+        if ("Desde o início".equals(periodo)) {
+
+            carregarHistorico(
+                    produtoSelecionado,
+                    null,
+                    null
+            );
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // PERÍODO PERSONALIZADO
+        //---------------------------------------------
+
+        LocalDate inicio =
+                view.getDtInicio()
+                        .getValue();
+
+        LocalDate fim =
+                view.getDtFim()
+                        .getValue();
+
+
+        if (inicio == null || fim == null) {
+
+            if ("Período personalizado".equals(periodo)) {
+
+                Alert alerta =
+                        new Alert(
+                                Alert.AlertType.WARNING
+                        );
+
+                alerta.setTitle(
+                        "Histórico do produto"
+                );
+
+                alerta.setHeaderText(
+                        "Período não informado"
+                );
+
+                alerta.setContentText(
+                        "Informe a data inicial e a data final."
+                );
+
+                alerta.showAndWait();
+            }
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // VALIDA PERÍODO
+        //---------------------------------------------
+
+        if (inicio.isAfter(fim)) {
+
+            Alert alerta =
+                    new Alert(
+                            Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle(
+                    "Histórico do produto"
+            );
+
+            alerta.setHeaderText(
+                    "Período inválido"
+            );
+
+            alerta.setContentText(
+                    "A data inicial não pode ser maior que a data final."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // CONSULTA
+        //---------------------------------------------
+
+        carregarHistorico(
+                produtoSelecionado,
+                inicio,
+                fim
+        );
     }
 
     //==================================================
-    // CARREGA HISTÓRICO DO PRODUTO
+    // CARREGA HISTÓRICO
     //==================================================
 
     private void carregarHistorico(
-            ProdutoDTO produto) {
+            ProdutoDTO produto,
+            LocalDate inicio,
+            LocalDate fim) {
 
         if (produto == null
                 || produto.getCodigoProduto() == null
@@ -209,15 +513,41 @@ public class ProdutoController {
             return;
         }
 
-        List<ProdutoHistoricoDTO> historico =
-                service.listarHistoricoPorCodigoProduto(
-                        produto.getCodigoProduto()
-                );
+
+        List<ProdutoHistoricoDTO> historico;
+
+
+        //---------------------------------------------
+        // DESDE O INÍCIO
+        //---------------------------------------------
+
+        if (inicio == null && fim == null) {
+
+            historico =
+                    service.listarHistoricoPorCodigoProduto(
+                            produto.getCodigoProduto()
+                    );
+
+        } else {
+
+            //---------------------------------------------
+            // PERÍODO COM DATAS
+            //---------------------------------------------
+
+            historico =
+                    service.listarHistoricoPorCodigoProduto(
+                            produto.getCodigoProduto(),
+                            inicio,
+                            fim
+                    );
+        }
+
 
         view.getTabelaHistorico()
                 .getItems()
                 .setAll(historico);
     }
+
 
     //==================================================
     // SELECIONA PRODUTO
@@ -227,6 +557,7 @@ public class ProdutoController {
             ProdutoDTO produto) {
 
         produtoSelecionado = produto;
+
 
         if (produto == null) {
 
@@ -243,9 +574,15 @@ public class ProdutoController {
             return;
         }
 
+
         carregarFormulario(produto);
 
-        carregarHistorico(produto);
+
+        //---------------------------------------------
+        // CARREGA HISTÓRICO DO PERÍODO ATUAL
+        //---------------------------------------------
+
+        consultarHistorico();
 
         bloquearFormulario();
 
@@ -253,6 +590,7 @@ public class ProdutoController {
 
         atualizarEstadoBotoes();
     }
+
 
     //==================================================
     // EDITAR
@@ -265,23 +603,23 @@ public class ProdutoController {
             return;
         }
 
+
         modoEdicao = true;
 
         atualizarEstadoBotoes();
 
         desbloquearFormulario();
 
-        //---------------------------------------------
-        // FOCO NA DESCRIÇÃO
-        //---------------------------------------------
 
         Platform.runLater(() -> {
 
-            view.getTxtDescricao().requestFocus();
+            view.getTxtDescricao()
+                    .requestFocus();
 
             posicionarDescricao();
         });
     }
+
 
     //==================================================
     // POSICIONA DESCRIÇÃO NO SCROLL
@@ -290,8 +628,10 @@ public class ProdutoController {
     private void posicionarDescricao() {
 
         if (view.getScrollPane() == null) {
+
             return;
         }
+
 
         Platform.runLater(() -> {
 
@@ -304,13 +644,13 @@ public class ProdutoController {
             javafx.scene.Node conteudo =
                     scrollPane.getContent();
 
-            if (campo == null || conteudo == null) {
+
+            if (campo == null
+                    || conteudo == null) {
+
                 return;
             }
 
-            //---------------------------------------------
-            // POSIÇÃO DO CAMPO DENTRO DO CONTEÚDO
-            //---------------------------------------------
 
             javafx.geometry.Bounds campoBounds =
                     campo.localToScene(
@@ -322,51 +662,35 @@ public class ProdutoController {
                             conteudo.getBoundsInLocal()
                     );
 
-            //---------------------------------------------
-            // DISTÂNCIA DO CAMPO ATÉ O TOPO DO CONTEÚDO
-            //---------------------------------------------
 
             double campoY =
                     campoBounds.getMinY()
                             - conteudoBounds.getMinY();
 
-            //---------------------------------------------
-            // ALTURA VISÍVEL DO SCROLL
-            //---------------------------------------------
 
             double viewportHeight =
                     scrollPane.getViewportBounds()
                             .getHeight();
 
-            //---------------------------------------------
-            // ALTURA TOTAL DO CONTEÚDO
-            //---------------------------------------------
 
             double conteudoHeight =
                     conteudoBounds.getHeight();
 
-            //---------------------------------------------
-            // QUANTO PODE ROLAR
-            //---------------------------------------------
 
             double maxScroll =
                     conteudoHeight
                             - viewportHeight;
 
+
             if (maxScroll <= 0) {
+
                 return;
             }
 
-            //---------------------------------------------
-            // POSIÇÃO DESEJADA
-            //---------------------------------------------
 
             double novoVvalue =
                     campoY / maxScroll;
 
-            //---------------------------------------------
-            // LIMITA ENTRE 0 E 1
-            //---------------------------------------------
 
             novoVvalue =
                     Math.max(
@@ -377,15 +701,26 @@ public class ProdutoController {
                             )
                     );
 
-            //---------------------------------------------
-            // APLICA O SCROLL
-            //---------------------------------------------
 
             scrollPane.setVvalue(
                     novoVvalue
             );
         });
     }
+
+
+    //==================================================
+    // CARREGA PRODUTOS
+    //==================================================
+
+    private void carregarProdutos() {
+
+        List<ProdutoDTO> lista =
+                service.listarTodos();
+
+        produtos.setAll(lista);
+    }
+
 
     //==================================================
     // SALVAR
@@ -398,6 +733,7 @@ public class ProdutoController {
 
             return;
         }
+
 
         try {
 
@@ -443,20 +779,13 @@ public class ProdutoController {
             );
 
 
-            //-----------------------------------------
-            // ATUALIZA BANCO
-            //-----------------------------------------
-
             service.atualizar(
                     produtoSelecionado
             );
 
 
-            //-----------------------------------------
-            // ATUALIZA TABELA
-            //-----------------------------------------
-
             carregarProdutos();
+
 
             modoEdicao = false;
 
@@ -464,9 +793,6 @@ public class ProdutoController {
 
             atualizarEstadoBotoes();
 
-            //-----------------------------------------
-            // MENSAGEM
-            //-----------------------------------------
 
             Alert alerta =
                     new Alert(
@@ -492,10 +818,6 @@ public class ProdutoController {
 
             e.printStackTrace();
 
-
-            //-----------------------------------------
-            // ERRO
-            //-----------------------------------------
 
             Alert alerta =
                     new Alert(
@@ -530,23 +852,26 @@ public class ProdutoController {
             return;
         }
 
+
         try {
 
             service.excluir(
                     produtoSelecionado.getId()
             );
 
+
             produtos.remove(
                     produtoSelecionado
             );
 
+
             produtoSelecionado = null;
 
-            // Limpa o histórico do produto excluído
 
             view.getTabelaHistorico()
                     .getItems()
                     .clear();
+
 
             limparFormulario();
 
@@ -554,11 +879,11 @@ public class ProdutoController {
 
             atualizarEstadoBotoes();
 
+
         } catch (Exception e) {
 
             e.printStackTrace();
         }
-
     }
 
 
@@ -571,33 +896,51 @@ public class ProdutoController {
 
         view.getTxtCodigoProduto()
                 .setText(
-                        valor(produto.getCodigoProduto())
+                        valor(
+                                produto.getCodigoProduto()
+                        )
                 );
+
 
         view.getTxtCodigoBarras()
                 .setText(
-                        valor(produto.getCodigoBarras())
+                        valor(
+                                produto.getCodigoBarras()
+                        )
                 );
+
 
         view.getTxtDescricao()
                 .setText(
-                        valor(produto.getDescricao())
+                        valor(
+                                produto.getDescricao()
+                        )
                 );
+
 
         view.getTxtNcm()
                 .setText(
-                        valor(produto.getNcm())
+                        valor(
+                                produto.getNcm()
+                        )
                 );
+
 
         view.getTxtCest()
                 .setText(
-                        valor(produto.getCest())
+                        valor(
+                                produto.getCest()
+                        )
                 );
+
 
         view.getTxtUnidade()
                 .setText(
-                        valor(produto.getUnidade())
+                        valor(
+                                produto.getUnidade()
+                        )
                 );
+
 
         view.getChkAtivo()
                 .setSelected(
@@ -694,37 +1037,34 @@ public class ProdutoController {
                 .setDisable(false);
     }
 
+
     //==================================================
-    // CONTROLE DOS BOTÕES
+    // ESTADO DOS BOTÕES
     //==================================================
 
     private void atualizarEstadoBotoes() {
 
-        boolean produtoSelecionado =
-                this.produtoSelecionado != null;
+        boolean selecionado =
+                produtoSelecionado != null;
 
         boolean editando =
-                this.modoEdicao;
+                modoEdicao;
 
 
-        // EDITAR
         view.getCrudButtonBar()
                 .getBtNovo()
                 .setDisable(
-                        !produtoSelecionado
-                                || editando
+                        !selecionado || editando
                 );
 
 
-        // EXCLUIR
         view.getCrudButtonBar()
                 .getBtExcluir()
                 .setDisable(
-                        !produtoSelecionado || editando
+                        !selecionado || editando
                 );
 
 
-        // FECHAR
         view.getCrudButtonBar()
                 .getBtFechar()
                 .setDisable(
@@ -732,7 +1072,6 @@ public class ProdutoController {
                 );
 
 
-        // SALVAR
         view.getCrudButtonBar()
                 .getBtSalvar()
                 .setDisable(
@@ -767,8 +1106,10 @@ public class ProdutoController {
             return;
         }
 
+
         String filtro =
                 texto.trim().toLowerCase();
+
 
         List<ProdutoDTO> lista =
                 service.listarTodos()
@@ -791,6 +1132,7 @@ public class ProdutoController {
                         )
                         .toList();
 
+
         produtos.setAll(lista);
 
         produtoSelecionado = null;
@@ -800,8 +1142,8 @@ public class ProdutoController {
         bloquearFormulario();
 
         atualizarEstadoBotoes();
-
     }
+
 
     //==================================================
     // CONTÉM

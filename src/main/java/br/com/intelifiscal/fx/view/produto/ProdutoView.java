@@ -6,28 +6,28 @@ import br.com.intelifiscal.fx.components.common.Card;
 import br.com.intelifiscal.fx.components.common.CrudButtonBar;
 import br.com.intelifiscal.fx.components.common.SectionTitle;
 import br.com.intelifiscal.fx.view.base.BaseView;
+import br.com.intelifiscal.util.FormatadorNumero;
 
-import javafx.scene.control.Label;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ProdutoView extends BaseView {
 
@@ -66,7 +66,7 @@ public class ProdutoView extends BaseView {
 
 
     //==================================================
-    // TABELA
+    // TABELAS
     //==================================================
 
     private final TableView<ProdutoDTO> tabelaProdutos =
@@ -77,12 +77,28 @@ public class ProdutoView extends BaseView {
 
 
     //==================================================
+    // FILTRO DO HISTÓRICO
+    //==================================================
+
+    private final ComboBox<String> cmbPeriodo =
+            new ComboBox<>();
+
+    private final DatePicker dtInicio =
+            new DatePicker();
+
+    private final DatePicker dtFim =
+            new DatePicker();
+
+    private final Button btConsultarHistorico =
+            new Button("Consultar");
+
+
+    //==================================================
     // BOTÕES
     //==================================================
 
     private final CrudButtonBar crudButtonBar =
             new CrudButtonBar();
-
 
     private ScrollPane scrollPane;
 
@@ -144,7 +160,7 @@ public class ProdutoView extends BaseView {
 
 
         //---------------------------------------------
-        // TÍTULO DA TABELA
+        // TÍTULOS
         //---------------------------------------------
 
         SectionTitle secProdutos =
@@ -159,12 +175,20 @@ public class ProdutoView extends BaseView {
 
 
         //---------------------------------------------
-        // TABELA
+        // TABELAS
         //---------------------------------------------
 
         configurarTabela();
 
         configurarTabelaHistorico();
+
+
+        //---------------------------------------------
+        // FILTRO DO HISTÓRICO
+        //---------------------------------------------
+
+        HBox filtroHistorico =
+                criarFiltroHistorico();
 
 
         //---------------------------------------------
@@ -191,6 +215,8 @@ public class ProdutoView extends BaseView {
                 tabelaProdutos,
 
                 secHistorico,
+
+                filtroHistorico,
 
                 tabelaHistorico,
 
@@ -241,6 +267,155 @@ public class ProdutoView extends BaseView {
         //---------------------------------------------
 
         setContent(scrollPane);
+    }
+
+
+    //==================================================
+    // CONFIGURA FILTRO DO HISTÓRICO
+    //==================================================
+
+    private HBox criarFiltroHistorico() {
+
+        Label lblPeriodo =
+                new Label("Período:");
+
+        Label lblDe =
+                new Label("De:");
+
+        Label lblAte =
+                new Label("Até:");
+
+
+        cmbPeriodo.getItems().setAll(
+
+                "Últimos 30 dias",
+
+                "Últimos 90 dias",
+
+                "Últimos 6 meses",
+
+                "Últimos 12 meses",
+
+                "Últimos 24 meses",
+
+                "Desde o início",
+
+                "Período personalizado"
+        );
+
+
+        cmbPeriodo.setValue(
+                "Últimos 12 meses"
+        );
+
+
+        cmbPeriodo.setPrefWidth(180);
+
+        dtInicio.setPrefWidth(120);
+
+        dtFim.setPrefWidth(120);
+
+        btConsultarHistorico.setPrefWidth(100);
+
+
+        HBox filtro =
+                new HBox(
+                        10,
+                        lblPeriodo,
+                        cmbPeriodo,
+                        lblDe,
+                        dtInicio,
+                        lblAte,
+                        dtFim,
+                        btConsultarHistorico
+                );
+
+
+        filtro.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        filtro.setPadding(
+                new Insets(0, 0, 5, 0)
+        );
+
+
+        return filtro;
+    }
+
+    //==================================================
+    // CONTROLE DOS CAMPOS DE PERÍODO
+    //==================================================
+
+    public void atualizarControlesPeriodo() {
+
+        String periodo =
+                cmbPeriodo.getValue();
+
+
+        //---------------------------------------------
+        // DESDE O INÍCIO
+        //---------------------------------------------
+
+        if ("Desde o início".equals(periodo)) {
+
+            dtInicio.setValue(null);
+
+            dtFim.setValue(null);
+
+            dtInicio.setVisible(false);
+            dtInicio.setManaged(false);
+
+            dtFim.setVisible(false);
+            dtFim.setManaged(false);
+
+            dtInicio.setDisable(true);
+            dtFim.setDisable(true);
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // MOSTRA OS CALENDÁRIOS
+        //---------------------------------------------
+
+        dtInicio.setVisible(true);
+        dtInicio.setManaged(true);
+
+        dtFim.setVisible(true);
+        dtFim.setManaged(true);
+
+
+        //---------------------------------------------
+        // PERÍODO PERSONALIZADO
+        //---------------------------------------------
+
+        if ("Período personalizado".equals(periodo)) {
+
+            dtInicio.setDisable(false);
+            dtFim.setDisable(false);
+
+            dtInicio.setValue(null);
+
+            dtFim.setValue(null);
+
+
+            Platform.runLater(() ->
+                    dtInicio.requestFocus()
+            );
+
+            return;
+        }
+
+
+        //---------------------------------------------
+        // PERÍODOS AUTOMÁTICOS
+        //---------------------------------------------
+
+        dtInicio.setDisable(true);
+        dtFim.setDisable(true);
+
     }
 
 
@@ -320,6 +495,7 @@ public class ProdutoView extends BaseView {
         Label lblCodigoBarras =
                 new Label("Código de barras:");
 
+
         grid.add(
                 lblCodigo,
                 0,
@@ -352,6 +528,7 @@ public class ProdutoView extends BaseView {
         Label lblDescricao =
                 new Label("Descrição:");
 
+
         grid.add(
                 lblDescricao,
                 0,
@@ -377,8 +554,6 @@ public class ProdutoView extends BaseView {
         Label lblCest =
                 new Label("CEST:");
 
-        Label lblUnidade =
-                new Label("Unidade:");
 
         grid.add(
                 lblNcm,
@@ -408,6 +583,10 @@ public class ProdutoView extends BaseView {
         //---------------------------------------------
         // LINHA 3
         //---------------------------------------------
+
+        Label lblUnidade =
+                new Label("Unidade:");
+
 
         grid.add(
                 lblUnidade,
@@ -454,45 +633,26 @@ public class ProdutoView extends BaseView {
         //---------------------------------------------
 
         TableColumn<ProdutoDTO, String> colCodigo =
-                new TableColumn<>(
-                        "Código"
-                );
+                new TableColumn<>("Código");
 
         TableColumn<ProdutoDTO, String> colCodigoBarras =
-                new TableColumn<>(
-                        "Código de Barras"
-                );
+                new TableColumn<>("Código de Barras");
 
         TableColumn<ProdutoDTO, String> colDescricao =
-                new TableColumn<>(
-                        "Descrição"
-                );
+                new TableColumn<>("Descrição");
 
         TableColumn<ProdutoDTO, String> colNcm =
-                new TableColumn<>(
-                        "NCM"
-                );
+                new TableColumn<>("NCM");
 
         TableColumn<ProdutoDTO, String> colCest =
-                new TableColumn<>(
-                        "CEST"
-                );
+                new TableColumn<>("CEST");
 
         TableColumn<ProdutoDTO, String> colUnidade =
-                new TableColumn<>(
-                        "Unidade"
-                );
+                new TableColumn<>("Unidade");
 
-        // ATIVO AGORA SERÁ TEXTO: SIM / NÃO
         TableColumn<ProdutoDTO, String> colAtivo =
-                new TableColumn<>(
-                        "Ativo"
-                );
+                new TableColumn<>("Ativo");
 
-
-        //---------------------------------------------
-        // ADICIONA COLUNAS
-        //---------------------------------------------
 
         tabelaProdutos.getColumns().addAll(
 
@@ -512,20 +672,17 @@ public class ProdutoView extends BaseView {
         );
 
 
-        //---------------------------------------------
-        // TAMANHO DA TABELA
-        //---------------------------------------------
+        tabelaProdutos.setPrefHeight(220);
 
-        tabelaProdutos.setPrefHeight(230);
+        tabelaProdutos.setMinHeight(220);
 
-        tabelaProdutos.setMinHeight(230);
-
-        tabelaProdutos.setMaxHeight(230);
+        tabelaProdutos.setMaxHeight(220);
     }
 
+
     //==================================================
-// CONFIGURA TABELA HISTÓRICO
-//==================================================
+    // CONFIGURA TABELA HISTÓRICO
+    //==================================================
 
     private void configurarTabelaHistorico() {
 
@@ -589,28 +746,50 @@ public class ProdutoView extends BaseView {
         // EMISSÃO
         //---------------------------------------------
 
-        TableColumn<ProdutoHistoricoDTO, String> colData =
+        TableColumn<ProdutoHistoricoDTO, LocalDateTime> colData =
                 new TableColumn<>("Emissão");
 
         colData.setCellValueFactory(
-                data -> {
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue()
+                                        .getDataEmissao()
+                        )
+        );
 
-                    LocalDateTime dataEmissao =
-                            data.getValue().getDataEmissao();
 
-                    String texto =
-                            dataEmissao == null
-                                    ? ""
-                                    : dataEmissao.format(
+        colData.setCellFactory(
+                coluna ->
+                        new javafx.scene.control.TableCell<>() {
+
+                            private final DateTimeFormatter formato =
                                     DateTimeFormatter.ofPattern(
                                             "dd/MM/yyyy"
-                                    )
-                            );
+                                    );
 
-                    return new SimpleStringProperty(
-                            texto
-                    );
-                }
+                            @Override
+                            protected void updateItem(
+                                    LocalDateTime item,
+                                    boolean empty
+                            ) {
+
+                                super.updateItem(
+                                        item,
+                                        empty
+                                );
+
+                                if (empty || item == null) {
+
+                                    setText(null);
+
+                                } else {
+
+                                    setText(
+                                            formato.format(item)
+                                    );
+                                }
+                            }
+                        }
         );
 
 
@@ -654,8 +833,13 @@ public class ProdutoView extends BaseView {
         colQuantidade.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getQuantidade()
+                                data.getValue()
+                                        .getQuantidade()
                         )
+        );
+
+        FormatadorNumero.aplicarQuantidade(
+                colQuantidade
         );
 
 
@@ -669,8 +853,13 @@ public class ProdutoView extends BaseView {
         colValorUnitario.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getValorUnitario()
+                                data.getValue()
+                                        .getValorUnitario()
                         )
+        );
+
+        FormatadorNumero.aplicarValorUnitario(
+                colValorUnitario
         );
 
 
@@ -684,8 +873,13 @@ public class ProdutoView extends BaseView {
         colValorTotal.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getValorTotal()
+                                data.getValue()
+                                        .getValorTotal()
                         )
+        );
+
+        FormatadorNumero.aplicar(
+                colValorTotal
         );
 
 
@@ -715,10 +909,6 @@ public class ProdutoView extends BaseView {
         );
 
 
-        //---------------------------------------------
-        // TAMANHO
-        //---------------------------------------------
-
         tabelaHistorico.setPrefHeight(220);
 
         tabelaHistorico.setMinHeight(220);
@@ -732,117 +922,126 @@ public class ProdutoView extends BaseView {
     //==================================================
 
     public TextField getTxtPesquisa() {
-
         return txtPesquisa;
     }
 
-
     public TextField getTxtCodigoProduto() {
-
         return txtCodigoProduto;
     }
 
-
     public TextField getTxtCodigoBarras() {
-
         return txtCodigoBarras;
     }
 
-
     public TextField getTxtDescricao() {
-
         return txtDescricao;
     }
 
-
     public TextField getTxtNcm() {
-
         return txtNcm;
     }
 
-
     public TextField getTxtCest() {
-
         return txtCest;
     }
 
-
     public TextField getTxtUnidade() {
-
         return txtUnidade;
     }
 
-
     public CheckBox getChkAtivo() {
-
         return chkAtivo;
     }
 
+    public ComboBox<String> getCmbPeriodo() {
+        return cmbPeriodo;
+    }
+
+    public DatePicker getDtInicio() {
+        return dtInicio;
+    }
+
+    public DatePicker getDtFim() {
+        return dtFim;
+    }
+
+    public Button getBtConsultarHistorico() {
+        return btConsultarHistorico;
+    }
 
     public TableView<ProdutoDTO> getTabelaProdutos() {
-
         return tabelaProdutos;
     }
 
+    public TableView<ProdutoHistoricoDTO> getTabelaHistorico() {
+        return tabelaHistorico;
+    }
 
     public CrudButtonBar getCrudButtonBar() {
-
         return crudButtonBar;
     }
+
+    public ScrollPane getScrollPane() {
+        return scrollPane;
+    }
+
 
     //==================================================
     // CONTROLE DOS BOTÕES
     //==================================================
-
     public void configurarBotoesInicial() {
 
-        crudButtonBar.getBtNovo().setDisable(true);
+        crudButtonBar.getBtNovo()
+                .setDisable(true);
 
-        crudButtonBar.getBtExcluir().setDisable(true);
+        crudButtonBar.getBtExcluir()
+                .setVisible(false);
 
-        crudButtonBar.getBtSalvar().setDisable(false);
+        crudButtonBar.getBtExcluir()
+                .setManaged(false);
 
-        crudButtonBar.getBtFechar().setDisable(false);
+        crudButtonBar.getBtSalvar()
+                .setDisable(false);
 
+        crudButtonBar.getBtFechar()
+                .setDisable(false);
     }
 
 
-    // Produto selecionado na tabela
     public void produtoSelecionado() {
 
-        crudButtonBar.getBtNovo().setDisable(false);
+        crudButtonBar.getBtNovo()
+                .setDisable(false);
 
-        crudButtonBar.getBtExcluir().setDisable(false);
+        crudButtonBar.getBtExcluir()
+                .setVisible(false);
 
-        crudButtonBar.getBtSalvar().setDisable(false);
+        crudButtonBar.getBtExcluir()
+                .setManaged(false);
 
-        crudButtonBar.getBtFechar().setDisable(false);
+        crudButtonBar.getBtSalvar()
+                .setDisable(false);
 
+        crudButtonBar.getBtFechar()
+                .setDisable(false);
     }
 
-
-    // Entrou no modo de edição
     public void modoEdicao() {
 
-        crudButtonBar.getBtNovo().setDisable(true);
+        crudButtonBar.getBtNovo()
+                .setDisable(true);
 
-        crudButtonBar.getBtExcluir().setDisable(false);
+        crudButtonBar.getBtExcluir()
+                .setVisible(false);
 
-        crudButtonBar.getBtSalvar().setDisable(false);
+        crudButtonBar.getBtExcluir()
+                .setManaged(false);
 
-        crudButtonBar.getBtFechar().setDisable(true);
+        crudButtonBar.getBtSalvar()
+                .setDisable(false);
 
-    }
-
-
-    public ScrollPane getScrollPane() {
-
-        return scrollPane;
-    }
-
-    public TableView<ProdutoHistoricoDTO> getTabelaHistorico() {
-
-        return tabelaHistorico;
+        crudButtonBar.getBtFechar()
+                .setDisable(true);
     }
 
 }

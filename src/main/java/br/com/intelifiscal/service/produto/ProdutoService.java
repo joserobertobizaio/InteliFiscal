@@ -4,7 +4,7 @@ import br.com.intelifiscal.dto.produto.ProdutoDTO;
 import br.com.intelifiscal.dto.produto.ProdutoHistoricoDTO;
 import br.com.intelifiscal.repository.nfeitem.NFeItemRepository;
 import br.com.intelifiscal.repository.produto.ProdutoRepository;
-
+import java.time.LocalDate;
 import java.util.List;
 
 public class ProdutoService {
@@ -137,6 +137,36 @@ public class ProdutoService {
                     "Descrição do produto é obrigatória."
             );
         }
+    }
+
+    public List<ProdutoHistoricoDTO> listarHistoricoPorCodigoProduto(
+            String codigoProduto,
+            LocalDate inicio,
+            LocalDate fim) {
+
+        if (codigoProduto == null
+                || codigoProduto.isBlank()) {
+
+            return List.of();
+        }
+
+        if (inicio == null || fim == null) {
+
+            return List.of();
+        }
+
+        if (inicio.isAfter(fim)) {
+
+            throw new IllegalArgumentException(
+                    "Período inválido."
+            );
+        }
+
+        return nfeItemRepository.listarHistoricoPorCodigoProduto(
+                codigoProduto,
+                inicio,
+                fim
+        );
     }
 
     public List<ProdutoHistoricoDTO> listarHistoricoPorCodigoProduto(
