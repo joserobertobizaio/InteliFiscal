@@ -4,6 +4,7 @@ import br.com.intelifiscal.fx.view.base.BaseView;
 import br.com.intelifiscal.fx.components.common.Card;
 import br.com.intelifiscal.fx.components.dashboard.MetricCard;
 import br.com.intelifiscal.fx.components.common.icons.IconType;
+import br.com.intelifiscal.fx.controller.dashboard.DashboardController;
 import javafx.geometry.HPos;
 import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
@@ -13,6 +14,23 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 
 public class DashboardView extends BaseView {
+
+    // ============================================================
+    // LINKS - CONSULTAS RÁPIDAS
+    // ============================================================
+
+    private final Label comprasLink =
+            new Label("Consultar →");
+
+    private final Label vendasLink =
+            new Label("Consultar →");
+
+    private final Label produtosLink =
+            new Label("Consultar →");
+
+    private final Label periodoLink =
+            new Label("Consultar →");
+
 
     public DashboardView() {
 
@@ -25,6 +43,10 @@ public class DashboardView extends BaseView {
     }
 
     private void initialize() {
+
+        // ============================================================
+        // TEXTO CENTRAL ATUAL
+        // ============================================================
 
         Label lblIcon = new Label("🚧");
         lblIcon.getStyleClass().add("dashboard-icon");
@@ -48,6 +70,10 @@ public class DashboardView extends BaseView {
                 lblTitulo,
                 lblDescricao
         );
+
+        // ============================================================
+        // CARDS DOS INDICADORES
+        // ============================================================
 
         GridPane indicadores = new GridPane();
 
@@ -85,11 +111,8 @@ public class DashboardView extends BaseView {
                 );
 
         indicadores.add(xmlCard, 0, 0);
-
         indicadores.add(comprasCard, 1, 0);
-
         indicadores.add(vendasCard, 2, 0);
-
         indicadores.add(produtosCard, 3, 0);
 
         GridPane.setHalignment(xmlCard, HPos.CENTER);
@@ -101,15 +124,224 @@ public class DashboardView extends BaseView {
 
         faixaIndicadores.setAlignment(Pos.CENTER);
 
-        faixaIndicadores.setPadding(new Insets(10, 0, 20, 0));
+        faixaIndicadores.setPadding(
+                new Insets(10, 0, 10, 0)
+        );
 
-        Card card = new Card(conteudo);
+        // ============================================================
+        // CONSULTAS RÁPIDAS
+        // ============================================================
 
-        card.setWidthPercentage(0.55);
+        Label lblConsultas = new Label("Consultas rápidas");
 
-        card.setMaxContentWidth(850);
+        lblConsultas.setStyle(
+                "-fx-font-size: 20px;"
+                        + "-fx-font-weight: bold;"
+        );
 
-        VBox painel = new VBox(30);
+        Label lblSubtituloConsultas = new Label(
+                "Acesse rapidamente as principais informações do sistema."
+        );
+
+        lblSubtituloConsultas.setStyle(
+                "-fx-font-size: 13px;"
+        );
+
+        VBox tituloConsultas = new VBox(5);
+
+        tituloConsultas.setAlignment(Pos.CENTER_LEFT);
+
+        tituloConsultas.getChildren().addAll(
+                lblConsultas,
+                lblSubtituloConsultas
+        );
+
+        // ------------------------------------------------------------
+        // CONSULTA 1 - COMPRAS
+        // ------------------------------------------------------------
+
+        Label comprasTitulo = new Label("📊  Resumo de Compras");
+
+        comprasTitulo.setStyle(
+                "-fx-font-size: 15px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+        comprasLink.setStyle(
+                "-fx-font-size: 13px;"
+                        + "-fx-cursor: hand;"
+        );
+
+        VBox consultaCompras = new VBox(8);
+
+        consultaCompras.setPadding(new Insets(15));
+
+        consultaCompras.setPrefWidth(300);
+
+        consultaCompras.getChildren().addAll(
+                comprasTitulo,
+                comprasLink
+        );
+
+        consultaCompras.setStyle(
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 10;"
+                        + "-fx-border-color: #e0e0e0;"
+                        + "-fx-border-radius: 10;"
+                        + "-fx-border-width: 1;"
+        );
+
+        // ------------------------------------------------------------
+        // CONSULTA 2 - VENDAS
+        // ------------------------------------------------------------
+
+        Label vendasTitulo = new Label("📈  Resumo de Vendas");
+
+        vendasTitulo.setStyle(
+                "-fx-font-size: 15px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+        vendasLink.setStyle(
+                "-fx-font-size: 13px;"
+                        + "-fx-cursor: hand;"
+        );
+
+        VBox consultaVendas = new VBox(8);
+
+        consultaVendas.setPadding(new Insets(15));
+
+        consultaVendas.setPrefWidth(300);
+
+        consultaVendas.getChildren().addAll(
+                vendasTitulo,
+                vendasLink
+        );
+
+        consultaVendas.setStyle(
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 10;"
+                        + "-fx-border-color: #e0e0e0;"
+                        + "-fx-border-radius: 10;"
+                        + "-fx-border-width: 1;"
+        );
+
+        // ------------------------------------------------------------
+        // CONSULTA 3 - PRODUTOS
+        // ------------------------------------------------------------
+
+        Label produtosTitulo = new Label("📦  Histórico de Produto");
+
+        produtosTitulo.setStyle(
+                "-fx-font-size: 15px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+        produtosLink.setStyle(
+                "-fx-font-size: 13px;"
+                        + "-fx-cursor: hand;"
+        );
+
+        VBox consultaProdutos = new VBox(8);
+
+        consultaProdutos.setPadding(new Insets(15));
+
+        consultaProdutos.setPrefWidth(300);
+
+        consultaProdutos.getChildren().addAll(
+                produtosTitulo,
+                produtosLink
+        );
+
+        consultaProdutos.setStyle(
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 10;"
+                        + "-fx-border-color: #e0e0e0;"
+                        + "-fx-border-radius: 10;"
+                        + "-fx-border-width: 1;"
+        );
+
+        // ------------------------------------------------------------
+        // CONSULTA 4 - ÚLTIMOS 12 MESES
+        // ------------------------------------------------------------
+
+        Label periodoTitulo = new Label("📅  Últimos 12 meses");
+
+        periodoTitulo.setStyle(
+                "-fx-font-size: 15px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+        periodoLink.setStyle(
+                "-fx-font-size: 13px;"
+                        + "-fx-cursor: hand;"
+        );
+
+        VBox consultaPeriodo = new VBox(8);
+
+        consultaPeriodo.setPadding(new Insets(15));
+
+        consultaPeriodo.setPrefWidth(300);
+
+        consultaPeriodo.getChildren().addAll(
+                periodoTitulo,
+                periodoLink
+        );
+
+        consultaPeriodo.setStyle(
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 10;"
+                        + "-fx-border-color: #e0e0e0;"
+                        + "-fx-border-radius: 10;"
+                        + "-fx-border-width: 1;"
+        );
+
+        // ============================================================
+        // GRID DAS CONSULTAS
+        // ============================================================
+
+        GridPane consultasGrid = new GridPane();
+
+        consultasGrid.setAlignment(Pos.CENTER);
+
+        consultasGrid.setHgap(20);
+
+        consultasGrid.setVgap(15);
+
+        consultasGrid.add(consultaCompras, 0, 0);
+        consultasGrid.add(consultaVendas, 1, 0);
+
+        consultasGrid.add(consultaProdutos, 0, 1);
+        consultasGrid.add(consultaPeriodo, 1, 1);
+
+        // ============================================================
+        // PAINEL DE CONSULTAS
+        // ============================================================
+
+        VBox painelConsultas = new VBox(15);
+
+        painelConsultas.setAlignment(Pos.CENTER);
+
+        painelConsultas.setPadding(
+                new Insets(20)
+        );
+
+        painelConsultas.getChildren().addAll(
+                tituloConsultas,
+                consultasGrid
+        );
+
+        Card cardConsultas = new Card(painelConsultas);
+
+        cardConsultas.setWidthPercentage(0.75);
+
+        cardConsultas.setMaxContentWidth(850);
+
+        // ============================================================
+        // PAINEL PRINCIPAL
+        // ============================================================
+
+        VBox painel = new VBox(20);
 
         painel.setAlignment(Pos.TOP_CENTER);
 
@@ -117,10 +349,39 @@ public class DashboardView extends BaseView {
 
         painel.getChildren().addAll(
                 faixaIndicadores,
-                card
+                cardConsultas
         );
 
         setContent(painel);
 
+        new DashboardController(this);
     }
+
+    //==================================================
+    // GETTERS - CONSULTAS RÁPIDAS
+    //==================================================
+
+    public Label getComprasLink() {
+
+        return comprasLink;
+    }
+
+
+    public Label getVendasLink() {
+
+        return vendasLink;
+    }
+
+
+    public Label getProdutosLink() {
+
+        return produtosLink;
+    }
+
+
+    public Label getPeriodoLink() {
+
+        return periodoLink;
+    }
+
 }

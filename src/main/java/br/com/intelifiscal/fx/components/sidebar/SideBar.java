@@ -83,6 +83,8 @@ public class SideBar extends VBox {
             case RELATORIOS -> IconType.RELATORIOS;
 
             case CONFIGURACOES -> IconType.CONFIGURACOES;
+
+            default -> IconType.CONFIGURACOES;
         };
 
         SidebarItem item = new SidebarItem(

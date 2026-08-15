@@ -17,6 +17,8 @@ public enum ScreenType {
 
     PRODUTOS,
 
+    RESUMO_PERIODO,
+
     RELATORIOS,
 
     CONFIGURACOES

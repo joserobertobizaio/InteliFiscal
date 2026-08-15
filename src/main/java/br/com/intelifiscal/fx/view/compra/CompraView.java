@@ -1,28 +1,30 @@
-package br.com.intelifiscal.fx.view.venda;
+package br.com.intelifiscal.fx.view.compra;
 
-import br.com.intelifiscal.dto.venda.VendaDTO;
-import br.com.intelifiscal.dto.venda.VendaItemDTO;
+import javafx.scene.control.TableCell;
+import br.com.intelifiscal.dto.compra.CompraDTO;
+import br.com.intelifiscal.dto.compra.CompraItemDTO;
 import br.com.intelifiscal.fx.components.common.Card;
 import br.com.intelifiscal.fx.components.common.SectionTitle;
 import br.com.intelifiscal.fx.view.base.BaseView;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import br.com.intelifiscal.util.FormatadorNumero;
 
-import javafx.scene.control.TableColumn;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class VendaView extends BaseView {
+public class CompraView extends BaseView {
 
     //==================================================
     // PESQUISA
@@ -36,10 +38,10 @@ public class VendaView extends BaseView {
     // TABELAS
     //==================================================
 
-    private final TableView<VendaDTO> tabelaVendas =
+    private final TableView<CompraDTO> tabelaCompras =
             new TableView<>();
 
-    private final TableView<VendaItemDTO> tabelaItens =
+    private final TableView<CompraItemDTO> tabelaItens =
             new TableView<>();
 
 
@@ -54,11 +56,11 @@ public class VendaView extends BaseView {
     // CONSTRUTOR
     //==================================================
 
-    public VendaView() {
+    public CompraView() {
 
         super(
-                "Vendas",
-                "Consulta das Notas Fiscais de saída"
+                "Compras",
+                "Consulta das Notas Fiscais de entrada"
         );
 
         initialize();
@@ -76,7 +78,7 @@ public class VendaView extends BaseView {
         //---------------------------------------------
 
         txtPesquisa.setPromptText(
-                "Pesquisar por NF, cliente ou CNPJ..."
+                "Pesquisar por NF, fornecedor ou CNPJ..."
         );
 
         txtPesquisa.setPrefWidth(500);
@@ -96,14 +98,14 @@ public class VendaView extends BaseView {
         // TÍTULOS
         //---------------------------------------------
 
-        SectionTitle secVendas =
+        SectionTitle secCompras =
                 new SectionTitle(
-                        "Vendas"
+                        "Compras"
                 );
 
         SectionTitle secItens =
                 new SectionTitle(
-                        "Itens da venda"
+                        "Itens da compra"
                 );
 
 
@@ -111,7 +113,7 @@ public class VendaView extends BaseView {
         // TABELAS
         //---------------------------------------------
 
-        configurarTabelaVendas();
+        configurarTabelaCompras();
 
         configurarTabelaItens();
 
@@ -131,9 +133,9 @@ public class VendaView extends BaseView {
 
                 barraPesquisa,
 
-                secVendas,
+                secCompras,
 
-                tabelaVendas,
+                tabelaCompras,
 
                 secItens,
 
@@ -188,18 +190,18 @@ public class VendaView extends BaseView {
 
 
     //==================================================
-    // TABELA DE VENDAS
+    // TABELA DE COMPRAS
     //==================================================
 
-    private void configurarTabelaVendas() {
+    private void configurarTabelaCompras() {
 
-        tabelaVendas.setColumnResizePolicy(
+        tabelaCompras.setColumnResizePolicy(
                 TableView.CONSTRAINED_RESIZE_POLICY
         );
 
-        tabelaVendas.setPlaceholder(
+        tabelaCompras.setPlaceholder(
                 new Label(
-                        "Nenhuma venda encontrada."
+                        "Nenhuma compra encontrada."
                 )
         );
 
@@ -208,7 +210,7 @@ public class VendaView extends BaseView {
         // NF
         //---------------------------------------------
 
-        TableColumn<VendaDTO, String> colNumero =
+        TableColumn<CompraDTO, String> colNumero =
                 new TableColumn<>("NF");
 
         colNumero.setCellValueFactory(
@@ -221,20 +223,24 @@ public class VendaView extends BaseView {
         colNumero.setComparator((a, b) -> {
 
             try {
+
                 return Integer.compare(
                         Integer.parseInt(a),
                         Integer.parseInt(b)
                 );
+
             } catch (NumberFormatException e) {
+
                 return a.compareToIgnoreCase(b);
             }
         });
+
 
         //---------------------------------------------
         // SÉRIE
         //---------------------------------------------
 
-        TableColumn<VendaDTO, String> colSerie =
+        TableColumn<CompraDTO, String> colSerie =
                 new TableColumn<>("Série");
 
         colSerie.setCellValueFactory(
@@ -249,22 +255,27 @@ public class VendaView extends BaseView {
         // EMISSÃO
         //---------------------------------------------
 
-        TableColumn<VendaDTO, String> colData =
+        TableColumn<CompraDTO, String> colData =
                 new TableColumn<>("Emissão");
 
         DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                DateTimeFormatter.ofPattern(
+                        "dd/MM/yyyy"
+                );
 
         colData.setCellValueFactory(
                 data -> {
 
                     LocalDate dataEmissao =
-                            data.getValue().getDataEmissao();
+                            data.getValue()
+                                    .getDataEmissao();
 
                     String texto =
                             dataEmissao == null
                                     ? ""
-                                    : dataEmissao.format(formatter);
+                                    : dataEmissao.format(
+                                    formatter
+                            );
 
                     return new SimpleStringProperty(
                             texto
@@ -275,48 +286,59 @@ public class VendaView extends BaseView {
         colData.setComparator((a, b) -> {
 
             if (a == null || a.isBlank()) {
-                return (b == null || b.isBlank()) ? 0 : -1;
+
+                return (b == null || b.isBlank())
+                        ? 0
+                        : -1;
             }
 
             if (b == null || b.isBlank()) {
                 return 1;
             }
 
-            return LocalDate.parse(a, formatter)
-                    .compareTo(
-                            LocalDate.parse(b, formatter)
-                    );
+            return LocalDate.parse(
+                    a,
+                    formatter
+            ).compareTo(
+                    LocalDate.parse(
+                            b,
+                            formatter
+                    )
+            );
         });
 
+
         //---------------------------------------------
-        // CLIENTE
+        // FORNECEDOR
         //---------------------------------------------
 
-        TableColumn<VendaDTO, String> colCliente =
-                new TableColumn<>("Cliente");
+        TableColumn<CompraDTO, String> colFornecedor =
+                new TableColumn<>("Fornecedor");
 
-        colCliente.setCellValueFactory(
+        colFornecedor.setCellValueFactory(
                 data ->
                         new SimpleStringProperty(
-                                data.getValue().getDestinatario()
+                                data.getValue().getEmitente()
                         )
         );
 
-        colCliente.setComparator(
+        colFornecedor.setComparator(
                 String.CASE_INSENSITIVE_ORDER
         );
+
 
         //---------------------------------------------
         // CNPJ
         //---------------------------------------------
 
-        TableColumn<VendaDTO, String> colCnpj =
+        TableColumn<CompraDTO, String> colCnpj =
                 new TableColumn<>("CNPJ");
 
         colCnpj.setCellValueFactory(
                 data ->
                         new SimpleStringProperty(
-                                data.getValue().getCnpjDestinatario()
+                                data.getValue()
+                                        .getCnpjEmitente()
                         )
         );
 
@@ -325,7 +347,7 @@ public class VendaView extends BaseView {
         // VALOR
         //---------------------------------------------
 
-        TableColumn<VendaDTO, Number> colValor =
+        TableColumn<CompraDTO, Number> colValor =
                 new TableColumn<>("Valor");
 
         colValor.setCellValueFactory(
@@ -344,7 +366,7 @@ public class VendaView extends BaseView {
         // SITUAÇÃO
         //---------------------------------------------
 
-        TableColumn<VendaDTO, String> colSituacao =
+        TableColumn<CompraDTO, String> colSituacao =
                 new TableColumn<>("Situação");
 
         colSituacao.setCellValueFactory(
@@ -359,7 +381,7 @@ public class VendaView extends BaseView {
         // ADICIONA COLUNAS
         //---------------------------------------------
 
-        tabelaVendas.getColumns().setAll(
+        tabelaCompras.getColumns().setAll(
 
                 colNumero,
 
@@ -367,7 +389,7 @@ public class VendaView extends BaseView {
 
                 colData,
 
-                colCliente,
+                colFornecedor,
 
                 colCnpj,
 
@@ -381,11 +403,11 @@ public class VendaView extends BaseView {
         // TAMANHO
         //---------------------------------------------
 
-        tabelaVendas.setPrefHeight(300);
+        tabelaCompras.setPrefHeight(300);
 
-        tabelaVendas.setMinHeight(300);
+        tabelaCompras.setMinHeight(300);
 
-        tabelaVendas.setMaxHeight(300);
+        tabelaCompras.setMaxHeight(300);
     }
 
 
@@ -401,7 +423,7 @@ public class VendaView extends BaseView {
 
         tabelaItens.setPlaceholder(
                 new Label(
-                        "Selecione uma venda para visualizar os itens."
+                        "Selecione uma compra para visualizar os itens."
                 )
         );
 
@@ -410,13 +432,14 @@ public class VendaView extends BaseView {
         // ITEM
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, Number> colItem =
+        TableColumn<CompraItemDTO, Number> colItem =
                 new TableColumn<>("Item");
 
         colItem.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getNumeroItem()
+                                data.getValue()
+                                        .getNumeroItem()
                         )
         );
 
@@ -425,13 +448,14 @@ public class VendaView extends BaseView {
         // CÓDIGO
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, String> colCodigo =
+        TableColumn<CompraItemDTO, String> colCodigo =
                 new TableColumn<>("Código");
 
         colCodigo.setCellValueFactory(
                 data ->
                         new SimpleStringProperty(
-                                data.getValue().getCodigoProduto()
+                                data.getValue()
+                                        .getCodigoProduto()
                         )
         );
 
@@ -440,14 +464,19 @@ public class VendaView extends BaseView {
         // DESCRIÇÃO
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, String> colDescricao =
+        TableColumn<CompraItemDTO, String> colDescricao =
                 new TableColumn<>("Descrição");
 
         colDescricao.setCellValueFactory(
                 data ->
                         new SimpleStringProperty(
-                                data.getValue().getDescricao()
+                                data.getValue()
+                                        .getDescricao()
                         )
+        );
+
+        colDescricao.setComparator(
+                String.CASE_INSENSITIVE_ORDER
         );
 
 
@@ -455,13 +484,14 @@ public class VendaView extends BaseView {
         // UNIDADE
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, String> colUnidade =
+        TableColumn<CompraItemDTO, String> colUnidade =
                 new TableColumn<>("Unidade");
 
         colUnidade.setCellValueFactory(
                 data ->
                         new SimpleStringProperty(
-                                data.getValue().getUnidade()
+                                data.getValue()
+                                        .getUnidade()
                         )
         );
 
@@ -470,13 +500,14 @@ public class VendaView extends BaseView {
         // QUANTIDADE
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, Number> colQuantidade =
+        TableColumn<CompraItemDTO, Number> colQuantidade =
                 new TableColumn<>("Quantidade");
 
         colQuantidade.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getQuantidade()
+                                data.getValue()
+                                        .getQuantidade()
                         )
         );
 
@@ -488,13 +519,14 @@ public class VendaView extends BaseView {
         // VALOR UNITÁRIO
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, Number> colValorUnitario =
+        TableColumn<CompraItemDTO, Number> colValorUnitario =
                 new TableColumn<>("Valor Unitário");
 
         colValorUnitario.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getValorUnitario()
+                                data.getValue()
+                                        .getValorUnitario()
                         )
         );
 
@@ -502,36 +534,37 @@ public class VendaView extends BaseView {
                 colValorUnitario
         );
 
-
         //---------------------------------------------
         // DESCONTO
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, Number> colDesconto =
+        TableColumn<CompraItemDTO, Number> colDesconto =
                 new TableColumn<>("Desconto");
 
-        colDesconto.setCellValueFactory(
+        colValorUnitario.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getDesconto()
+                                data.getValue()
+                                        .getValorUnitario()
                         )
         );
 
-        FormatadorNumero.aplicar(
-                colDesconto
+        FormatadorNumero.aplicarValorUnitario(
+                colValorUnitario
         );
 
         //---------------------------------------------
         // VALOR TOTAL
         //---------------------------------------------
 
-        TableColumn<VendaItemDTO, Number> colValorTotal =
+        TableColumn<CompraItemDTO, Number> colValorTotal =
                 new TableColumn<>("Valor Total");
 
         colValorTotal.setCellValueFactory(
                 data ->
                         new SimpleObjectProperty<>(
-                                data.getValue().getValorTotal()
+                                data.getValue()
+                                        .getValorTotal()
                         )
         );
 
@@ -574,6 +607,7 @@ public class VendaView extends BaseView {
         tabelaItens.setMaxHeight(220);
     }
 
+
     //==================================================
     // GETTERS
     //==================================================
@@ -584,13 +618,13 @@ public class VendaView extends BaseView {
     }
 
 
-    public TableView<VendaDTO> getTabelaVendas() {
+    public TableView<CompraDTO> getTabelaCompras() {
 
-        return tabelaVendas;
+        return tabelaCompras;
     }
 
 
-    public TableView<VendaItemDTO> getTabelaItens() {
+    public TableView<CompraItemDTO> getTabelaItens() {
 
         return tabelaItens;
     }

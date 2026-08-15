@@ -5,6 +5,7 @@ import br.com.intelifiscal.service.nfeitem.NFeItemService;
 import br.com.intelifiscal.dto.nfeitem.NFeItemDTO;
 import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
 import br.com.intelifiscal.util.XmlUtil;
+import javafx.concurrent.Task;
 
 import br.com.intelifiscal.dto.produto.ProdutoDTO;
 import br.com.intelifiscal.service.produto.ProdutoService;
@@ -62,6 +63,8 @@ public class ImportacaoXMLController {
         this.view = view;
 
         configurarEventos();
+
+        atualizarEstadoBotoes();
     }
 
     private void configurarEventos() {
@@ -81,6 +84,30 @@ public class ImportacaoXMLController {
         view.getButtonBar()
                 .getBtSelecionarPasta()
                 .setOnAction(e -> selecionarPasta());
+    }
+
+
+    private void atualizarEstadoBotoes() {
+
+        boolean existemXmls = !xmls.isEmpty();
+
+        view.getButtonBar()
+                .getBtImportar()
+                .setDisable(!existemXmls);
+
+        view.getButtonBar()
+                .getBtRemover()
+                .setDisable(!existemXmls);
+    }
+
+    private void resetarProgressBar() {
+
+        view.getProgressBar()
+                .progressProperty()
+                .unbind();
+
+        view.getProgressBar()
+                .setProgress(0);
     }
 
     private void selecionarXml() {
@@ -130,7 +157,7 @@ public class ImportacaoXMLController {
 
         xmls.clear();
 
-        view.getProgressBar().setProgress(0);
+        resetarProgressBar();
 
         view.getTxtLog().clear();
 
@@ -208,6 +235,8 @@ public class ImportacaoXMLController {
                         + xmls.size()
                         + "\n"
         );
+
+        atualizarEstadoBotoes();
 
         System.out.println("Itens na tabela: " + view.getTabela().getItems().size());
 
@@ -337,6 +366,8 @@ public class ImportacaoXMLController {
                         + "\n"
         );
 
+        atualizarEstadoBotoes();
+
         System.out.println("Itens na tabela: " + view.getTabela().getItems().size());
     }
 
@@ -366,13 +397,15 @@ public class ImportacaoXMLController {
 
         view.getTxtLog().clear();
 
-        view.getProgressBar().setProgress(0);
+        resetarProgressBar();
 
         view.getResumo().limpar();
 
         view.getTxtLog().appendText(
                 "Lista de arquivos removida.\n"
         );
+
+        atualizarEstadoBotoes();
 
     }
 
@@ -387,258 +420,602 @@ public class ImportacaoXMLController {
             return;
         }
 
+        // ==================================================
+        // DESABILITA OS BOTÕES DURANTE A IMPORTAÇÃO
+        // ==================================================
+
+        view.getButtonBar()
+                .getBtSelecionarXml()
+                .setDisable(true);
+
+        view.getButtonBar()
+                .getBtSelecionarPasta()
+                .setDisable(true);
+
+        view.getButtonBar()
+                .getBtImportar()
+                .setDisable(true);
+
+        view.getButtonBar()
+                .getBtRemover()
+                .setDisable(true);
+
         view.getProgressBar().setProgress(0);
-        view.getTxtLog().appendText("Iniciando importação...\n");
-
-        int importadas = 0;
-        int ignoradas = 0;
-        int total = xmls.size();
-
-        for (XmlNFeDTO dto : xmls) {
-
-            try {
-
-                //==========================
-                // Validação do XML
-                //==========================
-
-                if (dto == null) {
-
-                    ignoradas++;
-
-                    view.getTxtLog().appendText(
-                            "XML ignorado: objeto nulo.\n"
-                    );
-
-                    continue;
-                }
-
-                if (dto.getChave() == null || dto.getChave().isBlank()) {
-
-                    ignoradas++;
-
-                    view.getTxtLog().appendText(
-                            "XML ignorado: chave inexistente.\n"
-                    );
-
-                    continue;
-                }
-
-                if (dto.getNumero() == null) {
-
-                    ignoradas++;
-
-                    view.getTxtLog().appendText(
-                            "XML ignorado: número inexistente.\n"
-                    );
-
-                    continue;
-                }
-
-                //==========================
-                // NF já existe
-                //==========================
-
-                if (nfeService.existe(dto.getChave())) {
-
-                    ignoradas++;
-
-                    view.getTxtLog().appendText(
-                            "NF " + dto.getNumero() + " já existe.\n"
-                    );
-
-                    continue;
-                }
-
-                //==========================
-                // Monta entidade
-                //==========================
-
-                NFe nfe = new NFe();
-
-                nfe.setChave(dto.getChave());
-                nfe.setNumero(dto.getNumero());
-                nfe.setSerie(dto.getSerie());
-                nfe.setModelo("55");
-                nfe.setDataEmissao(dto.getDataEmissao());
-                nfe.setCnpjEmitente(dto.getCnpjEmitente());
-                nfe.setEmitente(dto.getRazaoSocialEmitente());
-                nfe.setCnpjDestinatario(dto.getCnpjDestinatario());
-                nfe.setDestinatario(dto.getRazaoSocialDestinatario());
-                nfe.setValorTotal(dto.getValorTotal());
-
-                if (minhaEmpresaService.ehMinhaEmpresa(dto.getCnpjEmitente())) {
-                    nfe.setTipo("Venda");
-                } else {
-                    nfe.setTipo("Compra");
-                }
-
-                nfe.setSituacao("Importado");
-                nfe.setDataImportacao(LocalDateTime.now());
-
-                System.out.println("-----------------------------------");
-                System.out.println("Arquivo : " + dto.getArquivo());
-                System.out.println("Chave   : " + dto.getChave());
-                System.out.println("Número  : " + dto.getNumero());
-
-                Integer idNFe =
-                        nfeService.salvar(nfe);
-
-                List<NFeItemDTO> itens =
-                        itemReader.ler(dto.getArquivoXml());
-
-                for (NFeItemDTO item : itens) {
-
-                    item.setIdNfe(idNFe);
-
-                    item.setDataImportacao(LocalDateTime.now());
-
-                    // Salva o item da NF-e
-                    nfeItemService.salvar(item);
-
-                    // ==========================
-                    // Cadastro do produto
-                    // ==========================
-
-                    ProdutoDTO produto = new ProdutoDTO();
-
-                    produto.setCodigoProduto(
-                            item.getCodigoProduto()
-                    );
-
-                    produto.setCodigoBarras(
-                            item.getCodigoBarras()
-                    );
-
-                    produto.setDescricao(
-                            item.getDescricao()
-                    );
-
-                    produto.setNcm(
-                            item.getNcm()
-                    );
-
-                    produto.setCest(
-                            item.getCest()
-                    );
-
-                    produto.setUnidade(
-                            item.getUnidade()
-                    );
-
-                    produto.setDataCadastro(
-                            LocalDateTime.now()
-                    );
-
-                    produto.setAtivo(true);
-
-                    produtoService.salvarSeNaoExistir(produto);
-                }
-
-                System.out.println();
-                System.out.println("====================================");
-                System.out.println("NF " + dto.getNumero());
-                System.out.println("Quantidade de itens: " + itens.size());
-
-                for (NFeItemDTO item : itens) {
-
-                    System.out.println("------------------------------------");
-
-                    System.out.println("Item.............: " + item.getNumeroItem());
-
-                    System.out.println("Código...........: " + item.getCodigoProduto());
-
-                    System.out.println("Descrição........: " + item.getDescricao());
-
-                    System.out.println("NCM..............: " + item.getNcm());
-
-                    System.out.println("CFOP.............: " + item.getCfop());
-
-                    System.out.println("Unidade..........: " + item.getUnidade());
-
-                }
-
-                System.out.println("====================================");
-                System.out.println();
-
-
-
-                importadas++;
-
-                view.getTxtLog().appendText(
-                        "NF " + dto.getNumero() + " importada.\n"
-                );
-
-            } catch (Exception ex) {
-
-                ignoradas++;
-
-                view.getTxtLog().appendText(
-                        "Erro ao importar XML: "
-                                + dto.getArquivo()
-                                + "\n"
-                );
-
-                view.getTxtLog().appendText(
-                        ex.getMessage() + "\n"
-                );
-
-                ex.printStackTrace();
-            }
-
-            view.getProgressBar().setProgress(
-                    (double) (importadas + ignoradas) / total
-            );
-        }
-
-        view.getProgressBar().setProgress(1.0);
 
         view.getTxtLog().appendText(
-
-                "\nImportação concluída.\n" +
-                        "Importadas: " + importadas + "\n" +
-                        "Ignoradas: " + ignoradas + "\n"
-
+                "Iniciando importação...\n\n"
         );
 
-        ButtonType btNovoLote = new ButtonType("Novo Lote");
-        ButtonType btDashboard = new ButtonType("Dashboard");
+        // ==================================================
+        // CONTADORES
+        // ==================================================
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        final int total = xmls.size();
 
-        alert.setTitle("Importação Concluída");
-        alert.setHeaderText("Importação realizada com sucesso!");
+        final int[] importadas = {0};
 
-        alert.setContentText(
+        final int[] ignoradas = {0};
 
-                "Notas importadas: " + importadas +
-                        "\nNotas ignoradas: " + ignoradas +
-                        "\n\nO que deseja fazer?"
+        // ==================================================
+        // TASK DE IMPORTAÇÃO
+        // ==================================================
 
-        );
+        Task<Void> task = new Task<>() {
 
-        alert.getButtonTypes().setAll(
-                btNovoLote,
-                btDashboard
-        );
+            @Override
+            protected Void call() {
 
-        Optional<ButtonType> resultado = alert.showAndWait();
+                int processadas = 0;
 
-        if (resultado.isPresent()) {
+                for (XmlNFeDTO dto : xmls) {
 
-            if (resultado.get() == btDashboard) {
+                    try {
 
-                NavigationManager.show(ScreenType.DASHBOARD);
+                        // ==============================
+                        // VALIDAÇÃO DO XML
+                        // ==============================
 
-            } else {
+                        if (dto == null) {
 
-                view.getTabela().getItems().clear();
-                view.getTxtLog().clear();
-                view.getProgressBar().setProgress(0);
+                            ignoradas[0]++;
 
-                xmls.clear();
+                            updateMessage(
+                                    "XML ignorado: objeto nulo.\n"
+                            );
+
+                            continue;
+                        }
+
+                        if (dto.getChave() == null
+                                || dto.getChave().isBlank()) {
+
+                            ignoradas[0]++;
+
+                            updateMessage(
+                                    "XML ignorado: chave inexistente.\n"
+                            );
+
+                            continue;
+                        }
+
+                        if (dto.getNumero() == null) {
+
+                            ignoradas[0]++;
+
+                            updateMessage(
+                                    "XML ignorado: número inexistente.\n"
+                            );
+
+                            continue;
+                        }
+
+                        // ==============================
+                        // NF JÁ EXISTE
+                        // ==============================
+
+                        if (nfeService.existe(dto.getChave())) {
+
+                            ignoradas[0]++;
+
+                            updateMessage(
+                                    "NF "
+                                            + dto.getNumero()
+                                            + " já existe.\n"
+                            );
+
+                            continue;
+                        }
+
+                        // ==============================
+                        // MONTA A NFE
+                        // ==============================
+
+                        NFe nfe = new NFe();
+
+                        nfe.setChave(dto.getChave());
+
+                        nfe.setNumero(dto.getNumero());
+
+                        nfe.setSerie(dto.getSerie());
+
+                        nfe.setModelo("55");
+
+                        nfe.setDataEmissao(
+                                dto.getDataEmissao()
+                        );
+
+                        nfe.setCnpjEmitente(
+                                dto.getCnpjEmitente()
+                        );
+
+                        nfe.setEmitente(
+                                dto.getRazaoSocialEmitente()
+                        );
+
+                        nfe.setCnpjDestinatario(
+                                dto.getCnpjDestinatario()
+                        );
+
+                        nfe.setDestinatario(
+                                dto.getRazaoSocialDestinatario()
+                        );
+
+                        nfe.setValorTotal(
+                                dto.getValorTotal()
+                        );
+
+                        // ==============================
+                        // COMPRA OU VENDA
+                        // ==============================
+
+                        if (minhaEmpresaService
+                                .ehMinhaEmpresa(
+                                        dto.getCnpjEmitente()
+                                )) {
+
+                            nfe.setTipo("Venda");
+
+                        } else {
+
+                            nfe.setTipo("Compra");
+                        }
+
+                        nfe.setSituacao("Importado");
+
+                        nfe.setDataImportacao(
+                                LocalDateTime.now()
+                        );
+
+                        // ==============================
+                        // SALVA A NFE
+                        // ==============================
+
+                        System.out.println(
+                                "-----------------------------------"
+                        );
+
+                        System.out.println(
+                                "Arquivo : "
+                                        + dto.getArquivo()
+                        );
+
+                        System.out.println(
+                                "Chave   : "
+                                        + dto.getChave()
+                        );
+
+                        System.out.println(
+                                "Número  : "
+                                        + dto.getNumero()
+                        );
+
+                        Integer idNFe =
+                                nfeService.salvar(nfe);
+
+                        // ==============================
+                        // LÊ OS ITENS DO XML
+                        // ==============================
+
+                        List<NFeItemDTO> itens =
+                                itemReader.ler(
+                                        dto.getArquivoXml()
+                                );
+
+                        // ==============================
+                        // SALVA OS ITENS E PRODUTOS
+                        // ==============================
+
+                        for (NFeItemDTO item : itens) {
+
+                            item.setIdNfe(idNFe);
+
+                            item.setDataImportacao(
+                                    LocalDateTime.now()
+                            );
+
+                            // --------------------------
+                            // Salva item da NF-e
+                            // --------------------------
+
+                            nfeItemService.salvar(item);
+
+                            // --------------------------
+                            // Cadastro do produto
+                            // --------------------------
+
+                            ProdutoDTO produto =
+                                    new ProdutoDTO();
+
+                            produto.setCodigoProduto(
+                                    item.getCodigoProduto()
+                            );
+
+                            produto.setCodigoBarras(
+                                    item.getCodigoBarras()
+                            );
+
+                            produto.setDescricao(
+                                    item.getDescricao()
+                            );
+
+                            produto.setNcm(
+                                    item.getNcm()
+                            );
+
+                            produto.setCest(
+                                    item.getCest()
+                            );
+
+                            produto.setUnidade(
+                                    item.getUnidade()
+                            );
+
+                            produto.setDataCadastro(
+                                    LocalDateTime.now()
+                            );
+
+                            produto.setAtivo(true);
+
+                            produtoService
+                                    .salvarSeNaoExistir(
+                                            produto
+                                    );
+                        }
+
+                        // ==============================
+                        // LOG DO CONSOLE
+                        // ==============================
+
+                        System.out.println();
+
+                        System.out.println(
+                                "===================================="
+                        );
+
+                        System.out.println(
+                                "NF " + dto.getNumero()
+                        );
+
+                        System.out.println(
+                                "Quantidade de itens: "
+                                        + itens.size()
+                        );
+
+                        for (NFeItemDTO item : itens) {
+
+                            System.out.println(
+                                    "------------------------------------"
+                            );
+
+                            System.out.println(
+                                    "Item.............: "
+                                            + item.getNumeroItem()
+                            );
+
+                            System.out.println(
+                                    "Código...........: "
+                                            + item.getCodigoProduto()
+                            );
+
+                            System.out.println(
+                                    "Descrição........: "
+                                            + item.getDescricao()
+                            );
+
+                            System.out.println(
+                                    "NCM..............: "
+                                            + item.getNcm()
+                            );
+
+                            System.out.println(
+                                    "CFOP.............: "
+                                            + item.getCfop()
+                            );
+
+                            System.out.println(
+                                    "Unidade..........: "
+                                            + item.getUnidade()
+                            );
+                        }
+
+                        System.out.println(
+                                "===================================="
+                        );
+
+                        System.out.println();
+
+                        // ==============================
+                        // IMPORTAÇÃO CONCLUÍDA
+                        // ==============================
+
+                        importadas[0]++;
+
+                        updateMessage(
+                                "NF "
+                                        + dto.getNumero()
+                                        + " importada.\n"
+                        );
+
+                    } catch (Exception ex) {
+
+                        ignoradas[0]++;
+
+                        String arquivo =
+                                dto != null
+                                        ? dto.getArquivo()
+                                        : "(XML desconhecido)";
+
+                        updateMessage(
+                                "Erro ao importar XML: "
+                                        + arquivo
+                                        + "\n"
+                                        + ex.getMessage()
+                                        + "\n"
+                        );
+
+                        ex.printStackTrace();
+                    }
+
+                    // ==============================
+                    // ATUALIZA PROGRESSO
+                    // ==============================
+
+                    processadas++;
+
+                    updateProgress(
+                            processadas,
+                            total
+                    );
+
+                    updateMessage(
+                            "Processando XML "
+                                    + processadas
+                                    + " de "
+                                    + total
+                                    + "...\n"
+                    );
+                }
+
+                return null;
             }
-        }
+        };
+
+        // ==================================================
+        // LIGA A BARRA DE PROGRESSO À TASK
+        // ==================================================
+
+        view.getProgressBar()
+                .progressProperty()
+                .unbind();
+
+        view.getProgressBar()
+                .progressProperty()
+                .bind(task.progressProperty());
+
+        // ==================================================
+        // ATUALIZA O LOG NA THREAD DO JAVAFX
+        // ==================================================
+
+        task.messageProperty().addListener(
+                (obs, antigo, novo) -> {
+
+                    if (novo != null && !novo.isEmpty()) {
+
+                        view.getTxtLog().appendText(
+                                novo
+                        );
+                    }
+                }
+        );
+
+        // ==================================================
+        // QUANDO A IMPORTAÇÃO COMEÇAR
+        // ==================================================
+
+        task.setOnRunning(event -> {
+
+            view.getTxtLog().appendText(
+                    "Processamento em segundo plano iniciado.\n\n"
+            );
+        });
+
+        // ==================================================
+        // QUANDO TERMINAR COM SUCESSO
+        // ==================================================
+
+        task.setOnSucceeded(event -> {
+
+            view.getTxtLog().appendText(
+                    "\nImportação concluída.\n"
+                            + "Importadas: "
+                            + importadas[0]
+                            + "\n"
+                            + "Ignoradas: "
+                            + ignoradas[0]
+                            + "\n"
+            );
+
+            // ------------------------------
+            // Reabilita os botões
+            // ------------------------------
+
+            view.getButtonBar()
+                    .getBtSelecionarXml()
+                    .setDisable(false);
+
+            view.getButtonBar()
+                    .getBtSelecionarPasta()
+                    .setDisable(false);
+
+            view.getButtonBar()
+                    .getBtImportar()
+                    .setDisable(false);
+
+            view.getButtonBar()
+                    .getBtRemover()
+                    .setDisable(false);
+
+            // ==================================================
+            // MENSAGEM FINAL DA IMPORTAÇÃO
+            // ==================================================
+
+            ButtonType btFechar =
+                    new ButtonType("Fechar");
+
+            ButtonType btNovoLote =
+                    new ButtonType("Novo Lote");
+
+            ButtonType btDashboard =
+                    new ButtonType("Dashboard");
+
+            Alert alert =
+                    new Alert(
+                            Alert.AlertType.INFORMATION
+                    );
+
+            alert.setTitle(
+                    "Importação Concluída"
+            );
+
+            alert.setHeaderText(
+                    "Importação realizada com sucesso!"
+            );
+
+            alert.setContentText(
+                    "Notas importadas: "
+                            + importadas[0]
+                            + "\nNotas ignoradas: "
+                            + ignoradas[0]
+                            + "\n\nO que deseja fazer?"
+            );
+
+            alert.getButtonTypes().setAll(
+                    btFechar,
+                    btNovoLote,
+                    btDashboard
+            );
+
+            Optional<ButtonType> resultado =
+                    alert.showAndWait();
+
+            if (resultado.isPresent()) {
+
+                if (resultado.get() == btDashboard) {
+
+                    NavigationManager.show(
+                            ScreenType.DASHBOARD
+                    );
+
+                } else if (resultado.get() == btNovoLote) {
+
+                    // ==========================================
+                    // PREPARA PARA NOVA IMPORTAÇÃO
+                    // ==========================================
+
+                    view.getTabela()
+                            .getItems()
+                            .clear();
+
+                    view.getTxtLog()
+                            .clear();
+
+                    xmls.clear();
+
+                    resetarProgressBar();
+
+                    // Estado inicial da tela
+                    view.getButtonBar()
+                            .getBtImportar()
+                            .setDisable(true);
+
+                    view.getButtonBar()
+                            .getBtRemover()
+                            .setDisable(true);
+
+                } else if (resultado.get() == btFechar) {
+
+                    resetarProgressBar();
+
+                    // ==========================================
+                    // APENAS FECHA A MENSAGEM
+                    // ==========================================
+                    //
+                    // Não limpa tabela.
+                    // Não limpa log.
+                    // Não zera progresso.
+                    // Não limpa XMLs.
+                    //
+                }
+            }
+
+        });
+
+        // ==================================================
+        // SE DER ERRO NA TASK
+        // ==================================================
+
+        task.setOnFailed(event -> {
+
+            view.getButtonBar()
+                    .getBtSelecionarXml()
+                    .setDisable(false);
+
+            view.getButtonBar()
+                    .getBtSelecionarPasta()
+                    .setDisable(false);
+
+            view.getButtonBar()
+                    .getBtImportar()
+                    .setDisable(false);
+
+            view.getButtonBar()
+                    .getBtRemover()
+                    .setDisable(false);
+
+            Throwable erro =
+                    task.getException();
+
+            view.getTxtLog().appendText(
+                    "\nERRO DURANTE A IMPORTAÇÃO:\n"
+                            + (erro != null
+                            ? erro.getMessage()
+                            : "Erro desconhecido.")
+                            + "\n"
+            );
+
+            erro.printStackTrace();
+        });
+
+        // ==================================================
+        // INICIA A TASK EM SEGUNDO PLANO
+        // ==================================================
+
+        Thread thread =
+                new Thread(task);
+
+        thread.setDaemon(true);
+
+        thread.start();
     }
 
 }
