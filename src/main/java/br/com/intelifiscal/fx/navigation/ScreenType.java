@@ -15,6 +15,8 @@ public enum ScreenType {
 
     VENDAS,
 
+    COMPARAR_COMPRA_VENDA,
+
     PRODUTOS,
 
     RESUMO_PERIODO,

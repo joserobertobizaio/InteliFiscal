@@ -57,6 +57,12 @@ public class SideBar extends VBox {
 
         getChildren().add(createItem(ScreenType.VENDAS, "Vendas"));
 
+        getChildren().add(createItem(
+                ScreenType.COMPARAR_COMPRA_VENDA,
+                "Comparar \nCompra × Venda"
+        ));
+
+
         getChildren().add(createItem(ScreenType.PRODUTOS, "Produtos"));
 
         getChildren().add(createItem(ScreenType.RELATORIOS, "Relatórios"));
@@ -77,6 +83,8 @@ public class SideBar extends VBox {
             case COMPRAS -> IconType.COMPRAS;
 
             case VENDAS -> IconType.VENDAS;
+
+            case COMPARAR_COMPRA_VENDA -> IconType.COMPARAR_COMPRA_VENDA;
 
             case PRODUTOS -> IconType.PRODUTOS;
 

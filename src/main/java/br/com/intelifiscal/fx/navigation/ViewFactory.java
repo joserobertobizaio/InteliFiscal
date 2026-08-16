@@ -6,6 +6,9 @@ import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoControll
 import br.com.intelifiscal.fx.controller.produto.ProdutoController;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 
+import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
+import br.com.intelifiscal.fx.controller.produto.CompararCompraVendaController;
+
 import br.com.intelifiscal.fx.view.periodo.ResumoPeriodoView;
 import br.com.intelifiscal.fx.controller.periodo.ResumoPeriodoController;
 
@@ -80,6 +83,17 @@ public final class ViewFactory {
 
                 yield view;
             }
+
+            case COMPARAR_COMPRA_VENDA -> {
+
+                CompararCompraVendaView view =
+                        new CompararCompraVendaView();
+
+                new CompararCompraVendaController(view);
+
+                yield view;
+            }
+
 
             case RESUMO_PERIODO -> {
 

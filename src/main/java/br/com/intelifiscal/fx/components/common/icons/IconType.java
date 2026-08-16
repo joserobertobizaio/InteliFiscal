@@ -15,6 +15,8 @@ public enum IconType {
 
     VENDAS,
 
+    COMPARAR_COMPRA_VENDA,
+
     PRODUTOS,
 
     RELATORIOS,

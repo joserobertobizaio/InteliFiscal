@@ -32,6 +32,8 @@ public class AppIcon extends FontIcon {
 
             case VENDAS -> FontAwesomeSolid.MONEY_BILL;
 
+            case COMPARAR_COMPRA_VENDA -> FontAwesomeSolid.EXCHANGE_ALT;
+
             case PRODUTOS -> FontAwesomeSolid.BOX_OPEN;
 
             case RELATORIOS -> FontAwesomeSolid.CHART_BAR;
@@ -47,6 +49,7 @@ public class AppIcon extends FontIcon {
             case EXCLUIR -> FontAwesomeSolid.TRASH;
 
             case FECHAR -> FontAwesomeSolid.TIMES;
+
         };
     }
 }
