@@ -7,6 +7,9 @@ import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 import br.com.intelifiscal.service.produto.ProdutoService;
 
+import br.com.intelifiscal.fx.controller.produto.CompararCompraVendaController;
+import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,8 +18,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.time.LocalDate;
+import br.com.intelifiscal.dto.produto.ProdutoHistoricoResumoDTO;
 import java.util.List;
+
+import java.time.LocalDate;
 
 public class ProdutoController {
 
@@ -262,6 +267,24 @@ public class ProdutoController {
                 .setOnAction(
                         event -> consultarHistorico()
                 );
+
+        view.getBtCompararCompraVenda()
+                .setOnAction(event -> abrirComparacao());
+    }
+
+
+    private void abrirComparacao() {
+
+        CompararCompraVendaView viewComparacao =
+                new CompararCompraVendaView();
+
+        new CompararCompraVendaController(
+                viewComparacao
+        );
+
+        NavigationManager.show(
+                viewComparacao
+        );
     }
 
 
@@ -546,6 +569,109 @@ public class ProdutoController {
         view.getTabelaHistorico()
                 .getItems()
                 .setAll(historico);
+
+        ProdutoHistoricoResumoDTO resumo =
+                calcularResumoHistorico(historico);
+
+        //==================================================
+// ATUALIZA RESUMO NA TELA
+//==================================================
+
+        view.getLblQtdCompras().setText(
+                formatarQuantidade(resumo.getQuantidadeComprada())
+                        + " "
+                        + obterUnidade(historico, "Compra")
+        );
+
+        view.getLblValorCompras().setText(
+                formatarValor(resumo.getValorTotalComprado())
+        );
+
+        view.getLblMenorPrecoCompra().setText(
+                formatarValor(resumo.getMenorPrecoCompra())
+        );
+
+        view.getLblMaiorPrecoCompra().setText(
+                formatarValor(resumo.getMaiorPrecoCompra())
+        );
+
+        view.getLblPrecoMedioCompra().setText(
+                formatarValor(resumo.getPrecoMedioCompra())
+        );
+
+        view.getLblQtdVendas().setText(
+                formatarQuantidade(resumo.getQuantidadeVendida())
+                        + " "
+                        + obterUnidade(historico, "Venda")
+        );
+
+
+        view.getLblValorVendas().setText(
+                formatarValor(resumo.getValorTotalVendido())
+        );
+
+        view.getLblMenorPrecoVenda().setText(
+                formatarValor(resumo.getMenorPrecoVenda())
+        );
+
+        view.getLblMaiorPrecoVenda().setText(
+                formatarValor(resumo.getMaiorPrecoVenda())
+        );
+
+        view.getLblPrecoMedioVenda().setText(
+                formatarValor(resumo.getPrecoMedioVenda())
+        );
+
+        System.out.println();
+        System.out.println("========================================");
+        System.out.println("       RESUMO DO PRODUTO");
+        System.out.println("========================================");
+
+        System.out.println("COMPRAS");
+        System.out.println("Quantidade: "
+                + resumo.getQuantidadeComprada());
+
+        System.out.println("Valor total: "
+                + resumo.getValorTotalComprado());
+
+        System.out.println("Menor preço: "
+                + resumo.getMenorPrecoCompra());
+
+        System.out.println("Maior preço: "
+                + resumo.getMaiorPrecoCompra());
+
+        System.out.println("Preço médio: "
+                + resumo.getPrecoMedioCompra());
+
+        System.out.println();
+
+        System.out.println("VENDAS");
+        System.out.println("Quantidade: "
+                + resumo.getQuantidadeVendida());
+
+        System.out.println("Valor total: "
+                + resumo.getValorTotalVendido());
+
+        System.out.println("Menor preço: "
+                + resumo.getMenorPrecoVenda());
+
+        System.out.println("Maior preço: "
+                + resumo.getMaiorPrecoVenda());
+
+        System.out.println("Preço médio: "
+                + resumo.getPrecoMedioVenda());
+
+        System.out.println("========================================");
+
+        for (ProdutoHistoricoDTO item : historico) {
+
+            System.out.println(
+                    "TIPO = " + item.getTipo()
+                            + " | QTD = " + item.getQuantidade()
+                            + " | VALOR = " + item.getValorUnitario()
+            );
+        }
+
     }
 
 
@@ -1169,4 +1295,195 @@ public class ProdutoController {
                 ScreenType.DASHBOARD
         );
     }
+
+    private ProdutoHistoricoResumoDTO calcularResumoHistorico(
+            List<ProdutoHistoricoDTO> historico
+    ) {
+
+        ProdutoHistoricoResumoDTO resumo =
+                new ProdutoHistoricoResumoDTO();
+
+        double somaPrecosCompra = 0;
+        double somaPrecosVenda = 0;
+
+        int quantidadeRegistrosCompra = 0;
+        int quantidadeRegistrosVenda = 0;
+
+        double menorCompra = Double.MAX_VALUE;
+        double maiorCompra = Double.MIN_VALUE;
+
+        double menorVenda = Double.MAX_VALUE;
+        double maiorVenda = Double.MIN_VALUE;
+
+
+        for (ProdutoHistoricoDTO item : historico) {
+
+            if (item.getTipo() == null) {
+                continue;
+            }
+
+
+            //==================================================
+            // COMPRAS
+            //==================================================
+
+            if (item.getTipo().equalsIgnoreCase("Compra")) {
+
+                resumo.setQuantidadeComprada(
+                        resumo.getQuantidadeComprada()
+                                + item.getQuantidade()
+                );
+
+                resumo.setValorTotalComprado(
+                        resumo.getValorTotalComprado()
+                                + item.getValorTotal()
+                );
+
+
+                double preco = item.getValorUnitario();
+
+
+                if (preco < menorCompra) {
+                    menorCompra = preco;
+                }
+
+                if (preco > maiorCompra) {
+                    maiorCompra = preco;
+                }
+
+
+                somaPrecosCompra += preco;
+                quantidadeRegistrosCompra++;
+            }
+
+
+            //==================================================
+            // VENDAS
+            //==================================================
+
+            else if (item.getTipo().equalsIgnoreCase("Venda")) {
+
+                resumo.setQuantidadeVendida(
+                        resumo.getQuantidadeVendida()
+                                + item.getQuantidade()
+                );
+
+                resumo.setValorTotalVendido(
+                        resumo.getValorTotalVendido()
+                                + item.getValorTotal()
+                );
+
+
+                double preco = item.getValorUnitario();
+
+
+                if (preco < menorVenda) {
+                    menorVenda = preco;
+                }
+
+                if (preco > maiorVenda) {
+                    maiorVenda = preco;
+                }
+
+
+                somaPrecosVenda += preco;
+                quantidadeRegistrosVenda++;
+            }
+        }
+
+
+        //==================================================
+        // RESULTADOS DAS COMPRAS
+        //==================================================
+
+        if (quantidadeRegistrosCompra > 0) {
+
+            resumo.setMenorPrecoCompra(menorCompra);
+
+            resumo.setMaiorPrecoCompra(maiorCompra);
+
+            resumo.setPrecoMedioCompra(
+                    somaPrecosCompra /
+                            quantidadeRegistrosCompra
+            );
+        }
+
+
+        //==================================================
+        // RESULTADOS DAS VENDAS
+        //==================================================
+
+        if (quantidadeRegistrosVenda > 0) {
+
+            resumo.setMenorPrecoVenda(menorVenda);
+
+            resumo.setMaiorPrecoVenda(maiorVenda);
+
+            resumo.setPrecoMedioVenda(
+                    somaPrecosVenda /
+                            quantidadeRegistrosVenda
+            );
+        }
+        return resumo;
+    }
+
+    //==================================================
+    // OBTÉM UNIDADE DO HISTÓRICO
+    //==================================================
+
+    private String obterUnidade(
+            List<ProdutoHistoricoDTO> historico,
+            String tipo
+    ) {
+
+        if (historico == null) {
+            return "";
+        }
+
+        for (ProdutoHistoricoDTO item : historico) {
+
+            if (item.getTipo() == null) {
+                continue;
+            }
+
+            if (item.getTipo().equalsIgnoreCase(tipo)) {
+
+                if (item.getUnidade() != null
+                        && !item.getUnidade().isBlank()) {
+
+                    return item.getUnidade();
+                }
+            }
+        }
+
+        return "";
+    }
+
+    //==================================================
+    // FORMATA QUANTIDADE
+    //==================================================
+
+    private String formatarQuantidade(double valor) {
+
+        return String.format(
+                java.util.Locale.forLanguageTag("pt-BR"),
+                "%,.0f",
+                valor
+        );
+    }
+
+
+//==================================================
+// FORMATA VALOR
+//==================================================
+
+    private String formatarValor(double valor) {
+
+        return String.format(
+                java.util.Locale.forLanguageTag("pt-BR"),
+                "R$ %,.2f",
+                valor
+        );
+    }
+
 }

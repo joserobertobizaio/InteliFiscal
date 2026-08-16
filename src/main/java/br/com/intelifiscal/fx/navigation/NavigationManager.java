@@ -3,6 +3,7 @@ package br.com.intelifiscal.fx.navigation;
 import br.com.intelifiscal.fx.components.content.ContentPane;
 import javafx.scene.Node;
 
+
 /**
  * Gerencia a navegação entre as telas da aplicação.
  */

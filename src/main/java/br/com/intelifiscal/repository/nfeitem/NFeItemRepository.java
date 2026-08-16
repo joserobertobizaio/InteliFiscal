@@ -131,6 +131,7 @@ public class NFeItemRepository {
             n.data_emissao,
             n.emitente,
             n.destinatario,
+            i.unidade,
             i.quantidade,
             i.valor_unitario,
             i.valor_total
@@ -140,7 +141,12 @@ public class NFeItemRepository {
         INNER JOIN tblNFe n
             ON n.id = i.id_nfe
 
-        WHERE i.codigo_produto = ?
+        WHERE (i.codigo_produto = ?
+                   OR (
+                         ? = '0056'
+                         AND i.codigo_produto = '102326'
+                       )
+                     )
 
           AND date(n.data_emissao)
               BETWEEN date(?) AND date(?)
@@ -159,20 +165,13 @@ public class NFeItemRepository {
                         conn.prepareStatement(sql)
         ) {
 
-            ps.setString(
-                    1,
-                    codigoProduto
-            );
+            ps.setString(1, codigoProduto);
 
-            ps.setString(
-                    2,
-                    inicio.toString()
-            );
+            ps.setString(2, codigoProduto);
 
-            ps.setString(
-                    3,
-                    fim.toString()
-            );
+            ps.setString(3, inicio.toString());
+
+            ps.setString(4, fim.toString());
 
             try (
                     ResultSet rs =
@@ -225,6 +224,10 @@ public class NFeItemRepository {
                             rs.getString("destinatario")
                     );
 
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
                     dto.setQuantidade(
                             rs.getDouble("quantidade")
                     );
@@ -252,6 +255,87 @@ public class NFeItemRepository {
         return lista;
     }
 
+    public ProdutoHistoricoDTO buscarProdutoPorCodigoETipo(
+            String codigoProduto,
+            String tipo) {
+
+        String sql = """
+        SELECT
+            i.codigo_produto,
+            i.descricao,
+            i.unidade,
+            i.quantidade,
+            i.valor_unitario,
+            i.valor_total
+
+        FROM tblNFeItem i
+
+        INNER JOIN tblNFe n
+            ON n.id = i.id_nfe
+
+        WHERE i.codigo_produto = ?
+          AND n.tipo = ?
+
+        ORDER BY n.data_emissao DESC
+
+        LIMIT 1
+        """;
+
+        try (
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, codigoProduto);
+            ps.setString(2, tipo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+
+                    ProdutoHistoricoDTO dto =
+                            new ProdutoHistoricoDTO();
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getDouble("valor_unitario")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getDouble("valor_total")
+                    );
+
+                    return dto;
+                }
+
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao buscar produto para comparação.",
+                    e
+            );
+        }
+
+        return null;
+    }
+
     private double valor(Double valor) {
 
         return valor == null ? 0.0 : valor;
@@ -269,6 +353,7 @@ public class NFeItemRepository {
                 n.data_emissao,
                 n.emitente,
                 n.destinatario,
+                i.unidade,
                 i.quantidade,
                 i.valor_unitario,
                 i.valor_total
@@ -278,7 +363,13 @@ public class NFeItemRepository {
             INNER JOIN tblNFe n
                 ON n.id = i.id_nfe
 
-            WHERE i.codigo_produto = ?
+            WHERE (
+                          i.codigo_produto = ?
+                          OR (
+                              ? = '0056'
+                              AND i.codigo_produto = '102326'
+                          )
+                        )
 
             ORDER BY n.data_emissao DESC
             """;
@@ -291,6 +382,7 @@ public class NFeItemRepository {
         ) {
 
             ps.setString(1, codigoProduto);
+            ps.setString(2, codigoProduto);
 
             try (ResultSet rs = ps.executeQuery()) {
 
@@ -336,6 +428,10 @@ public class NFeItemRepository {
 
                     dto.setDestinatario(
                             rs.getString("destinatario")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
                     );
 
                     dto.setQuantidade(

@@ -38,6 +38,9 @@ public class ProdutoView extends BaseView {
     private final TextField txtPesquisa =
             new TextField();
 
+    private final Button btCompararCompraVenda =
+            new Button("🔄 Comparar Compra × Venda");
+
 
     //==================================================
     // FORMULÁRIO DO PRODUTO
@@ -92,6 +95,41 @@ public class ProdutoView extends BaseView {
     private final Button btConsultarHistorico =
             new Button("Consultar");
 
+    //==================================================
+    // RESUMO DO PRODUTO
+    //==================================================
+
+    private final Label lblQtdCompras =
+            new Label("0");
+
+    private final Label lblValorCompras =
+            new Label("R$ 0,00");
+
+    private final Label lblMenorPrecoCompra =
+            new Label("R$ 0,00");
+
+    private final Label lblMaiorPrecoCompra =
+            new Label("R$ 0,00");
+
+    private final Label lblPrecoMedioCompra =
+            new Label("R$ 0,00");
+
+
+    private final Label lblQtdVendas =
+            new Label("0");
+
+    private final Label lblValorVendas =
+            new Label("R$ 0,00");
+
+    private final Label lblMenorPrecoVenda =
+            new Label("R$ 0,00");
+
+    private final Label lblMaiorPrecoVenda =
+            new Label("R$ 0,00");
+
+    private final Label lblPrecoMedioVenda =
+            new Label("R$ 0,00");
+
 
     //==================================================
     // BOTÕES
@@ -136,10 +174,13 @@ public class ProdutoView extends BaseView {
 
         txtPesquisa.setPrefWidth(500);
 
+        btCompararCompraVenda.setPrefHeight(32);
+
         HBox barraPesquisa =
                 new HBox(
                         12,
-                        txtPesquisa
+                        txtPesquisa,
+                        btCompararCompraVenda
                 );
 
         barraPesquisa.setAlignment(
@@ -190,6 +231,9 @@ public class ProdutoView extends BaseView {
         HBox filtroHistorico =
                 criarFiltroHistorico();
 
+        HBox resumoProduto =
+                criarResumoProduto();
+
 
         //---------------------------------------------
         // CONTEÚDO
@@ -220,9 +264,10 @@ public class ProdutoView extends BaseView {
 
                 tabelaHistorico,
 
+                resumoProduto,
+
                 crudButtonBar
         );
-
 
         //---------------------------------------------
         // CARD
@@ -916,6 +961,177 @@ public class ProdutoView extends BaseView {
         tabelaHistorico.setMaxHeight(220);
     }
 
+    //==================================================
+// RESUMO DO PRODUTO
+//==================================================
+
+    private HBox criarResumoProduto() {
+
+        VBox cardCompras =
+                criarCardResumo(
+                        "🛒 Compras",
+                        lblQtdCompras,
+                        lblValorCompras,
+                        lblMenorPrecoCompra,
+                        lblMaiorPrecoCompra,
+                        lblPrecoMedioCompra
+                );
+
+        VBox cardVendas =
+                criarCardResumo(
+                        "💰 Vendas",
+                        lblQtdVendas,
+                        lblValorVendas,
+                        lblMenorPrecoVenda,
+                        lblMaiorPrecoVenda,
+                        lblPrecoMedioVenda
+                );
+
+
+        HBox resumo =
+                new HBox(
+                        20,
+                        cardCompras,
+                        cardVendas
+                );
+
+        resumo.setAlignment(
+                Pos.CENTER
+        );
+
+        return resumo;
+    }
+
+    //==================================================
+// CARD DO RESUMO
+//==================================================
+
+    private VBox criarCardResumo(
+            String titulo,
+            Label lblQuantidade,
+            Label lblValorTotal,
+            Label lblMenorPreco,
+            Label lblMaiorPreco,
+            Label lblPrecoMedio
+    ) {
+
+        Label lblTitulo =
+                new Label(titulo);
+
+        lblTitulo.setStyle(
+                "-fx-font-size: 18px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+
+        GridPane grid =
+                new GridPane();
+
+        grid.setHgap(25);
+        grid.setVgap(8);
+
+
+        adicionarLinhaResumo(
+                grid,
+                0,
+                "Quantidade",
+                lblQuantidade
+        );
+
+        adicionarLinhaResumo(
+                grid,
+                1,
+                "Valor total",
+                lblValorTotal
+        );
+
+        adicionarLinhaResumo(
+                grid,
+                2,
+                "Menor preço",
+                lblMenorPreco
+        );
+
+        adicionarLinhaResumo(
+                grid,
+                3,
+                "Maior preço",
+                lblMaiorPreco
+        );
+
+        adicionarLinhaResumo(
+                grid,
+                4,
+                "Preço médio",
+                lblPrecoMedio
+        );
+
+
+        VBox card =
+                new VBox(
+                        15,
+                        lblTitulo,
+                        grid
+                );
+
+        card.setPadding(
+                new Insets(18)
+        );
+
+        card.setPrefWidth(360);
+
+        card.setMaxWidth(360);
+
+
+        card.setStyle(
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 10;"
+                        + "-fx-border-color: #e0e0e0;"
+                        + "-fx-border-radius: 10;"
+                        + "-fx-border-width: 1;"
+        );
+
+
+        return card;
+    }
+
+    //==================================================
+    // LINHA DO RESUMO
+    //==================================================
+
+    private void adicionarLinhaResumo(
+            GridPane grid,
+            int linha,
+            String descricao,
+            Label valor
+    ) {
+
+        Label lblDescricao =
+                new Label(descricao);
+
+        lblDescricao.setStyle(
+                "-fx-font-size: 13px;"
+        );
+
+
+        valor.setStyle(
+                "-fx-font-size: 14px;"
+                        + "-fx-font-weight: bold;"
+        );
+
+
+        grid.add(
+                lblDescricao,
+                0,
+                linha
+        );
+
+        grid.add(
+                valor,
+                1,
+                linha
+        );
+    }
 
     //==================================================
     // GETTERS
@@ -923,6 +1139,10 @@ public class ProdutoView extends BaseView {
 
     public TextField getTxtPesquisa() {
         return txtPesquisa;
+    }
+
+    public Button getBtCompararCompraVenda() {
+        return btCompararCompraVenda;
     }
 
     public TextField getTxtCodigoProduto() {
@@ -985,6 +1205,51 @@ public class ProdutoView extends BaseView {
         return scrollPane;
     }
 
+
+    //==================================================
+// GETTERS - RESUMO DO PRODUTO
+//==================================================
+
+    public Label getLblQtdCompras() {
+        return lblQtdCompras;
+    }
+
+    public Label getLblValorCompras() {
+        return lblValorCompras;
+    }
+
+    public Label getLblMenorPrecoCompra() {
+        return lblMenorPrecoCompra;
+    }
+
+    public Label getLblMaiorPrecoCompra() {
+        return lblMaiorPrecoCompra;
+    }
+
+    public Label getLblPrecoMedioCompra() {
+        return lblPrecoMedioCompra;
+    }
+
+
+    public Label getLblQtdVendas() {
+        return lblQtdVendas;
+    }
+
+    public Label getLblValorVendas() {
+        return lblValorVendas;
+    }
+
+    public Label getLblMenorPrecoVenda() {
+        return lblMenorPrecoVenda;
+    }
+
+    public Label getLblMaiorPrecoVenda() {
+        return lblMaiorPrecoVenda;
+    }
+
+    public Label getLblPrecoMedioVenda() {
+        return lblPrecoMedioVenda;
+    }
 
     //==================================================
     // CONTROLE DOS BOTÕES
