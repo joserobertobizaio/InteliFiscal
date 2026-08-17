@@ -6,8 +6,17 @@ import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoControll
 import br.com.intelifiscal.fx.controller.produto.ProdutoController;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 
+import br.com.intelifiscal.fx.view.relatorio.ResumoVendasView;
+import br.com.intelifiscal.fx.controller.relatorio.ResumoVendasController;
+
+import br.com.intelifiscal.fx.view.relatorio.RelatoriosView;
+import br.com.intelifiscal.fx.controller.relatorio.RelatoriosController;
+
 import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
 import br.com.intelifiscal.fx.controller.produto.CompararCompraVendaController;
+
+import br.com.intelifiscal.fx.view.relatorio.ResumoComprasView;
+import br.com.intelifiscal.fx.controller.relatorio.ResumoComprasController;
 
 import br.com.intelifiscal.fx.view.periodo.ResumoPeriodoView;
 import br.com.intelifiscal.fx.controller.periodo.ResumoPeriodoController;
@@ -101,6 +110,36 @@ public final class ViewFactory {
                         new ResumoPeriodoView();
 
                 new ResumoPeriodoController(view);
+
+                yield view;
+            }
+
+            case RESUMO_COMPRAS -> {
+
+                ResumoComprasView view =
+                        new ResumoComprasView();
+
+                new ResumoComprasController(view);
+
+                yield view;
+            }
+
+            case RESUMO_VENDAS -> {
+
+                ResumoVendasView view =
+                        new ResumoVendasView();
+
+                new ResumoVendasController(view);
+
+                yield view;
+            }
+
+            case RELATORIOS -> {
+
+                RelatoriosView view =
+                        new RelatoriosView();
+
+                new RelatoriosController(view);
 
                 yield view;
             }

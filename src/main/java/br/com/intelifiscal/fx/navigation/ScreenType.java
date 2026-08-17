@@ -21,6 +21,10 @@ public enum ScreenType {
 
     RESUMO_PERIODO,
 
+    RESUMO_COMPRAS,
+
+    RESUMO_VENDAS,
+
     RELATORIOS,
 
     CONFIGURACOES
