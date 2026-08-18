@@ -1,19 +1,42 @@
 package br.com.intelifiscal.fx.view.relatorio;
 
 import br.com.intelifiscal.dto.relatorio.ResumoVendasDTO;
+import br.com.intelifiscal.dto.relatorio.ClienteVendaDTO;
+
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
+import javafx.scene.control.cell.PropertyValueFactory;
+
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+
+import javafx.scene.control.TableCell;
+
+import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.Locale;
 
+
 public class ResumoVendasView extends BorderPane {
+
+    //==================================================
+    // COMPONENTES DO RESUMO
+    //==================================================
 
     private final Label lblNotas =
             new Label("0");
@@ -30,8 +53,48 @@ public class ResumoVendasView extends BorderPane {
     private final Label lblTicketMedio =
             new Label("R$ 0,00");
 
+    //==================================================
+    // TABELA DE VENDAS POR CLIENTE
+    //==================================================
+
+    private final TableView<ClienteVendaDTO> tabelaClientes =
+            new TableView<>();
+
+
+    //==================================================
+    // FILTRO DE PERÍODO
+    //==================================================
+
+    private final ComboBox<String> cbPeriodo =
+            new ComboBox<>();
+
+    private final Label lblDe =
+            new Label("De:");
+
+    private final Label lblAte =
+            new Label("Até:");
+
+    private final DatePicker dtInicio =
+            new DatePicker();
+
+    private final DatePicker dtFim =
+            new DatePicker();
+
+    private final Button btConsultar =
+            new Button("🔎 Consultar");
+
+
+    //==================================================
+    // BOTÃO FECHAR
+    //==================================================
+
     private final Button btFechar =
             new Button("✖ Fechar");
+
+
+    //==================================================
+    // FORMATAÇÃO
+    //==================================================
 
     private final NumberFormat moeda =
             NumberFormat.getCurrencyInstance(
@@ -44,15 +107,23 @@ public class ResumoVendasView extends BorderPane {
             );
 
 
+    //==================================================
+    // CONSTRUTOR
+    //==================================================
+
     public ResumoVendasView() {
 
         configurarView();
 
         criarCabecalho();
 
+        criarFiltroPeriodo();
+
         criarResumo();
 
         criarRodape();
+
+        atualizarControlesPeriodo();
     }
 
 
@@ -108,6 +179,224 @@ public class ResumoVendasView extends BorderPane {
 
 
     //==================================================
+    // FILTRO DE PERÍODO
+    //==================================================
+
+    private void criarFiltroPeriodo() {
+
+        HBox filtro =
+                new HBox(8);
+
+        filtro.setAlignment(Pos.CENTER_LEFT);
+
+        filtro.setPadding(
+                new Insets(10, 0, 0, 0)
+        );
+
+        Label lblPeriodo =
+                new Label("Período:");
+
+
+        //==================================================
+        // COMBOBOX
+        //==================================================
+
+        cbPeriodo.getItems().addAll(
+                "Últimos 30 dias",
+                "Últimos 3 meses",
+                "Últimos 6 meses",
+                "Últimos 12 meses",
+                "Últimos 24 meses",
+                "Desde o início",
+                "Período personalizado"
+        );
+
+        cbPeriodo.setValue(
+                "Últimos 12 meses"
+        );
+
+        cbPeriodo.setPrefWidth(175);
+
+
+        //==================================================
+        // DATAS
+        //==================================================
+
+        dtInicio.setPrefWidth(120);
+        dtFim.setPrefWidth(120);
+
+        // Inicialmente os campos de data ficam bloqueados
+        dtInicio.setDisable(true);
+        dtFim.setDisable(true);
+
+        //==================================================
+        // DATA PADRÃO
+        //==================================================
+
+        LocalDate hoje =
+                LocalDate.now();
+
+        dtInicio.setValue(
+                hoje.minusMonths(12)
+        );
+
+        dtFim.setValue(
+                hoje
+        );
+
+
+        //==================================================
+        // BOTÃO CONSULTAR
+        //==================================================
+
+        btConsultar.setPrefWidth(110);
+
+        // Só aparece para período personalizado
+        btConsultar.setVisible(false);
+        btConsultar.setManaged(false);
+
+
+        //==================================================
+        // MONTAGEM
+        //==================================================
+
+        filtro.getChildren().addAll(
+                lblPeriodo,
+                cbPeriodo,
+                lblDe,
+                dtInicio,
+                lblAte,
+                dtFim,
+                btConsultar
+        );
+
+
+        //==================================================
+        // COLOCA O FILTRO ABAIXO DO CABEÇALHO
+        //==================================================
+
+        VBox topo =
+                new VBox(5);
+
+        topo.getChildren().addAll(
+                getTop(),
+                filtro
+        );
+
+        setTop(topo);
+
+        atualizarControlesPeriodo();
+    }
+
+
+        //==================================================
+        // ATUALIZAR DATAS CONFORME O PERÍODO
+        //==================================================
+
+    private void atualizarDatasPeriodo() {
+
+        LocalDate hoje =
+                LocalDate.now();
+
+        String periodo =
+                cbPeriodo.getValue();
+
+
+        if (periodo == null) {
+            return;
+        }
+
+
+        switch (periodo) {
+
+            case "Últimos 30 dias":
+
+                dtInicio.setValue(
+                        hoje.minusDays(30)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 3 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(3)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 6 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(6)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 12 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(12)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 24 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(24)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Desde o início":
+
+                dtInicio.setValue(
+                        null
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Período personalizado":
+
+                // Mantém as datas escolhidas pelo usuário.
+
+                break;
+        }
+    }
+
+
+    //==================================================
     // RESUMO
     //==================================================
 
@@ -124,6 +413,7 @@ public class ResumoVendasView extends BorderPane {
                 new Insets(25, 0, 20, 0)
         );
 
+
         grid.add(
                 criarCard(
                         "🧾 Notas fiscais",
@@ -131,6 +421,7 @@ public class ResumoVendasView extends BorderPane {
                 ),
                 0, 0
         );
+
 
         grid.add(
                 criarCard(
@@ -140,6 +431,7 @@ public class ResumoVendasView extends BorderPane {
                 1, 0
         );
 
+
         grid.add(
                 criarCard(
                         "🔢 Quantidade",
@@ -147,6 +439,7 @@ public class ResumoVendasView extends BorderPane {
                 ),
                 2, 0
         );
+
 
         grid.add(
                 criarCard(
@@ -156,6 +449,7 @@ public class ResumoVendasView extends BorderPane {
                 0, 1
         );
 
+
         grid.add(
                 criarCard(
                         "🎯 Ticket médio",
@@ -164,7 +458,147 @@ public class ResumoVendasView extends BorderPane {
                 1, 1
         );
 
-        setCenter(grid);
+        VBox areaCentral = new VBox(10);
+
+        areaCentral.getChildren().addAll(
+                grid,
+                criarTabelaClientes()
+        );
+
+        setCenter(areaCentral);
+
+    }
+
+    //==================================================
+    // TABELA DE VENDAS POR CLIENTE
+    //==================================================
+
+    private TableView<ClienteVendaDTO> criarTabelaClientes() {
+
+        //==================================================
+        // CLIENTE
+        //==================================================
+
+        TableColumn<ClienteVendaDTO, String> colunaCliente =
+                new TableColumn<>("Cliente");
+
+        colunaCliente.setCellValueFactory(
+                new PropertyValueFactory<>("cliente")
+        );
+
+        colunaCliente.setPrefWidth(300);
+
+
+        //==================================================
+        // NOTAS
+        //==================================================
+
+        TableColumn<ClienteVendaDTO, Integer> colunaNotas =
+                new TableColumn<>("Notas");
+
+        colunaNotas.setCellValueFactory(
+                new PropertyValueFactory<>("notas")
+        );
+
+        colunaNotas.setPrefWidth(90);
+
+
+        //==================================================
+        // ITENS
+        //==================================================
+
+        TableColumn<ClienteVendaDTO, Integer> colunaItens =
+                new TableColumn<>("Itens");
+
+        colunaItens.setCellValueFactory(
+                new PropertyValueFactory<>("itens")
+        );
+
+        colunaItens.setPrefWidth(90);
+
+
+        //==================================================
+        // QUANTIDADE
+        //==================================================
+
+        TableColumn<ClienteVendaDTO, String> colunaQuantidade =
+                new TableColumn<>("Quantidade");
+
+        colunaQuantidade.setCellValueFactory(
+                data ->
+                        new SimpleStringProperty(
+                                formatarNumero(
+                                        data.getValue().getQuantidade()
+                                )
+                        )
+        );
+
+        colunaQuantidade.setPrefWidth(130);
+
+
+        //==================================================
+        // VALOR TOTAL
+        //==================================================
+
+        TableColumn<ClienteVendaDTO, BigDecimal> colunaValorTotal =
+                new TableColumn<>("Valor Total");
+
+        colunaValorTotal.setCellValueFactory(
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue().getValorTotal()
+                        )
+        );
+
+        colunaValorTotal.setCellFactory(
+                coluna -> new TableCell<>() {
+
+                    @Override
+                    protected void updateItem(
+                            BigDecimal valor,
+                            boolean empty
+                    ) {
+
+                        super.updateItem(valor, empty);
+
+                        if (empty || valor == null) {
+
+                            setText(null);
+
+                        } else {
+
+                            setText(
+                                    formatarValorBrasil(valor)
+                            );
+                        }
+                    }
+                }
+        );
+
+        colunaValorTotal.setPrefWidth(150);
+
+
+        //==================================================
+        // ADICIONA AS COLUNAS
+        //==================================================
+
+        tabelaClientes.getColumns().setAll(
+                colunaCliente,
+                colunaNotas,
+                colunaItens,
+                colunaQuantidade,
+                colunaValorTotal
+        );
+
+
+        tabelaClientes.setPrefHeight(250);
+
+        tabelaClientes.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY
+        );
+
+
+        return tabelaClientes;
     }
 
 
@@ -185,11 +619,13 @@ public class ResumoVendasView extends BorderPane {
                         "-fx-text-fill: #444444;"
         );
 
+
         valor.setStyle(
                 "-fx-font-size: 19px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: #123b70;"
         );
+
 
         VBox card =
                 new VBox(8);
@@ -213,10 +649,12 @@ public class ResumoVendasView extends BorderPane {
                         "-fx-border-radius: 10;"
         );
 
+
         card.getChildren().addAll(
                 lblTitulo,
                 valor
         );
+
 
         return card;
     }
@@ -263,11 +701,13 @@ public class ResumoVendasView extends BorderPane {
                 )
         );
 
+
         lblItens.setText(
                 String.valueOf(
                         dto.getItens()
                 )
         );
+
 
         lblQuantidade.setText(
                 formatarNumero(
@@ -275,11 +715,13 @@ public class ResumoVendasView extends BorderPane {
                 )
         );
 
+
         lblValorTotal.setText(
                 moeda.format(
                         dto.getValorTotal()
                 )
         );
+
 
         lblTicketMedio.setText(
                 moeda.format(
@@ -288,9 +730,145 @@ public class ResumoVendasView extends BorderPane {
         );
     }
 
+    //==================================================
+    // ATUALIZAR TABELA DE CLIENTES
+    //==================================================
+
+    public void atualizarClientes(
+            java.util.List<ClienteVendaDTO> lista
+    ) {
+
+        tabelaClientes.setItems(
+                FXCollections.observableArrayList(lista)
+        );
+    }
+
 
     //==================================================
-    // GETTERS
+    // GETTERS - FILTRO
+    //==================================================
+
+    public ComboBox<String> getCbPeriodo() {
+
+        return cbPeriodo;
+    }
+
+
+    public DatePicker getDtInicio() {
+
+        return dtInicio;
+    }
+
+
+    public DatePicker getDtFim() {
+
+        return dtFim;
+    }
+
+
+    public Button getBtConsultar() {
+
+        return btConsultar;
+    }
+
+    //==================================================
+    // CONTROLE DOS FILTROS CONFORME O PERÍODO
+    //==================================================
+
+    public void atualizarControlesPeriodo() {
+
+        String periodo = cbPeriodo.getValue();
+
+        if (periodo == null) {
+            return;
+        }
+
+        boolean personalizado =
+                "Período personalizado".equals(periodo);
+
+        boolean desdeInicio =
+                "Desde o início".equals(periodo);
+
+
+        //==================================================
+        // PERÍODO PERSONALIZADO
+        //==================================================
+
+        if (personalizado) {
+
+            lblDe.setVisible(true);
+            lblDe.setManaged(true);
+
+            lblAte.setVisible(true);
+            lblAte.setManaged(true);
+
+            dtInicio.setVisible(true);
+            dtInicio.setManaged(true);
+            dtInicio.setDisable(false);
+
+            dtFim.setVisible(true);
+            dtFim.setManaged(true);
+            dtFim.setDisable(false);
+
+            btConsultar.setVisible(true);
+            btConsultar.setManaged(true);
+
+            return;
+        }
+
+
+        //==================================================
+        // DESDE O INÍCIO
+        //==================================================
+
+        if (desdeInicio) {
+
+            lblDe.setVisible(false);
+            lblDe.setManaged(false);
+
+            lblAte.setVisible(false);
+            lblAte.setManaged(false);
+
+            dtInicio.setVisible(false);
+            dtInicio.setManaged(false);
+            dtInicio.setDisable(true);
+
+            dtFim.setVisible(false);
+            dtFim.setManaged(false);
+            dtFim.setDisable(true);
+
+            btConsultar.setVisible(false);
+            btConsultar.setManaged(false);
+
+            return;
+        }
+
+
+        //==================================================
+        // PERÍODOS AUTOMÁTICOS
+        //==================================================
+
+        lblDe.setVisible(true);
+        lblDe.setManaged(true);
+
+        lblAte.setVisible(true);
+        lblAte.setManaged(true);
+
+        dtInicio.setVisible(true);
+        dtInicio.setManaged(true);
+        dtInicio.setDisable(true);
+
+        dtFim.setVisible(true);
+        dtFim.setManaged(true);
+        dtFim.setDisable(true);
+
+        btConsultar.setVisible(false);
+        btConsultar.setManaged(false);
+    }
+
+
+    //==================================================
+    // GETTER - FECHAR
     //==================================================
 
     public Button getBtFechar() {
@@ -309,4 +887,20 @@ public class ResumoVendasView extends BorderPane {
 
         return numero.format(valor);
     }
+
+    private String formatarValorBrasil(
+            BigDecimal valor
+    ) {
+
+        NumberFormat formato =
+                NumberFormat.getNumberInstance(
+                        new Locale("pt", "BR")
+                );
+
+        formato.setMinimumFractionDigits(2);
+        formato.setMaximumFractionDigits(2);
+
+        return formato.format(valor);
+    }
+
 }

@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,16 @@ public class ResumoComprasRepository {
 
     public ResumoComprasDTO consultarResumo() {
 
-        String sql = """
+        return consultarResumo(null, null);
+    }
+
+
+    public ResumoComprasDTO consultarResumo(
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
+
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 COUNT(DISTINCT n.id) AS notas,
 
@@ -50,46 +60,71 @@ public class ResumoComprasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.cnpj_emitente <> e.cnpj
-            """;
+            """);
+
+
+        if (dataInicio != null && dataFim != null) {
+
+            sql.append("""
+                
+                AND date(n.data_emissao)
+                    BETWEEN date(?) AND date(?)
+                """);
+        }
+
 
         try (
                 Connection conn =
                         DatabaseConnection.getConnection();
 
                 PreparedStatement ps =
-                        conn.prepareStatement(sql);
-
-                ResultSet rs =
-                        ps.executeQuery()
+                        conn.prepareStatement(sql.toString())
         ) {
 
-            ResumoComprasDTO dto =
-                    new ResumoComprasDTO();
+            if (dataInicio != null && dataFim != null) {
 
-            if (rs.next()) {
-
-                dto.setNotas(
-                        rs.getInt("notas")
+                ps.setString(
+                        1,
+                        dataInicio.toString()
                 );
 
-                dto.setItens(
-                        rs.getInt("itens")
-                );
-
-                dto.setQuantidade(
-                        rs.getDouble("quantidade")
-                );
-
-                dto.setValorTotal(
-                        rs.getBigDecimal("valor_total")
-                );
-
-                dto.setTicketMedio(
-                        rs.getBigDecimal("ticket_medio")
+                ps.setString(
+                        2,
+                        dataFim.toString()
                 );
             }
 
-            return dto;
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                ResumoComprasDTO dto =
+                        new ResumoComprasDTO();
+
+                if (rs.next()) {
+
+                    dto.setNotas(
+                            rs.getInt("notas")
+                    );
+
+                    dto.setItens(
+                            rs.getInt("itens")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getBigDecimal("valor_total")
+                    );
+
+                    dto.setTicketMedio(
+                            rs.getBigDecimal("ticket_medio")
+                    );
+                }
+
+                return dto;
+            }
 
         } catch (SQLException e) {
 
@@ -107,79 +142,119 @@ public class ResumoComprasRepository {
 
     public List<FornecedorCompraDTO> consultarPorFornecedor() {
 
-        String sql = """
-        SELECT
-            n.cnpj_emitente AS cnpj,
-            MAX(n.emitente) AS fornecedor,
+        return consultarPorFornecedor(null, null);
+    }
 
-            COUNT(DISTINCT n.id) AS notas,
 
-            COUNT(i.id) AS itens,
+    public List<FornecedorCompraDTO> consultarPorFornecedor(
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
 
-            ROUND(
-                COALESCE(SUM(i.quantidade), 0),
-                3
-            ) AS quantidade,
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                n.cnpj_emitente AS cnpj,
 
-            ROUND(
-                COALESCE(SUM(i.valor_total), 0),
-                2
-            ) AS valor_total
+                MAX(n.emitente) AS fornecedor,
 
-        FROM tblNFe n
+                COUNT(DISTINCT n.id) AS notas,
 
-        CROSS JOIN tblMinhaEmpresa e
+                COUNT(i.id) AS itens,
 
-        LEFT JOIN tblNFeItem i
-            ON i.id_nfe = n.id
+                ROUND(
+                    COALESCE(SUM(i.quantidade), 0),
+                    3
+                ) AS quantidade,
 
-        WHERE n.cnpj_emitente <> e.cnpj
+                ROUND(
+                    COALESCE(SUM(i.valor_total), 0),
+                    2
+                ) AS valor_total
 
-        GROUP BY n.cnpj_emitente
+            FROM tblNFe n
 
-        ORDER BY valor_total DESC
-        """;
+            CROSS JOIN tblMinhaEmpresa e
+
+            LEFT JOIN tblNFeItem i
+                ON i.id_nfe = n.id
+
+            WHERE n.cnpj_emitente <> e.cnpj
+            """);
+
+
+        if (dataInicio != null && dataFim != null) {
+
+            sql.append("""
+                
+                AND date(n.data_emissao)
+                    BETWEEN date(?) AND date(?)
+                """);
+        }
+
+
+        sql.append("""
+
+            GROUP BY n.cnpj_emitente
+
+            ORDER BY valor_total DESC
+            """);
+
 
         List<FornecedorCompraDTO> lista =
                 new ArrayList<>();
+
 
         try (
                 Connection conn =
                         DatabaseConnection.getConnection();
 
                 PreparedStatement ps =
-                        conn.prepareStatement(sql);
-
-                ResultSet rs =
-                        ps.executeQuery()
+                        conn.prepareStatement(sql.toString())
         ) {
 
-            while (rs.next()) {
+            if (dataInicio != null && dataFim != null) {
 
-                FornecedorCompraDTO dto =
-                        new FornecedorCompraDTO();
-
-                dto.setFornecedor(
-                        rs.getString("fornecedor")
+                ps.setString(
+                        1,
+                        dataInicio.toString()
                 );
 
-                dto.setNotas(
-                        rs.getInt("notas")
+                ps.setString(
+                        2,
+                        dataFim.toString()
                 );
+            }
 
-                dto.setItens(
-                        rs.getInt("itens")
-                );
 
-                dto.setQuantidade(
-                        rs.getDouble("quantidade")
-                );
+            try (ResultSet rs = ps.executeQuery()) {
 
-                dto.setValorTotal(
-                        rs.getBigDecimal("valor_total")
-                );
+                while (rs.next()) {
 
-                lista.add(dto);
+                    FornecedorCompraDTO dto =
+                            new FornecedorCompraDTO();
+
+                    dto.setFornecedor(
+                            rs.getString("fornecedor")
+                    );
+
+                    dto.setNotas(
+                            rs.getInt("notas")
+                    );
+
+                    dto.setItens(
+                            rs.getInt("itens")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getBigDecimal("valor_total")
+                    );
+
+                    lista.add(dto);
+                }
             }
 
         } catch (SQLException e) {
@@ -189,6 +264,7 @@ public class ResumoComprasRepository {
                     e
             );
         }
+
 
         return lista;
     }

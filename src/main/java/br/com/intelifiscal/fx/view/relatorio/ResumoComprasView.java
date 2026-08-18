@@ -6,6 +6,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -30,11 +34,28 @@ public class ResumoComprasView extends BorderPane {
     private final Label lblValorTotal = new Label("R$ 0,00");
     private final Label lblTicketMedio = new Label("R$ 0,00");
 
+
     private final TableView<FornecedorCompraDTO> tabelaFornecedores =
             new TableView<>();
 
     private final Button btFechar =
             new Button("✖ Fechar");
+
+    private final ComboBox<String> cbPeriodo =
+            new ComboBox<>();
+
+    private final DatePicker dtInicio =
+            new DatePicker();
+
+    private final DatePicker dtFim =
+            new DatePicker();
+
+    private final Label lblDe = new Label("De:");
+
+    private final Label lblAte = new Label("Até:");
+
+    private final Button btConsultar =
+            new Button("🔎 Consultar");
 
     private final NumberFormat moeda =
             NumberFormat.getCurrencyInstance(
@@ -55,6 +76,8 @@ public class ResumoComprasView extends BorderPane {
         criarResumo();
 
         criarRodape();
+
+        atualizarControlesPeriodo();
     }
 
 
@@ -100,10 +123,54 @@ public class ResumoComprasView extends BorderPane {
                         "-fx-text-fill: #333333;"
         );
 
+        //==================================================
+        // FILTRO DE PERÍODO
+        //==================================================
+
+        HBox filtro =
+                new HBox(10);
+
+        filtro.setAlignment(Pos.CENTER_LEFT);
+
+        Label lblPeriodo =
+                new Label("Período:");
+
+        cbPeriodo.getItems().addAll(
+                "Últimos 30 dias",
+                "Últimos 3 meses",
+                "Últimos 6 meses",
+                "Últimos 12 meses",
+                "Últimos 24 meses",
+                "Desde o início",
+                "Período personalizado"
+        );
+
+        cbPeriodo.setValue("Últimos 12 meses");
+
+
+        dtInicio.setPrefWidth(120);
+        dtFim.setPrefWidth(120);
+
+        btConsultar.setPrefWidth(110);
+
+        filtro.getChildren().addAll(
+                lblPeriodo,
+                cbPeriodo,
+                lblDe,
+                dtInicio,
+                lblAte,
+                dtFim,
+                btConsultar
+        );
+
+
         cabecalho.getChildren().addAll(
                 titulo,
-                subtitulo
+                subtitulo,
+                filtro
         );
+
+        setTop(cabecalho);
 
         setTop(cabecalho);
     }
@@ -168,6 +235,7 @@ public class ResumoComprasView extends BorderPane {
         setCenter(
                 new VBox(grid, criarAreaTabela())
         );
+
     }
 
 
@@ -453,6 +521,106 @@ public class ResumoComprasView extends BorderPane {
                 .setAll(lista);
     }
 
+    //==================================================
+// CONTROLE DOS FILTROS CONFORME O PERÍODO
+//==================================================
+
+    public void atualizarControlesPeriodo() {
+
+        String periodo = cbPeriodo.getValue();
+
+        if (periodo == null) {
+            return;
+        }
+
+        boolean personalizado =
+                "Período personalizado".equals(periodo);
+
+        boolean desdeInicio =
+                "Desde o início".equals(periodo);
+
+        //==================================================
+        // PERÍODO PERSONALIZADO
+        //==================================================
+
+        if (personalizado) {
+
+            // Mostra datas
+            lblDe.setVisible(true);
+            lblDe.setManaged(true);
+
+            dtInicio.setVisible(true);
+            dtInicio.setManaged(true);
+
+            lblAte.setVisible(true);
+            lblAte.setManaged(true);
+
+            dtFim.setVisible(true);
+            dtFim.setManaged(true);
+
+            // Libera os calendários
+            dtInicio.setDisable(false);
+            dtFim.setDisable(false);
+
+            // Mostra botão Consultar
+            btConsultar.setVisible(true);
+            btConsultar.setManaged(true);
+
+            return;
+        }
+
+        //==================================================
+        // DESDE O INÍCIO
+        //==================================================
+
+        if (desdeInicio) {
+
+            // Esconde os campos de data
+            lblDe.setVisible(false);
+            lblDe.setManaged(false);
+
+            dtInicio.setVisible(false);
+            dtInicio.setManaged(false);
+
+            lblAte.setVisible(false);
+            lblAte.setManaged(false);
+
+            dtFim.setVisible(false);
+            dtFim.setManaged(false);
+
+            // Esconde botão Consultar
+            btConsultar.setVisible(false);
+            btConsultar.setManaged(false);
+
+            return;
+        }
+
+        //==================================================
+        // PERÍODOS AUTOMÁTICOS
+        //==================================================
+
+        // Mostra datas
+        lblDe.setVisible(true);
+        lblDe.setManaged(true);
+
+        dtInicio.setVisible(true);
+        dtInicio.setManaged(true);
+
+        lblAte.setVisible(true);
+        lblAte.setManaged(true);
+
+        dtFim.setVisible(true);
+        dtFim.setManaged(true);
+
+        // Bloqueia os calendários
+        dtInicio.setDisable(true);
+        dtFim.setDisable(true);
+
+        // Esconde botão Consultar
+        btConsultar.setVisible(false);
+        btConsultar.setManaged(false);
+    }
+
 
     //==================================================
     // GETTERS
@@ -461,6 +629,29 @@ public class ResumoComprasView extends BorderPane {
     public Button getBtFechar() {
 
         return btFechar;
+    }
+
+    public ComboBox<String> getCbPeriodo() {
+
+        return cbPeriodo;
+    }
+
+
+    public DatePicker getDtInicio() {
+
+        return dtInicio;
+    }
+
+
+    public DatePicker getDtFim() {
+
+        return dtFim;
+    }
+
+
+    public Button getBtConsultar() {
+
+        return btConsultar;
     }
 
 
