@@ -145,6 +145,7 @@ public class ResumoVendasRepository {
                             rs.getInt("itens")
                     );
 
+
                     dto.setQuantidade(
                             rs.getDouble("quantidade")
                     );
@@ -196,10 +197,15 @@ public class ResumoVendasRepository {
             MAX(n.destinatario) AS cliente,
 
             COUNT(DISTINCT n.id) AS notas,
-
+        
             COUNT(i.id) AS itens,
-
+       
+            MAX(date(n.data_emissao)) AS data_ultima_venda,
+       
+            MAX(date(n.data_emissao)) AS data_ultima_venda,
+      
             ROUND(
+      
                 COALESCE(SUM(i.quantidade), 0),
                 3
             ) AS quantidade,
@@ -315,6 +321,17 @@ public class ResumoVendasRepository {
                     dto.setItens(
                             rs.getInt("itens")
                     );
+
+                    String dataUltimaVenda =
+                            rs.getString("data_ultima_venda");
+
+                    if (dataUltimaVenda != null
+                            && !dataUltimaVenda.isBlank()) {
+
+                        dto.setDataUltimaVenda(
+                                LocalDate.parse(dataUltimaVenda)
+                        );
+                    }
 
 
                     dto.setQuantidade(

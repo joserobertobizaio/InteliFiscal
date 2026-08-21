@@ -402,60 +402,40 @@ public class ResumoVendasView extends BorderPane {
 
     private void criarResumo() {
 
-        GridPane grid =
-                new GridPane();
+        HBox grid = new HBox(15);
 
-        grid.setHgap(20);
-
-        grid.setVgap(15);
+        grid.setAlignment(Pos.CENTER_LEFT);
 
         grid.setPadding(
                 new Insets(25, 0, 20, 0)
         );
 
 
-        grid.add(
+        grid.getChildren().addAll(
                 criarCard(
                         "🧾 Notas fiscais",
                         lblNotas
                 ),
-                0, 0
-        );
 
-
-        grid.add(
                 criarCard(
                         "📦 Itens",
                         lblItens
                 ),
-                1, 0
-        );
 
-
-        grid.add(
                 criarCard(
                         "🔢 Quantidade",
                         lblQuantidade
                 ),
-                2, 0
-        );
 
-
-        grid.add(
                 criarCard(
                         "💰 Valor total",
                         lblValorTotal
                 ),
-                0, 1
-        );
 
-
-        grid.add(
                 criarCard(
                         "🎯 Ticket médio",
                         lblTicketMedio
-                ),
-                1, 1
+                )
         );
 
         VBox areaCentral = new VBox(10);
@@ -504,33 +484,91 @@ public class ResumoVendasView extends BorderPane {
 
 
         //==================================================
-        // ITENS
+        //  DATA DA ÚLTIMA VENDA
         //==================================================
 
-        TableColumn<ClienteVendaDTO, Integer> colunaItens =
-                new TableColumn<>("Itens");
+        TableColumn<ClienteVendaDTO, LocalDate> colunaDataUltimaVenda =
+                new TableColumn<>("Data da última venda");
 
-        colunaItens.setCellValueFactory(
-                new PropertyValueFactory<>("itens")
+        colunaDataUltimaVenda.setCellValueFactory(
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue().getDataUltimaVenda()
+                        )
         );
 
-        colunaItens.setPrefWidth(90);
+        colunaDataUltimaVenda.setCellFactory(
+                coluna -> new TableCell<>() {
+
+                    @Override
+                    protected void updateItem(
+                            LocalDate data,
+                            boolean empty
+                    ) {
+                        super.updateItem(data, empty);
+
+                        if (empty || data == null) {
+                            setText(null);
+                        } else {
+                            setText(
+                                    data.format(
+                                            java.time.format.DateTimeFormatter
+                                                    .ofPattern("dd/MM/yyyy")
+                                    )
+                            );
+                        }
+                    }
+                }
+        );
+
+        colunaDataUltimaVenda.setPrefWidth(150);
 
 
         //==================================================
         // QUANTIDADE
         //==================================================
 
-        TableColumn<ClienteVendaDTO, String> colunaQuantidade =
+        TableColumn<ClienteVendaDTO, Double> colunaQuantidade =
                 new TableColumn<>("Quantidade");
 
         colunaQuantidade.setCellValueFactory(
                 data ->
-                        new SimpleStringProperty(
-                                formatarNumero(
-                                        data.getValue().getQuantidade()
-                                )
+                        new SimpleObjectProperty<>(
+                                data.getValue().getQuantidade()
                         )
+        );
+
+        colunaQuantidade.setCellFactory(
+                coluna -> new TableCell<>() {
+
+                    @Override
+                    protected void updateItem(
+                            Double quantidade,
+                            boolean empty
+                    ) {
+
+                        super.updateItem(quantidade, empty);
+
+                        if (empty || quantidade == null) {
+
+                            setText(null);
+
+                        } else {
+
+                            NumberFormat formato =
+                                    NumberFormat.getNumberInstance(
+                                            new Locale("pt", "BR")
+                                    );
+
+                            formato.setMinimumFractionDigits(0);
+                            formato.setMaximumFractionDigits(0);
+
+                            setText(
+                                    formato.format(quantidade)
+                            );
+                        }
+                    }
+                }
         );
 
         colunaQuantidade.setPrefWidth(130);
@@ -585,7 +623,7 @@ public class ResumoVendasView extends BorderPane {
         tabelaClientes.getColumns().setAll(
                 colunaCliente,
                 colunaNotas,
-                colunaItens,
+                colunaDataUltimaVenda,
                 colunaQuantidade,
                 colunaValorTotal
         );

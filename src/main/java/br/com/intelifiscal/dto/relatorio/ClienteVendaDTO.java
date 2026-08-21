@@ -1,6 +1,7 @@
 package br.com.intelifiscal.dto.relatorio;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class ClienteVendaDTO {
 
@@ -8,6 +9,7 @@ public class ClienteVendaDTO {
     private String cliente;
     private int notas;
     private int itens;
+    private LocalDate dataUltimaVenda;
     private double quantidade;
     private BigDecimal valorTotal;
 
@@ -44,6 +46,14 @@ public class ClienteVendaDTO {
 
     public void setItens(int itens) {
         this.itens = itens;
+    }
+
+    public LocalDate getDataUltimaVenda() {
+        return dataUltimaVenda;
+    }
+
+    public void setDataUltimaVenda(LocalDate dataUltimaVenda) {
+        this.dataUltimaVenda = dataUltimaVenda;
     }
 
     public double getQuantidade() {
