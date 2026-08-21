@@ -3,6 +3,7 @@ package br.com.intelifiscal.repository.venda;
 import br.com.intelifiscal.database.connection.DatabaseConnection;
 import br.com.intelifiscal.dto.venda.VendaDTO;
 import br.com.intelifiscal.dto.venda.VendaItemDTO;
+import br.com.intelifiscal.dto.relatorio.TopProdutosDTO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -206,4 +207,86 @@ public class VendaRepository {
             );
         }
     }
+
+    public List<TopProdutosDTO> listarTopProdutos(int limite) {
+
+        String sql = """
+        SELECT
+            i.codigo_produto,
+            i.descricao,
+            SUM(i.quantidade) AS quantidade_vendida,
+            SUM(i.valor_total) AS valor_vendido
+
+        FROM tblNFe n
+
+        INNER JOIN tblNFeItem i
+            ON i.id_nfe = n.id
+
+        WHERE n.tipo = 'Venda'
+          AND date(n.data_emissao) >= date('now', '-12 months')
+
+        GROUP BY
+            i.codigo_produto,
+            i.descricao
+
+        ORDER BY
+            quantidade_vendida DESC
+
+        LIMIT ?
+        """;
+
+        List<TopProdutosDTO> lista = new ArrayList<>();
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, limite);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                int posicao = 1;
+
+                while (rs.next()) {
+
+                    TopProdutosDTO dto =
+                            new TopProdutosDTO();
+
+                    dto.setPosicao(posicao++);
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setQuantidadeVendida(
+                            rs.getBigDecimal("quantidade_vendida")
+                    );
+
+                    dto.setValorVendido(
+                            rs.getBigDecimal("valor_vendido")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+            return lista;
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao listar os produtos mais vendidos.",
+                    e
+            );
+        }
+    }
+
 }

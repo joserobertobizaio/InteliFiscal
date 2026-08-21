@@ -1,5 +1,6 @@
 package br.com.intelifiscal.fx.controller.dashboard;
 
+import javafx.scene.input.MouseEvent;
 import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.dashboard.DashboardView;
@@ -26,6 +27,44 @@ public class DashboardController {
     private void configurarEventos() {
 
         //==================================================
+        // CARD - MAIORES CLIENTES
+        //==================================================
+
+        view.getClientesCard()
+                .setOnMouseClicked(
+                        event ->
+                                NavigationManager.show(
+                                        ScreenType.TOP_CLIENTES
+                                )
+                );
+
+        //==================================================
+        // CARD - COMPRAS
+        //==================================================
+
+        view.getComprasCard()
+                .setOnMouseClicked(
+                        event ->
+                                NavigationManager.show(
+                                        ScreenType.ANALISE_COMPRAS
+                                )
+                );
+
+
+        //==================================================
+        // CARD - VENDAS
+        //==================================================
+
+        view.getVendasCard()
+                .setOnMouseClicked(
+                        event ->
+                                NavigationManager.show(
+                                        ScreenType.RESUMO_VENDAS
+                                )
+                );
+
+
+        //==================================================
         // RESUMO DE COMPRAS
         //==================================================
 
@@ -33,10 +72,9 @@ public class DashboardController {
                 .setOnMouseClicked(
                         event ->
                                 NavigationManager.show(
-                                        ScreenType.COMPRAS
+                                        ScreenType.RESUMO_COMPRAS
                                 )
                 );
-
 
         //==================================================
         // RESUMO DE VENDAS
@@ -46,7 +84,7 @@ public class DashboardController {
                 .setOnMouseClicked(
                         event ->
                                 NavigationManager.show(
-                                        ScreenType.VENDAS
+                                        ScreenType.RESUMO_VENDAS
                                 )
                 );
 
@@ -74,6 +112,20 @@ public class DashboardController {
                                         ScreenType.RESUMO_PERIODO
                                 )
                 );
+
+        //==================================================
+        // CARD - PRODUTOS MAIS VENDIDOS
+        //==================================================
+
+        view.getProdutosCard()
+                .addEventFilter(
+                        MouseEvent.MOUSE_CLICKED,
+                        event ->
+                                NavigationManager.show(
+                                        ScreenType.TOP_PRODUTOS
+                                )
+                );
+
 
     }
 

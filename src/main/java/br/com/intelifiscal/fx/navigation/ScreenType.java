@@ -19,14 +19,19 @@ public enum ScreenType {
 
     PRODUTOS,
 
+    TOP_PRODUTOS,
+
+    TOP_CLIENTES,
+
     RESUMO_PERIODO,
 
     RESUMO_COMPRAS,
+
+    ANALISE_COMPRAS,
 
     RESUMO_VENDAS,
 
     RELATORIOS,
 
     CONFIGURACOES
-
 }

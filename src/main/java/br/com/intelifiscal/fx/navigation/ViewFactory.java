@@ -6,9 +6,18 @@ import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoControll
 import br.com.intelifiscal.fx.controller.produto.ProdutoController;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 
+
+import br.com.intelifiscal.fx.view.compra.AnaliseComprasView;
+import br.com.intelifiscal.fx.controller.compra.AnaliseComprasController;
+import br.com.intelifiscal.fx.view.relatorio.TopClientesView;
+import br.com.intelifiscal.fx.controller.relatorio.TopClientesController;
+
+import br.com.intelifiscal.fx.view.relatorio.TopProdutosView;
+import br.com.intelifiscal.fx.controller.relatorio.TopProdutosController;
+
 import br.com.intelifiscal.fx.view.relatorio.ResumoVendasView;
 import br.com.intelifiscal.fx.controller.relatorio.ResumoVendasController;
-
+import br.com.intelifiscal.fx.controller.dashboard.DashboardController;
 import br.com.intelifiscal.fx.view.relatorio.RelatoriosView;
 import br.com.intelifiscal.fx.controller.relatorio.RelatoriosController;
 
@@ -42,7 +51,21 @@ public final class ViewFactory {
 
         return switch (screenType) {
 
-            case DASHBOARD -> new DashboardView();
+            case DASHBOARD -> {
+                DashboardView view = new DashboardView();
+                new DashboardController(view);
+                yield view;
+            }
+
+            case TOP_CLIENTES -> {
+
+                TopClientesView view =
+                        new TopClientesView();
+
+                new TopClientesController(view);
+
+                yield view;
+            }
 
             case ESTABELECIMENTO -> {
 
@@ -124,12 +147,32 @@ public final class ViewFactory {
                 yield view;
             }
 
+            case ANALISE_COMPRAS -> {
+
+                AnaliseComprasView view =
+                        new AnaliseComprasView();
+
+                new AnaliseComprasController(view);
+
+                yield view;
+            }
+
             case RESUMO_VENDAS -> {
 
                 ResumoVendasView view =
                         new ResumoVendasView();
 
                 new ResumoVendasController(view);
+
+                yield view;
+            }
+
+            case TOP_PRODUTOS -> {
+
+                TopProdutosView view =
+                        new TopProdutosView();
+
+                new TopProdutosController(view);
 
                 yield view;
             }

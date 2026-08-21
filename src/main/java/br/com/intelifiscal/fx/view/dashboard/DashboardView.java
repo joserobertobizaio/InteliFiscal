@@ -6,6 +6,7 @@ import br.com.intelifiscal.fx.components.dashboard.MetricCard;
 import br.com.intelifiscal.fx.components.common.icons.IconType;
 import br.com.intelifiscal.fx.controller.dashboard.DashboardController;
 import javafx.geometry.HPos;
+import javafx.scene.Cursor;
 import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.scene.layout.GridPane;
@@ -31,6 +32,13 @@ public class DashboardView extends BaseView {
     private final Label periodoLink =
             new Label("Consultar →");
 
+    private MetricCard produtosCard;
+
+    private MetricCard clientesCard;
+
+    private MetricCard comprasCard;
+
+    private MetricCard vendasCard;
 
     public DashboardView() {
 
@@ -82,40 +90,49 @@ public class DashboardView extends BaseView {
         indicadores.setHgap(30);
         indicadores.setVgap(20);
 
-        MetricCard xmlCard =
+        clientesCard =
                 new MetricCard(
                         IconType.IMPORTACAO_XML,
-                        "XML",
-                        "0"
+                        "Clientes -> Consulte aqui",
+                        "os maiores clientes."
                 );
 
-        MetricCard comprasCard =
+        clientesCard.setCursor(Cursor.HAND);
+
+        comprasCard =
                 new MetricCard(
                         IconType.COMPRAS,
-                        "Compras",
-                        "R$ 0,00"
+                        "Compras -> Consulte aqui",
+                        "a análise detalhada."
                 );
 
-        MetricCard vendasCard =
+        comprasCard.setCursor(Cursor.HAND);
+
+
+        vendasCard =
                 new MetricCard(
                         IconType.VENDAS,
-                        "Vendas",
-                        "R$ 0,00"
+                        "Vendas -> Consulte aqui",
+                        "a análise detalhada."
                 );
 
-        MetricCard produtosCard =
+        vendasCard.setCursor(Cursor.HAND);
+
+        produtosCard =
                 new MetricCard(
                         IconType.PRODUTOS,
-                        "Produtos",
-                        "0"
+                        "Produtos -> Consulte aqui",
+                        "os produtos mais vendidos."
                 );
 
-        indicadores.add(xmlCard, 0, 0);
+        produtosCard.setCursor(Cursor.HAND);
+
+        indicadores.add(clientesCard, 0, 0);
         indicadores.add(comprasCard, 1, 0);
         indicadores.add(vendasCard, 2, 0);
         indicadores.add(produtosCard, 3, 0);
 
-        GridPane.setHalignment(xmlCard, HPos.CENTER);
+        GridPane.setHalignment(clientesCard, HPos.CENTER);
         GridPane.setHalignment(comprasCard, HPos.CENTER);
         GridPane.setHalignment(vendasCard, HPos.CENTER);
         GridPane.setHalignment(produtosCard, HPos.CENTER);
@@ -366,6 +383,18 @@ public class DashboardView extends BaseView {
         return comprasLink;
     }
 
+    public MetricCard getClientesCard() {
+        return clientesCard;
+    }
+
+    public MetricCard getComprasCard() {
+        return comprasCard;
+    }
+
+    public MetricCard getVendasCard() {
+        return vendasCard;
+    }
+
 
     public Label getVendasLink() {
 
@@ -382,6 +411,10 @@ public class DashboardView extends BaseView {
     public Label getPeriodoLink() {
 
         return periodoLink;
+    }
+
+    public MetricCard getProdutosCard() {
+        return produtosCard;
     }
 
 }
