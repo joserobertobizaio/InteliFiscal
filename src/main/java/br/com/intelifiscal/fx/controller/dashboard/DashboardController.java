@@ -59,7 +59,7 @@ public class DashboardController {
                 .setOnMouseClicked(
                         event ->
                                 NavigationManager.show(
-                                        ScreenType.RESUMO_VENDAS
+                                        ScreenType.ANALISE_VENDAS
                                 )
                 );
 

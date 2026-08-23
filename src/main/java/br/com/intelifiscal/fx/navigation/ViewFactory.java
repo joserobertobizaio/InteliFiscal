@@ -6,7 +6,6 @@ import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoControll
 import br.com.intelifiscal.fx.controller.produto.ProdutoController;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 
-
 import br.com.intelifiscal.fx.view.compra.AnaliseComprasView;
 import br.com.intelifiscal.fx.controller.compra.AnaliseComprasController;
 import br.com.intelifiscal.fx.view.relatorio.TopClientesView;
@@ -14,7 +13,7 @@ import br.com.intelifiscal.fx.controller.relatorio.TopClientesController;
 
 import br.com.intelifiscal.fx.view.relatorio.TopProdutosView;
 import br.com.intelifiscal.fx.controller.relatorio.TopProdutosController;
-
+import br.com.intelifiscal.fx.controller.venda.AnaliseVendasController;
 import br.com.intelifiscal.fx.view.relatorio.ResumoVendasView;
 import br.com.intelifiscal.fx.controller.relatorio.ResumoVendasController;
 import br.com.intelifiscal.fx.controller.dashboard.DashboardController;
@@ -32,6 +31,7 @@ import br.com.intelifiscal.fx.controller.periodo.ResumoPeriodoController;
 
 import br.com.intelifiscal.fx.view.compra.CompraView;
 import br.com.intelifiscal.fx.controller.compra.CompraController;
+import br.com.intelifiscal.fx.view.venda.AnaliseVendasView;
 import br.com.intelifiscal.fx.view.venda.VendaView;
 import br.com.intelifiscal.fx.controller.venda.VendaController;
 
@@ -157,6 +157,15 @@ public final class ViewFactory {
                 yield view;
             }
 
+            case ANALISE_VENDAS -> {
+                AnaliseVendasView view =
+                        new AnaliseVendasView();
+
+                new AnaliseVendasController(view);
+
+                yield view;
+            }
+
             case RESUMO_VENDAS -> {
 
                 ResumoVendasView view =
@@ -166,6 +175,7 @@ public final class ViewFactory {
 
                 yield view;
             }
+
 
             case TOP_PRODUTOS -> {
 

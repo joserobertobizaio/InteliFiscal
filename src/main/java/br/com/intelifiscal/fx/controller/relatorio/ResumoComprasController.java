@@ -2,6 +2,8 @@ package br.com.intelifiscal.fx.controller.relatorio;
 
 import br.com.intelifiscal.dto.relatorio.FornecedorCompraDTO;
 import br.com.intelifiscal.dto.relatorio.ResumoComprasDTO;
+import br.com.intelifiscal.fx.navigation.NavigationManager;
+import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.relatorio.ResumoComprasView;
 import br.com.intelifiscal.service.relatorio.ResumoComprasService;
 
@@ -118,7 +120,6 @@ public class ResumoComprasController {
     //==================================================
     // AJUSTAR PERÍODO
     //==================================================
-
 
     private void ajustarPeriodo() {
 
@@ -305,6 +306,8 @@ public class ResumoComprasController {
 
     private void fechar() {
 
-        view.setVisible(false);
+        NavigationManager.show(
+                ScreenType.DASHBOARD
+        );
     }
 }

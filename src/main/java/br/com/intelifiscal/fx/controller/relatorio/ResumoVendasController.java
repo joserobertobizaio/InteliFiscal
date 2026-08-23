@@ -2,6 +2,8 @@ package br.com.intelifiscal.fx.controller.relatorio;
 
 import br.com.intelifiscal.dto.relatorio.ClienteVendaDTO;
 import br.com.intelifiscal.dto.relatorio.ResumoVendasDTO;
+import br.com.intelifiscal.fx.navigation.NavigationManager;
+import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.relatorio.ResumoVendasView;
 import br.com.intelifiscal.service.relatorio.ResumoVendasService;
 
@@ -219,12 +221,12 @@ public class ResumoVendasController {
                 break;
         }
 
+
         //==================================================
         // ATUALIZA APARÊNCIA DOS CONTROLES
         //==================================================
 
         view.atualizarControlesPeriodo();
-
 
 
         //==================================================
@@ -297,6 +299,8 @@ public class ResumoVendasController {
 
     private void fechar() {
 
-        view.setVisible(false);
+        NavigationManager.show(
+                ScreenType.DASHBOARD
+        );
     }
 }

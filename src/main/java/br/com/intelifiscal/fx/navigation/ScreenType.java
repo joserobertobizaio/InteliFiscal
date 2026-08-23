@@ -29,6 +29,8 @@ public enum ScreenType {
 
     ANALISE_COMPRAS,
 
+    ANALISE_VENDAS,
+
     RESUMO_VENDAS,
 
     RELATORIOS,
