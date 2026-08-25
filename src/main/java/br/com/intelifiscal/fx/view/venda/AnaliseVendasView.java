@@ -298,7 +298,7 @@ public class AnaliseVendasView extends BorderPane {
         // LINHA 2
         //==================================================
 
-        filtros.add(
+        /*filtros.add(
                 lblCliente,
                 0,
                 1
@@ -326,7 +326,7 @@ public class AnaliseVendasView extends BorderPane {
                 btConsultar,
                 5,
                 1
-        );
+        );*/
 
 
         //==================================================
@@ -412,6 +412,15 @@ public class AnaliseVendasView extends BorderPane {
         area.getChildren().add(
                 linha1
         );
+
+        //==================================================
+        // CARDS TEMPORARIAMENTE OCULTOS
+        // Os indicadores continuam existindo e sendo calculados.
+        // Apenas não são exibidos nesta versão.
+        //==================================================
+
+        area.setVisible(false);
+        area.setManaged(false);
 
         return area;
     }

@@ -81,6 +81,7 @@ public class AnaliseVendasController {
         LocalDate hoje =
                 LocalDate.now();
 
+
         switch (periodo) {
 
             case "Últimos 30 dias":
@@ -137,9 +138,42 @@ public class AnaliseVendasController {
 
             case "Personalizado":
 
-                // Usuário informa as datas manualmente.
+                // O usuário escolherá as datas manualmente.
                 break;
         }
+
+        //==================================================
+        // ATUALIZA ESTADO DOS CALENDÁRIOS
+        //==================================================
+
+        atualizarEstadoCalendarios();
+
+
+        //==================================================
+        // CONSULTA AUTOMÁTICA
+        //==================================================
+
+        if (!"Personalizado".equals(periodo)) {
+
+            consultar();
+        }
+
+    }
+
+    //==================================================
+    // ESTADO DOS CALENDÁRIOS
+    //==================================================
+
+    private void atualizarEstadoCalendarios() {
+
+        boolean personalizado =
+                "Personalizado".equals(
+                        view.getCbPeriodo().getValue()
+                );
+
+        view.getDtInicio().setDisable(!personalizado);
+
+        view.getDtFim().setDisable(!personalizado);
     }
 
 
@@ -149,12 +183,56 @@ public class AnaliseVendasController {
 
     private void configurarEventos() {
 
-        view.getBtConsultar().setOnAction(
-                event -> consultar()
-        );
+        //==================================================
+        // FECHAR
+        //==================================================
 
         view.getBtFechar().setOnAction(
                 event -> fechar()
+        );
+
+
+        //==================================================
+        // DATA INICIAL
+        //==================================================
+
+        view.getDtInicio()
+                .valueProperty()
+                .addListener(
+                        (obs, antiga, nova) -> {
+
+                            if (isPeriodoPersonalizado()) {
+                                consultar();
+                            }
+                        }
+                );
+
+
+        //==================================================
+        // DATA FINAL
+        //==================================================
+
+        view.getDtFim()
+                .valueProperty()
+                .addListener(
+                        (obs, antiga, nova) -> {
+
+                            if (isPeriodoPersonalizado()) {
+                                consultar();
+                            }
+                        }
+                );
+    }
+
+
+    //==================================================
+    // VERIFICA SE É PERSONALIZADO
+    //==================================================
+
+    private boolean isPeriodoPersonalizado() {
+
+        return "Personalizado".equals(
+                view.getCbPeriodo().getValue()
         );
     }
 
@@ -172,6 +250,10 @@ public class AnaliseVendasController {
                 view.getDtFim().getValue();
 
 
+        //==================================================
+        // VALIDAÇÃO
+        //==================================================
+
         if (dataInicio == null || dataFim == null) {
 
             limparDados();
@@ -187,6 +269,10 @@ public class AnaliseVendasController {
             return;
         }
 
+
+        //==================================================
+        // CONSULTA
+        //==================================================
 
         List<AnaliseVendasDTO> lista =
                 service.consultar(
@@ -211,17 +297,22 @@ public class AnaliseVendasController {
 
         dados.clear();
 
+
         view.getLblTotalVendido()
                 .setText("R$ 0,00");
+
 
         view.getLblNotas()
                 .setText("0");
 
+
         view.getLblClientes()
                 .setText("0");
 
+
         view.getLblProdutos()
                 .setText("0");
+
 
         view.getLblTicketMedio()
                 .setText("R$ 0,00");
@@ -240,6 +331,7 @@ public class AnaliseVendasController {
                 BigDecimal.ZERO;
 
         int notas = 0;
+
 
         for (AnaliseVendasDTO dto : lista) {
 
