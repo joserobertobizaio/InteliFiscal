@@ -177,10 +177,15 @@ public class AnaliseComprasView extends BorderPane {
         );
 
 
-        // Período
+        //==================================================
+        // PERÍODO
+        //==================================================
 
         Label lblPeriodo =
                 new Label("Período:");
+
+
+        cbPeriodo.getItems().clear();
 
         cbPeriodo.getItems().addAll(
                 "Últimos 30 dias",
@@ -190,57 +195,40 @@ public class AnaliseComprasView extends BorderPane {
                 "Personalizado"
         );
 
+
         cbPeriodo.setValue(
                 "Últimos 12 meses"
         );
 
+
         cbPeriodo.setPrefWidth(170);
 
 
-        // Data inicial
+        //==================================================
+        // DATA INICIAL
+        //==================================================
 
         Label lblDe =
                 new Label("De:");
 
+
         dtInicio.setPrefWidth(125);
 
 
-        // Data final
+        //==================================================
+        // DATA FINAL
+        //==================================================
 
         Label lblAte =
                 new Label("Até:");
 
+
         dtFim.setPrefWidth(125);
 
 
-        // Fornecedor
-
-        Label lblFornecedor =
-                new Label("Fornecedor:");
-
-        cbFornecedor.setPromptText(
-                "Todos"
-        );
-
-        cbFornecedor.setPrefWidth(180);
-
-
-        // Produto
-
-        Label lblProduto =
-                new Label("Produto:");
-
-        cbProduto.setPromptText(
-                "Todos"
-        );
-
-        cbProduto.setPrefWidth(180);
-
-
-        // Botão
-
-        btConsultar.setPrefWidth(105);
-
+        //==================================================
+        // POSICIONAMENTO
+        //==================================================
 
         filtros.add(
                 lblPeriodo,
@@ -248,11 +236,13 @@ public class AnaliseComprasView extends BorderPane {
                 0
         );
 
+
         filtros.add(
                 cbPeriodo,
                 1,
                 0
         );
+
 
         filtros.add(
                 lblDe,
@@ -260,11 +250,13 @@ public class AnaliseComprasView extends BorderPane {
                 0
         );
 
+
         filtros.add(
                 dtInicio,
                 3,
                 0
         );
+
 
         filtros.add(
                 lblAte,
@@ -272,61 +264,37 @@ public class AnaliseComprasView extends BorderPane {
                 0
         );
 
+
         filtros.add(
                 dtFim,
                 5,
                 0
         );
 
-        filtros.add(
-                lblFornecedor,
-                0,
-                1
-        );
 
-        filtros.add(
-                cbFornecedor,
-                1,
-                1
-        );
-
-        filtros.add(
-                lblProduto,
-                2,
-                1
-        );
-
-        filtros.add(
-                cbProduto,
-                3,
-                1
-        );
-
-        filtros.add(
-                btConsultar,
-                5,
-                1
-        );
-
+        //==================================================
+        // ÁREA CENTRAL
+        //==================================================
 
         VBox centro =
                 new VBox();
 
+
         centro.getChildren().addAll(
                 filtros,
-                criarAreaIndicadores(),
                 criarTituloTabela(),
                 tabela
         );
+
 
         VBox.setMargin(
                 tabela,
                 new Insets(5, 0, 0, 0)
         );
 
+
         setCenter(centro);
     }
-
 
     //==================================================
     // INDICADORES
@@ -500,9 +468,6 @@ public class AnaliseComprasView extends BorderPane {
     // TABELA
     //==================================================
 
-    //==================================================
-// TABELA
-//==================================================
 
     private void criarTabela() {
 

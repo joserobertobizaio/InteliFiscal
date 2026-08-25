@@ -5,11 +5,8 @@ import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.view.compra.AnaliseComprasView;
 import br.com.intelifiscal.service.relatorio.AnaliseComprasService;
 
-import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 public class AnaliseComprasController {
 
@@ -18,12 +15,16 @@ public class AnaliseComprasController {
     private final AnaliseComprasService service =
             new AnaliseComprasService();
 
-    public AnaliseComprasController(AnaliseComprasView view) {
+
+    public AnaliseComprasController(
+            AnaliseComprasView view
+    ) {
 
         this.view = view;
 
         inicializar();
     }
+
 
     //==================================================
     // INICIALIZAÇÃO
@@ -33,7 +34,11 @@ public class AnaliseComprasController {
 
         configurarPeriodo();
 
+        configurarDatas();
+
         configurarEventos();
+
+        atualizarPeriodo();
     }
 
 
@@ -46,8 +51,6 @@ public class AnaliseComprasController {
         view.getCbPeriodo().setOnAction(
                 event -> atualizarPeriodo()
         );
-
-        atualizarPeriodo();
     }
 
 
@@ -63,6 +66,7 @@ public class AnaliseComprasController {
         LocalDate hoje =
                 LocalDate.now();
 
+
         switch (periodo) {
 
             case "Últimos 30 dias":
@@ -74,6 +78,10 @@ public class AnaliseComprasController {
                 view.getDtFim().setValue(
                         hoje
                 );
+
+                bloquearCalendarios();
+
+                consultar();
 
                 break;
 
@@ -88,6 +96,10 @@ public class AnaliseComprasController {
                         hoje
                 );
 
+                bloquearCalendarios();
+
+                consultar();
+
                 break;
 
 
@@ -100,6 +112,10 @@ public class AnaliseComprasController {
                 view.getDtFim().setValue(
                         hoje
                 );
+
+                bloquearCalendarios();
+
+                consultar();
 
                 break;
 
@@ -114,14 +130,89 @@ public class AnaliseComprasController {
                         hoje
                 );
 
+                bloquearCalendarios();
+
+                consultar();
+
                 break;
 
 
             case "Personalizado":
 
-                // O usuário informa as datas manualmente.
+                habilitarCalendarios();
+
+                // Se já existirem duas datas,
+                // consulta automaticamente.
+                if (view.getDtInicio().getValue() != null
+                        && view.getDtFim().getValue() != null) {
+
+                    consultar();
+                }
+
                 break;
         }
+    }
+
+
+    //==================================================
+    // CALENDÁRIOS
+    //==================================================
+
+    private void bloquearCalendarios() {
+
+        view.getDtInicio().setDisable(true);
+
+        view.getDtFim().setDisable(true);
+    }
+
+
+    private void habilitarCalendarios() {
+
+        view.getDtInicio().setDisable(false);
+
+        view.getDtFim().setDisable(false);
+    }
+
+
+    //==================================================
+    // DATAS PERSONALIZADAS
+    //==================================================
+
+    private void configurarDatas() {
+
+        view.getDtInicio()
+                .valueProperty()
+                .addListener(
+                        (obs, antiga, nova) ->
+                                consultarSePersonalizado()
+                );
+
+
+        view.getDtFim()
+                .valueProperty()
+                .addListener(
+                        (obs, antiga, nova) ->
+                                consultarSePersonalizado()
+                );
+    }
+
+
+    private void consultarSePersonalizado() {
+
+        String periodo =
+                view.getCbPeriodo().getValue();
+
+        if (!"Personalizado".equals(periodo)) {
+            return;
+        }
+
+        if (view.getDtInicio().getValue() == null
+                || view.getDtFim().getValue() == null) {
+
+            return;
+        }
+
+        consultar();
     }
 
 
@@ -130,10 +221,6 @@ public class AnaliseComprasController {
     //==================================================
 
     private void configurarEventos() {
-
-        view.getBtConsultar().setOnAction(
-                event -> consultar()
-        );
 
         view.getBtFechar().setOnAction(
                 event -> fechar()
@@ -154,15 +241,18 @@ public class AnaliseComprasController {
                 view.getDtFim().getValue();
 
 
-        if (dataInicio == null || dataFim == null) {
+        if (dataInicio == null
+                || dataFim == null) {
 
-            view.getLblTotalComprado().setText("R$ 0,00");
-            view.getLblNotas().setText("0");
-            view.getLblFornecedores().setText("0");
-            view.getLblProdutos().setText("0");
-            view.getLblTicketMedio().setText("R$ 0,00");
+            view.getTabela()
+                    .getItems()
+                    .clear();
 
-            view.getTabela().getItems().clear();
+            return;
+        }
+
+
+        if (dataInicio.isAfter(dataFim)) {
 
             return;
         }
@@ -180,95 +270,8 @@ public class AnaliseComprasController {
         view.getTabela()
                 .getItems()
                 .setAll(lista);
-
-
-        atualizarIndicadores(lista);
     }
 
-    private void atualizarIndicadores(
-            List<AnaliseComprasDTO> lista
-    ) {
-
-        BigDecimal totalComprado =
-                BigDecimal.ZERO;
-
-        int notas = 0;
-
-        double quantidade = 0;
-
-
-        for (AnaliseComprasDTO dto : lista) {
-
-            if (dto.getValorTotal() != null) {
-
-                totalComprado =
-                        totalComprado.add(
-                                dto.getValorTotal()
-                        );
-            }
-
-            notas += dto.getNotas();
-
-            quantidade += dto.getQuantidade();
-        }
-
-
-        int fornecedores =
-                lista.size();
-
-
-        int produtos = lista.size();
-
-
-        BigDecimal ticketMedio =
-                BigDecimal.ZERO;
-
-        if (notas > 0) {
-
-            ticketMedio =
-                    totalComprado.divide(
-                            BigDecimal.valueOf(notas),
-                            2,
-                            java.math.RoundingMode.HALF_UP
-                    );
-        }
-
-
-        NumberFormat moeda =
-                NumberFormat.getCurrencyInstance(
-                        new Locale("pt", "BR")
-                );
-
-
-        view.getLblTotalComprado()
-                .setText(
-                        moeda.format(totalComprado)
-                );
-
-
-        view.getLblNotas()
-                .setText(
-                        String.valueOf(notas)
-                );
-
-
-        view.getLblFornecedores()
-                .setText(
-                        String.valueOf(fornecedores)
-                );
-
-
-        view.getLblProdutos()
-                .setText(
-                        String.valueOf(produtos)
-                );
-
-
-        view.getLblTicketMedio()
-                .setText(
-                        moeda.format(ticketMedio)
-                );
-    }
 
     //==================================================
     // FECHAR
