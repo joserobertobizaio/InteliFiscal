@@ -399,15 +399,18 @@ public class CompraView extends BaseView {
         );
 
 
-        //---------------------------------------------
-        // TAMANHO
-        //---------------------------------------------
+        //=============================================
+        // LARGURAS PREFERENCIAIS
+        //=============================================
 
-        tabelaCompras.setPrefHeight(300);
+        colNumero.setPrefWidth(70);
+        colSerie.setPrefWidth(60);
+        colData.setPrefWidth(100);
+        colFornecedor.setPrefWidth(280);
+        colCnpj.setPrefWidth(150);
+        colValor.setPrefWidth(120);
+        colSituacao.setPrefWidth(110);
 
-        tabelaCompras.setMinHeight(300);
-
-        tabelaCompras.setMaxHeight(300);
     }
 
 
@@ -549,8 +552,16 @@ public class CompraView extends BaseView {
                         )
         );
 
-        FormatadorNumero.aplicarValorUnitario(
-                colValorUnitario
+        colDesconto.setCellValueFactory(
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue()
+                                        .getDesconto()
+                        )
+        );
+
+        FormatadorNumero.aplicar(
+                colDesconto
         );
 
         //---------------------------------------------
@@ -596,15 +607,19 @@ public class CompraView extends BaseView {
         );
 
 
-        //---------------------------------------------
-        // TAMANHO
-        //---------------------------------------------
+        //=============================================
+        // LARGURAS PREFERENCIAIS
+        //=============================================
 
-        tabelaItens.setPrefHeight(220);
+        colItem.setPrefWidth(55);
+        colCodigo.setPrefWidth(100);
+        colDescricao.setPrefWidth(300);
+        colUnidade.setPrefWidth(75);
+        colQuantidade.setPrefWidth(100);
+        colValorUnitario.setPrefWidth(120);
+        colDesconto.setPrefWidth(100);
+        colValorTotal.setPrefWidth(120);
 
-        tabelaItens.setMinHeight(220);
-
-        tabelaItens.setMaxHeight(220);
     }
 
 

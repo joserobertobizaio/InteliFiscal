@@ -376,16 +376,24 @@ public class VendaView extends BaseView {
                 colSituacao
         );
 
+        //=============================================
+        // LARGURAS PREFERENCIAIS
+        //=============================================
 
-        //---------------------------------------------
+        colNumero.setPrefWidth(70);
+        colSerie.setPrefWidth(60);
+        colData.setPrefWidth(100);
+        colCliente.setPrefWidth(280);
+        colCnpj.setPrefWidth(150);
+        colValor.setPrefWidth(120);
+        colSituacao.setPrefWidth(110);
+
+        //=============================================
         // TAMANHO
-        //---------------------------------------------
+        //=============================================
 
         tabelaVendas.setPrefHeight(300);
 
-        tabelaVendas.setMinHeight(300);
-
-        tabelaVendas.setMaxHeight(300);
     }
 
 
@@ -563,15 +571,19 @@ public class VendaView extends BaseView {
         );
 
 
-        //---------------------------------------------
-        // TAMANHO
-        //---------------------------------------------
+        //=============================================
+        // LARGURAS PREFERENCIAIS
+        //=============================================
 
-        tabelaItens.setPrefHeight(220);
+        colItem.setPrefWidth(55);
+        colCodigo.setPrefWidth(100);
+        colDescricao.setPrefWidth(300);
+        colUnidade.setPrefWidth(75);
+        colQuantidade.setPrefWidth(100);
+        colValorUnitario.setPrefWidth(120);
+        colDesconto.setPrefWidth(100);
+        colValorTotal.setPrefWidth(120);
 
-        tabelaItens.setMinHeight(220);
-
-        tabelaItens.setMaxHeight(220);
     }
 
     //==================================================
