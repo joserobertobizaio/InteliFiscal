@@ -58,8 +58,8 @@ public class ImportacaoXMLView extends BaseView {
                 new SectionTitle("Resumo da Importação"),
                //resumo,
 
-                new SectionTitle("Progresso"),  // se a barra de progresso der problema visual
-                progressBar,                        // é só comentar essas duas linhas
+                //new SectionTitle("Progresso"),  // se a barra de progresso der problema visual
+                //progressBar,                        // é só comentar essas duas linhas
 
                 new SectionTitle("Log da Importação"),
                 txtLog

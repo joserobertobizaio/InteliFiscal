@@ -65,9 +65,10 @@ public class SideBar extends VBox {
 
         getChildren().add(createItem(ScreenType.PRODUTOS, "Produtos"));
 
-        getChildren().add(createItem(ScreenType.RELATORIOS, "Relatórios"));
+        getChildren().add(createItem(ScreenType.RELATORIOS, "Relatórios Gerenciais"));
 
-        getChildren().add(createItem(ScreenType.CONFIGURACOES, "Configurações"));
+        //getChildren().add(createItem(ScreenType.CONFIGURACOES, "Configurações"));
+        // este menu será implementado na próxima versão
     }
 
     private SidebarItem createItem(ScreenType screenType, String text) {

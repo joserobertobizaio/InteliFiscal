@@ -26,6 +26,6 @@ public class ResumoPeriodoService {
 
     public List<ResumoMensalDTO> consultarResumoMensal() {
 
-        return repository.consultarResumoMensal();
+        return repository.consultarResumoMensalUltimos12Meses();
     }
 }

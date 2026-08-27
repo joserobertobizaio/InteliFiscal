@@ -10,9 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 public class ResumoPeriodoRepository {
-
 
     //==================================================
     // ÚLTIMOS 12 MESES
@@ -21,68 +21,117 @@ public class ResumoPeriodoRepository {
     public List<ResumoPeriodoDTO> consultarUltimos12Meses() {
 
         String sql = """
+        WITH periodo AS (
+        SELECT
+            MAX(data_emissao) AS data_final,
 
-            WITH periodo AS (
+            date(
+                MAX(data_emissao),
+                'start of month',
+                '-11 months'
+            ) AS data_inicial
 
-                SELECT
-                    MAX(data_emissao) AS data_final,
-                    date(MAX(data_emissao), '-12 months')
-                        AS data_inicial
+        FROM tblNFe
+        ),
 
-                FROM tblNFe
-            )
+        notas_periodo AS (
 
             SELECT
+                n.id,
+                n.valor_total,
 
                 CASE
                     WHEN n.cnpj_emitente = e.cnpj
                         THEN 'VENDA'
                     ELSE 'COMPRA'
-                END AS operacao,
-
-                COUNT(DISTINCT n.id) AS notas,
-
-                COUNT(i.id) AS itens,
-
-                ROUND(
-                    COALESCE(SUM(i.quantidade), 0),
-                    3
-                ) AS quantidade,
-
-                ROUND(
-                    COALESCE(SUM(i.valor_total), 0),
-                    2
-                ) AS valor_total,
-
-                ROUND(
-                    COALESCE(SUM(i.valor_total), 0)
-                    /
-                    NULLIF(COUNT(DISTINCT n.id), 0),
-                    2
-                ) AS ticket_medio
+                END AS operacao
 
             FROM tblNFe n
 
             CROSS JOIN tblMinhaEmpresa e
-
             CROSS JOIN periodo p
-
-            LEFT JOIN tblNFeItem i
-                ON i.id_nfe = n.id
 
             WHERE
                 n.data_emissao >= p.data_inicial
-
                 AND n.data_emissao <= p.data_final
+        ),
+
+        itens_por_nota AS (
+
+            SELECT
+                i.id_nfe,
+
+                COUNT(i.id) AS itens,
+
+                ROUND(
+                    COALESCE(
+                        SUM(i.quantidade),
+                        0
+                    ),
+                    3
+                ) AS quantidade
+
+            FROM tblNFeItem i
+
+            INNER JOIN notas_periodo n
+                ON n.id = i.id_nfe
 
             GROUP BY
-                operacao
+                i.id_nfe
+        )
 
-            ORDER BY
-                operacao
+        SELECT
 
-            """;
+            n.operacao,
 
+            COUNT(n.id) AS notas,
+
+            COALESCE(
+                SUM(i.itens),
+                0
+            ) AS itens,
+
+            ROUND(
+                COALESCE(
+                    SUM(i.quantidade),
+                    0
+                ),
+                3
+            ) AS quantidade,
+
+            ROUND(
+                COALESCE(
+                    SUM(n.valor_total),
+                    0
+                ),
+                2
+            ) AS valor_total,
+
+            ROUND(
+                COALESCE(
+                    SUM(n.valor_total),
+                    0
+                )
+                /
+                NULLIF(
+                    COUNT(n.id),
+                    0
+                ),
+                2
+            ) AS ticket_medio
+
+        FROM notas_periodo n
+
+        LEFT JOIN itens_por_nota i
+            ON i.id_nfe = n.id
+
+        GROUP BY
+            n.operacao
+
+        ORDER BY
+            n.operacao
+
+        """;
 
         List<ResumoPeriodoDTO> lista =
                 new ArrayList<>();
@@ -100,7 +149,6 @@ public class ResumoPeriodoRepository {
                         ps.executeQuery()
 
         ) {
-
 
             while (rs.next()) {
 
@@ -158,56 +206,78 @@ public class ResumoPeriodoRepository {
     // RESUMO MENSAL - ÚLTIMOS 12 MESES
     //==================================================
 
-    public List<ResumoMensalDTO> consultarResumoMensal() {
+    public List<ResumoMensalDTO> consultarResumoMensalUltimos12Meses() {
 
         String sql = """
+        WITH periodo AS (
 
-            WITH periodo AS (
+            SELECT
+                MAX(data_emissao) AS data_final,
+                date(MAX(data_emissao), '-12 months')
+                    AS data_inicial
 
-                SELECT
-                    MAX(data_emissao) AS data_final,
-                    date(MAX(data_emissao), '-12 months')
-                        AS data_inicial
+            FROM tblNFe
+        ),
 
-                FROM tblNFe
-            )
+        dados AS (
 
             SELECT
 
-                strftime('%Y-%m', n.data_emissao) AS mes,
+                strftime(
+                    '%m/%Y',
+                    n.data_emissao
+                ) AS mes,
+
+                strftime(
+                    '%Y-%m',
+                    n.data_emissao
+                ) AS ordem_mes,
 
                 CASE
+
                     WHEN n.cnpj_emitente = e.cnpj
                         THEN 'VENDA'
+
                     ELSE 'COMPRA'
+
                 END AS operacao,
 
-                ROUND(
-                    COALESCE(SUM(n.valor_total), 0),
-                    2
-                ) AS valor_total
+                n.valor_total
 
             FROM tblNFe n
 
             CROSS JOIN tblMinhaEmpresa e
-
             CROSS JOIN periodo p
 
             WHERE
                 n.data_emissao >= p.data_inicial
-
                 AND n.data_emissao <= p.data_final
+        )
 
-            GROUP BY
-                mes,
-                operacao
+        SELECT
 
-            ORDER BY
-                mes,
-                operacao
+            mes,
+            operacao,
 
-            """;
+            ROUND(
+                COALESCE(
+                    SUM(valor_total),
+                    0
+                ),
+                2
+            ) AS valor_total
 
+        FROM dados
+
+        GROUP BY
+            mes,
+            ordem_mes,
+            operacao
+
+        ORDER BY
+            ordem_mes,
+            operacao
+        """;
 
         List<ResumoMensalDTO> lista =
                 new ArrayList<>();
@@ -225,7 +295,6 @@ public class ResumoPeriodoRepository {
                         ps.executeQuery()
 
         ) {
-
 
             while (rs.next()) {
 

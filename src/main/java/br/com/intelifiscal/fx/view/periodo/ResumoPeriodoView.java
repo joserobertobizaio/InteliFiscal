@@ -12,11 +12,13 @@ import br.com.intelifiscal.fx.view.base.BaseView;
 import br.com.intelifiscal.util.FormatadorNumero;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Separator;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -66,6 +68,16 @@ public class ResumoPeriodoView extends BaseView {
     //==================================================
 
     private BarChart<String, Number> graficoMensal;
+
+    //==================================================
+    // BOTÕES DE EXPORTAÇÃO
+    //==================================================
+
+    private final Button btExcel =
+            new Button("📊 Exportar Excel");
+
+    private final Button btPdf =
+            new Button("📄 Exportar PDF");
 
     //==================================================
     // CONSTRUTOR
@@ -196,6 +208,25 @@ public class ResumoPeriodoView extends BaseView {
 
         graficoMensal.setMinHeight(250);
 
+        btExcel.setPrefWidth(180);
+        btExcel.setPrefHeight(38);
+
+        btPdf.setPrefWidth(180);
+        btPdf.setPrefHeight(38);
+
+        // PDF ficará disponível na próxima etapa
+        btPdf.setDisable(false);
+
+        HBox barraExportacao =
+                new HBox(15);
+
+        barraExportacao.setAlignment(Pos.CENTER_RIGHT);
+
+        barraExportacao.getChildren().addAll(
+                btExcel,
+                btPdf
+        );
+
 
         //==================================================
         // CONTEÚDO
@@ -214,6 +245,8 @@ public class ResumoPeriodoView extends BaseView {
 
         conteudo.getChildren().addAll(
                 periodoBox,
+                barraExportacao,
+                new Separator(),
                 comparativo,
                 graficoMensal
         );
@@ -494,8 +527,8 @@ public class ResumoPeriodoView extends BaseView {
     }
 
     //==================================================
-// ATUALIZA O GRÁFICO MENSAL
-//==================================================
+    // ATUALIZA O GRÁFICO MENSAL
+    //==================================================
 
     public void atualizarGrafico(
             List<ResumoMensalDTO> lista
@@ -586,4 +619,14 @@ public class ResumoPeriodoView extends BaseView {
                 serieVendas
         );
     }
+
+    public Button getBtExcel() {
+        return btExcel;
+    }
+
+    public Button getBtPdf() {
+        return btPdf;
+    }
+
+
 }

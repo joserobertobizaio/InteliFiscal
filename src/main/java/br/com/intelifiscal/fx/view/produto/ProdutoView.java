@@ -716,6 +716,19 @@ public class ProdutoView extends BaseView {
                 colAtivo
         );
 
+        //=============================================
+        // LARGURAS PREFERENCIAIS
+        //=============================================
+
+        colCodigo.setPrefWidth(95);
+        colCodigoBarras.setPrefWidth(100);
+        colDescricao.setPrefWidth(300);
+        colNcm.setPrefWidth(55);
+        colCest.setPrefWidth(55);
+        colUnidade.setPrefWidth(55);
+        colAtivo.setPrefWidth(45);
+
+
 
         tabelaProdutos.setPrefHeight(220);
 
@@ -952,6 +965,20 @@ public class ProdutoView extends BaseView {
 
                 colValorTotal
         );
+
+        //=============================================
+        // LARGURAS PREFERENCIAIS
+        //=============================================
+
+                colTipo.setPrefWidth(55);
+                colNf.setPrefWidth(75);
+                colSerie.setPrefWidth(45);
+                colData.setPrefWidth(85);
+                colEmitente.setPrefWidth(170);
+                colDestinatario.setPrefWidth(170);
+                colQuantidade.setPrefWidth(75);
+                colValorUnitario.setPrefWidth(75);
+                colValorTotal.setPrefWidth(75);
 
 
         tabelaHistorico.setPrefHeight(220);

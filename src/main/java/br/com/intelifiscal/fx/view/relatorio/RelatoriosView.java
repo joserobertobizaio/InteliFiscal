@@ -29,7 +29,7 @@ public class RelatoriosView extends BaseView {
     public RelatoriosView() {
 
         super(
-                "Relatórios",
+                "Relatórios Gerenciais",
                 "Consulte os principais relatórios gerenciais do sistema."
         );
 
@@ -70,7 +70,9 @@ public class RelatoriosView extends BaseView {
         configurarBotao(btResumoCompras);
         configurarBotao(btResumoVendas);
         configurarBotao(btHistoricoProduto);
-        configurarBotao(btCompararCompraVenda);
+        // Comparar Compra × Venda ficará oculto por enquanto
+        btCompararCompraVenda.setVisible(false);
+        btCompararCompraVenda.setManaged(false);
 
         GridPane grid =
                 new GridPane();
