@@ -33,7 +33,11 @@ public enum ScreenType {
 
     RESUMO_VENDAS,
 
+    DETALHAMENTO_COMPRAS,
+
     RELATORIOS,
+
+    HISTORICO_PRODUTO,
 
     CONFIGURACOES
 }

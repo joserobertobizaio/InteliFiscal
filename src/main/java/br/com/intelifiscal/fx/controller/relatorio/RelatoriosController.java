@@ -39,5 +39,11 @@ public class RelatoriosController {
                         ScreenType.RESUMO_VENDAS
                 )
         );
+
+        view.getBtHistoricoProduto().setOnAction(
+                e -> NavigationManager.show(
+                        ScreenType.HISTORICO_PRODUTO
+                )
+        );
     }
 }

@@ -17,25 +17,51 @@ public class VendaRepository {
     public List<VendaDTO> listarTodas() {
 
         String sql = """
-            SELECT
-                id,
-                chave,
-                numero,
-                serie,
-                data_emissao,
-                cnpj_destinatario,
-                destinatario,
-                valor_total,
-                situacao
+        SELECT
+            n.id,
+            n.chave,
+            n.numero,
+            n.serie,
+            n.data_emissao,
+            n.cnpj_destinatario,
+            n.destinatario,
+            n.valor_total,
+            n.situacao
 
-            FROM tblNFe
+        FROM tblNFe n
 
-            WHERE tipo = 'Venda'
+        INNER JOIN tblMinhaEmpresa e
+            ON e.cnpj = n.cnpj_emitente
+           AND e.ativo = 1
 
-            ORDER BY data_emissao DESC, id DESC
-            """;
+        INNER JOIN (
+            SELECT DISTINCT
+                id_nfe
+            FROM tblNFeItem
+            WHERE cfop IN (
+                '5101',
+                '5102',
+                '5401',
+                '5405',
+                '6101',
+                '6102',
+                '6107',
+                '6108',
+                '6401',
+                '6404'
+            )
+        ) iv
+            ON iv.id_nfe = n.id
 
-        List<VendaDTO> lista = new ArrayList<>();
+        WHERE n.tipo = 'Venda'
+
+        ORDER BY
+            n.data_emissao DESC,
+            n.id DESC
+        """;
+
+        List<VendaDTO> lista =
+                new ArrayList<>();
 
         try (
                 Connection conn =
@@ -72,7 +98,8 @@ public class VendaRepository {
                 String data =
                         rs.getString("data_emissao");
 
-                if (data != null && !data.isBlank()) {
+                if (data != null &&
+                        !data.isBlank()) {
 
                     dto.setDataEmissao(
                             java.time.LocalDate.parse(data)
@@ -113,24 +140,37 @@ public class VendaRepository {
             Integer idNfe) {
 
         String sql = """
-        SELECT
-            id_nfe,
-            numero_item,
-            codigo_produto,
-            codigo_barras,
-            descricao,
-            unidade,
-            quantidade,
-            valor_unitario,
-            valor_total,
-            desconto
+    SELECT
+        id_nfe,
+        numero_item,
+        codigo_produto,
+        codigo_barras,
+        descricao,
+        unidade,
+        quantidade,
+        valor_unitario,
+        valor_total,
+        desconto
 
-        FROM tblNFeItem
+    FROM tblNFeItem
 
-        WHERE id_nfe = ?
+    WHERE id_nfe = ?
 
-        ORDER BY numero_item
-        """;
+      AND cfop IN (
+          '5101',
+          '5102',
+          '5401',
+          '5405',
+          '6101',
+          '6102',
+          '6107',
+          '6108',
+          '6401',
+          '6404'
+      )
+
+    ORDER BY numero_item
+    """;
 
         List<VendaItemDTO> lista =
                 new ArrayList<>();

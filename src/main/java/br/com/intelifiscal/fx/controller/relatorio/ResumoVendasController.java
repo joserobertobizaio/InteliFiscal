@@ -6,6 +6,13 @@ import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.relatorio.ResumoVendasView;
 import br.com.intelifiscal.service.relatorio.ResumoVendasService;
+import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
+import br.com.intelifiscal.service.relatorio.exportacao.ExcelRelatorioService;
+import br.com.intelifiscal.util.Mensagem;
+
+import javafx.stage.FileChooser;
+
+import java.io.File;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,6 +21,9 @@ public class ResumoVendasController {
 
     private final ResumoVendasView view;
     private final ResumoVendasService service;
+
+    private final ExcelRelatorioService excelService =
+            new ExcelRelatorioService();
 
 
     public ResumoVendasController(
@@ -109,6 +119,10 @@ public class ResumoVendasController {
 
         view.getBtConsultar().setOnAction(
                 e -> consultarPorPeriodo()
+        );
+
+        view.getBtExcel().setOnAction(
+                e -> exportarExcel()
         );
 
         view.getCbPeriodo().setOnAction(
@@ -302,5 +316,115 @@ public class ResumoVendasController {
         NavigationManager.show(
                 ScreenType.DASHBOARD
         );
+    }
+
+    //==================================================
+    // EXPORTAR EXCEL
+    //==================================================
+
+    private void exportarExcel() {
+
+        LocalDate dataInicio =
+                view.getDtInicio().getValue();
+
+        LocalDate dataFim =
+                view.getDtFim().getValue();
+
+
+        //==================================================
+        // CONSULTAR DADOS
+        //==================================================
+
+        List<ResumoVendaDTO> dados =
+                service.consultarVendasParaExportacao(
+                        dataInicio,
+                        dataFim
+                );
+
+
+        if (dados == null || dados.isEmpty()) {
+
+            Mensagem.aviso(
+                    "Não existem vendas no período selecionado."
+            );
+
+            return;
+        }
+
+
+        //==================================================
+        // ESCOLHER ARQUIVO
+        //==================================================
+
+        FileChooser fileChooser =
+                new FileChooser();
+
+        fileChooser.setTitle(
+                "Salvar Resumo de Vendas"
+        );
+
+        fileChooser.setInitialFileName(
+                "Resumo_Vendas.xlsx"
+        );
+
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Arquivo Excel (*.xlsx)",
+                        "*.xlsx"
+                )
+        );
+
+
+        File arquivo =
+                fileChooser.showSaveDialog(
+                        view.getScene().getWindow()
+                );
+
+
+        // Usuário cancelou
+        if (arquivo == null) {
+            return;
+        }
+
+
+        //==================================================
+        // GARANTIR EXTENSÃO
+        //==================================================
+
+        String caminho =
+                arquivo.getAbsolutePath();
+
+        if (!caminho
+                .toLowerCase()
+                .endsWith(".xlsx")) {
+
+            caminho += ".xlsx";
+        }
+
+
+        //==================================================
+        // GERAR EXCEL
+        //==================================================
+
+        try {
+
+            excelService.gerarResumoVendas(
+                    dados,
+                    caminho
+            );
+
+            Mensagem.sucesso(
+                    "Resumo de Vendas exportado com sucesso."
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Mensagem.erro(
+                    "Não foi possível gerar o relatório de vendas.\n\n"
+                            + e.getMessage()
+            );
+        }
     }
 }

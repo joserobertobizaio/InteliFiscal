@@ -169,7 +169,9 @@ public class ResumoComprasRepository {
                 ROUND(
                     COALESCE(SUM(i.valor_total), 0),
                     2
-                ) AS valor_total
+                ) AS valor_total,
+
+                MAX(n.data_emissao) AS data_ultima_compra
 
             FROM tblNFe n
 
@@ -251,6 +253,10 @@ public class ResumoComprasRepository {
 
                     dto.setValorTotal(
                             rs.getBigDecimal("valor_total")
+                    );
+
+                    dto.setDataUltimaCompra(
+                            rs.getString("data_ultima_compra")
                     );
 
                     lista.add(dto);

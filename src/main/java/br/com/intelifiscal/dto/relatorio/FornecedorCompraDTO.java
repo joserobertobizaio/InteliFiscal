@@ -9,9 +9,18 @@ public class FornecedorCompraDTO {
     private int itens;
     private double quantidade;
     private BigDecimal valorTotal;
+    private String dataUltimaCompra;
+
+    //==================================================
+    // CONSTRUTOR
+    //==================================================
 
     public FornecedorCompraDTO() {
     }
+
+    //==================================================
+    // GETTERS E SETTERS
+    //==================================================
 
     public String getFornecedor() {
         return fornecedor;
@@ -51,5 +60,13 @@ public class FornecedorCompraDTO {
 
     public void setValorTotal(BigDecimal valorTotal) {
         this.valorTotal = valorTotal;
+    }
+
+    public String getDataUltimaCompra() {
+        return dataUltimaCompra;
+    }
+
+    public void setDataUltimaCompra(String dataUltimaCompra) {
+        this.dataUltimaCompra = dataUltimaCompra;
     }
 }

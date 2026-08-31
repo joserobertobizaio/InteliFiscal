@@ -6,7 +6,13 @@ import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.relatorio.ResumoComprasView;
 import br.com.intelifiscal.service.relatorio.ResumoComprasService;
+import br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO;
+import br.com.intelifiscal.service.relatorio.DetalhamentoCompraService;
+import br.com.intelifiscal.service.relatorio.exportacao.ExcelRelatorioService;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,6 +20,11 @@ public class ResumoComprasController {
 
     private final ResumoComprasView view;
     private final ResumoComprasService service;
+    private final DetalhamentoCompraService detalhamentoService;
+
+
+    private final ExcelRelatorioService excelService =
+            new ExcelRelatorioService();
 
 
     public ResumoComprasController(
@@ -24,6 +35,9 @@ public class ResumoComprasController {
 
         this.service =
                 new ResumoComprasService();
+
+        this.detalhamentoService =
+                new DetalhamentoCompraService();
 
         inicializar();
 
@@ -114,8 +128,11 @@ public class ResumoComprasController {
         view.getCbPeriodo().setOnAction(
                 e -> ajustarPeriodo()
         );
-    }
 
+        view.getBtExcel().setOnAction(
+                e -> exportarExcel()
+        );
+    }
 
     //==================================================
     // AJUSTAR PERÍODO
@@ -132,6 +149,7 @@ public class ResumoComprasController {
 
         LocalDate hoje =
                 LocalDate.now();
+
 
         switch (periodo) {
 
@@ -202,22 +220,27 @@ public class ResumoComprasController {
 
             case "Desde o início":
 
-                view.getDtInicio().setValue(null);
+                view.getDtInicio().setValue(
+                        null
+                );
 
-                view.getDtFim().setValue(hoje);
+                view.getDtFim().setValue(
+                        hoje
+                );
 
                 break;
 
 
             case "Período personalizado":
 
-                // Usuário escolherá as datas.
+                // O usuário escolhe as datas manualmente.
+
                 break;
         }
 
 
         //==================================================
-        // ATUALIZA OS CONTROLES VISUAIS
+        // ATUALIZA APARÊNCIA DOS CONTROLES
         //==================================================
 
         view.atualizarControlesPeriodo();
@@ -248,50 +271,37 @@ public class ResumoComprasController {
 
 
         //==================================================
-        // DESDE O INÍCIO
-        //==================================================
-
-        if (view.getCbPeriodo().getValue()
-                .equals("Desde o início")) {
-
-            carregarResumo(
-                    null,
-                    dataFim
-            );
-
-            carregarFornecedores(
-                    null,
-                    dataFim
-            );
-
-            return;
-        }
-
-
-        //==================================================
         // VALIDAÇÃO
         //==================================================
 
-        if (dataInicio == null || dataFim == null) {
+        if (dataInicio == null &&
+                dataFim == null) {
 
             return;
         }
 
 
-        if (dataInicio.isAfter(dataFim)) {
+        if (dataInicio != null &&
+                dataFim != null &&
+                dataInicio.isAfter(dataFim)) {
 
             return;
         }
 
 
         //==================================================
-        // CONSULTA
+        // CONSULTAR RESUMO
         //==================================================
 
         carregarResumo(
                 dataInicio,
                 dataFim
         );
+
+
+        //==================================================
+        // CONSULTAR FORNECEDORES
+        //==================================================
 
         carregarFornecedores(
                 dataInicio,
@@ -309,5 +319,86 @@ public class ResumoComprasController {
         NavigationManager.show(
                 ScreenType.DASHBOARD
         );
+    }
+
+    //==================================================
+    // EXPORTAR EXCEL
+    //==================================================
+
+    private void exportarExcel() {
+
+        LocalDate dataInicio =
+                view.getDtInicio().getValue();
+
+        LocalDate dataFim =
+                view.getDtFim().getValue();
+
+        List<FornecedorCompraDTO> lista =
+                service.consultarPorFornecedor(
+                        dataInicio,
+                        dataFim
+                );
+
+        List<DetalhamentoCompraDTO> detalhes =
+                detalhamentoService.listarPorPeriodo(
+                        dataInicio,
+                        dataFim
+                );
+
+        FileChooser chooser =
+                new FileChooser();
+
+        chooser.setTitle(
+                "Salvar Resumo de Compras"
+        );
+
+        chooser.setInitialFileName(
+                "Resumo_Compras.xlsx"
+        );
+
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Arquivo Excel (*.xlsx)",
+                        "*.xlsx"
+                )
+        );
+
+        Window window =
+                view.getScene().getWindow();
+
+        File arquivo =
+                chooser.showSaveDialog(window);
+
+        if (arquivo == null) {
+            return;
+        }
+
+        ResumoComprasDTO resumo =
+                service.consultarResumo(
+                        dataInicio,
+                        dataFim
+                );
+
+        excelService.gerarResumoCompras(
+                resumo,
+                lista,
+                detalhes,
+                dataInicio,
+                dataFim,
+                arquivo.getAbsolutePath()
+        );
+
+        javafx.scene.control.Alert alerta =
+                new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.INFORMATION
+                );
+
+        alerta.setTitle("Exportação concluída");
+        alerta.setHeaderText(null);
+        alerta.setContentText(
+                "O relatório de compras foi exportado com sucesso!"
+        );
+
+        alerta.showAndWait();
     }
 }

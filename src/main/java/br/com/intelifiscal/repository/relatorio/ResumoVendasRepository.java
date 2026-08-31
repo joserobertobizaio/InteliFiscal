@@ -3,6 +3,7 @@ package br.com.intelifiscal.repository.relatorio;
 import br.com.intelifiscal.database.connection.DatabaseConnection;
 import br.com.intelifiscal.dto.relatorio.ResumoVendasDTO;
 import br.com.intelifiscal.dto.relatorio.ClienteVendaDTO;
+import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -172,8 +173,8 @@ public class ResumoVendasRepository {
     }
 
     //==================================================
-// VENDAS POR CLIENTE
-//==================================================
+    // VENDAS POR CLIENTE
+    //==================================================
 
     public List<ClienteVendaDTO> consultarPorCliente() {
 
@@ -181,9 +182,9 @@ public class ResumoVendasRepository {
     }
 
 
-//==================================================
-// VENDAS POR CLIENTE - COM PERÍODO
-//==================================================
+    //==================================================
+    // VENDAS POR CLIENTE - COM PERÍODO
+    //==================================================
 
     public List<ClienteVendaDTO> consultarPorCliente(
             LocalDate dataInicio,
@@ -355,6 +356,212 @@ public class ResumoVendasRepository {
                     e
             );
         }
+
+        return lista;
+    }
+
+    //==================================================
+    // VENDAS PARA EXPORTAÇÃO
+    //==================================================
+
+    public List<ResumoVendaDTO> consultarVendasParaExportacao(
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT
+            n.numero AS nf,
+            n.data_emissao,
+            n.destinatario,
+            n.cnpj_destinatario,
+
+            CASE
+                WHEN ROW_NUMBER() OVER (
+                    PARTITION BY n.id
+                    ORDER BY i.numero_item
+                ) = 1
+                THEN n.valor_total
+                ELSE NULL
+            END AS valor_total_nf,
+
+            i.codigo_produto AS codigo_item,
+            i.descricao AS descricao_item,
+            i.cfop,
+            i.quantidade,
+            i.valor_unitario
+
+        FROM tblNFe n
+
+        CROSS JOIN tblMinhaEmpresa e
+
+        INNER JOIN tblNFeItem i
+            ON i.id_nfe = n.id
+
+        WHERE n.cnpj_emitente = e.cnpj
+
+          AND i.cfop IN (
+              '5101',
+              '5102',
+              '5401',
+              '5405',
+              '6101',
+              '6102',
+              '6107',
+              '6108',
+              '6401',
+              '6404'
+          )
+        """);
+
+
+        //==================================================
+        // FILTRO DE DATA
+        //==================================================
+
+        if (dataInicio != null && dataFim != null) {
+
+            sql.append("""
+            
+            AND date(n.data_emissao)
+                BETWEEN date(?) AND date(?)
+            """);
+        }
+
+
+        //==================================================
+        // ORDENAÇÃO
+        //==================================================
+
+        sql.append("""
+        
+        ORDER BY
+            date(n.data_emissao),
+            CAST(n.numero AS INTEGER),
+            i.numero_item
+        """);
+
+
+        List<ResumoVendaDTO> lista =
+                new ArrayList<>();
+
+
+        //==================================================
+        // EXECUÇÃO
+        //==================================================
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(
+                                sql.toString()
+                        )
+        ) {
+
+            //==================================================
+            // PARÂMETROS
+            //==================================================
+
+            if (dataInicio != null && dataFim != null) {
+
+                ps.setString(
+                        1,
+                        dataInicio.toString()
+                );
+
+                ps.setString(
+                        2,
+                        dataFim.toString()
+                );
+            }
+
+
+            //==================================================
+            // RESULTADO
+            //==================================================
+
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
+
+                while (rs.next()) {
+
+                    ResumoVendaDTO dto =
+                            new ResumoVendaDTO();
+
+
+                    dto.setNf(
+                            rs.getString("nf")
+                    );
+
+
+                    dto.setDataEmissao(
+                            rs.getString("data_emissao")
+                    );
+
+
+                    dto.setDestinatario(
+                            rs.getString("destinatario")
+                    );
+
+
+                    dto.setCnpjDestinatario(
+                            rs.getString("cnpj_destinatario")
+                    );
+
+
+                    dto.setValorTotalNF(
+                            rs.getBigDecimal(
+                                    "valor_total_nf"
+                            )
+                    );
+
+
+                    dto.setCodigoItem(
+                            rs.getString("codigo_item")
+                    );
+
+
+                    dto.setDescricaoItem(
+                            rs.getString("descricao_item")
+                    );
+
+
+                    dto.setCfop(
+                            rs.getString("cfop")
+                    );
+
+
+                    dto.setQuantidade(
+                            rs.getBigDecimal(
+                                    "quantidade"
+                            )
+                    );
+
+
+                    dto.setValorUnitario(
+                            rs.getBigDecimal(
+                                    "valor_unitario"
+                            )
+                    );
+
+
+                    lista.add(dto);
+                }
+            }
+
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao consultar vendas para exportação.",
+                    e
+            );
+        }
+
 
         return lista;
     }

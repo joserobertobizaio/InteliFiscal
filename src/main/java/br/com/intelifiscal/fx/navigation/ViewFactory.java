@@ -5,12 +5,12 @@ import br.com.intelifiscal.fx.view.estabelecimento.EstabelecimentoView;
 import br.com.intelifiscal.fx.controller.estabelecimento.EstabelecimentoController;
 import br.com.intelifiscal.fx.controller.produto.ProdutoController;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
-
+import br.com.intelifiscal.fx.view.produto.HistoricoProdutoView;
+import br.com.intelifiscal.fx.controller.produto.HistoricoProdutoController;
 import br.com.intelifiscal.fx.view.compra.AnaliseComprasView;
 import br.com.intelifiscal.fx.controller.compra.AnaliseComprasController;
 import br.com.intelifiscal.fx.view.relatorio.TopClientesView;
 import br.com.intelifiscal.fx.controller.relatorio.TopClientesController;
-
 import br.com.intelifiscal.fx.view.relatorio.TopProdutosView;
 import br.com.intelifiscal.fx.controller.relatorio.TopProdutosController;
 import br.com.intelifiscal.fx.controller.venda.AnaliseVendasController;
@@ -19,7 +19,8 @@ import br.com.intelifiscal.fx.controller.relatorio.ResumoVendasController;
 import br.com.intelifiscal.fx.controller.dashboard.DashboardController;
 import br.com.intelifiscal.fx.view.relatorio.RelatoriosView;
 import br.com.intelifiscal.fx.controller.relatorio.RelatoriosController;
-
+import br.com.intelifiscal.fx.view.relatorio.DetalhamentoCompraView;
+import br.com.intelifiscal.fx.controller.relatorio.DetalhamentoCompraController;
 import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
 import br.com.intelifiscal.fx.controller.produto.CompararCompraVendaController;
 
@@ -96,6 +97,16 @@ public final class ViewFactory {
                 yield view;
             }
 
+            case HISTORICO_PRODUTO -> {
+
+                HistoricoProdutoView view =
+                        new HistoricoProdutoView();
+
+                new HistoricoProdutoController(view);
+
+                yield view;
+            }
+
             case COMPRAS -> {
 
                 CompraView view =
@@ -143,6 +154,16 @@ public final class ViewFactory {
                         new ResumoComprasView();
 
                 new ResumoComprasController(view);
+
+                yield view;
+            }
+
+            case DETALHAMENTO_COMPRAS -> {
+
+                DetalhamentoCompraView view =
+                        new DetalhamentoCompraView();
+
+                new DetalhamentoCompraController(view);
 
                 yield view;
             }
@@ -196,6 +217,8 @@ public final class ViewFactory {
 
                 yield view;
             }
+
+
 
             default ->
                     throw new IllegalArgumentException(

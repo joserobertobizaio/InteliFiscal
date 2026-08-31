@@ -117,7 +117,6 @@ public class NFeItemRepository {
 
         }
     }
-
     public List<ProdutoHistoricoDTO> listarHistoricoPorCodigoProduto(
             String codigoProduto,
             LocalDate inicio,
@@ -127,26 +126,27 @@ public class NFeItemRepository {
         SELECT
             n.tipo,
             n.numero,
-            n.serie,
             n.data_emissao,
             n.emitente,
+            i.codigo_produto,
             n.destinatario,
+            i.descricao,
             i.unidade,
             i.quantidade,
-            i.valor_unitario,
-            i.valor_total
-
+            i.valor_unitario
+            
         FROM tblNFeItem i
 
         INNER JOIN tblNFe n
             ON n.id = i.id_nfe
 
-        WHERE (i.codigo_produto = ?
-                   OR (
-                         ? = '0056'
-                         AND i.codigo_produto = '102326'
-                       )
-                     )
+        WHERE (
+                i.codigo_produto = ?
+                OR (
+                    ? = '0056'
+                    AND i.codigo_produto = '102326'
+                )
+              )
 
           AND date(n.data_emissao)
               BETWEEN date(?) AND date(?)
@@ -191,10 +191,6 @@ public class NFeItemRepository {
                             rs.getString("numero")
                     );
 
-                    dto.setSerie(
-                            rs.getString("serie")
-                    );
-
                     String data =
                             rs.getString("data_emissao");
 
@@ -222,6 +218,14 @@ public class NFeItemRepository {
 
                     dto.setDestinatario(
                             rs.getString("destinatario")
+                    );
+
+                    // ------------------------------------------------
+                    // DESCRIÇÃO DO PRODUTO
+                    // ------------------------------------------------
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
                     );
 
                     dto.setUnidade(
@@ -346,45 +350,197 @@ public class NFeItemRepository {
             String codigoProduto) {
 
         String sql = """
-            SELECT
-                n.tipo,
-                n.numero,
-                n.serie,
-                n.data_emissao,
-                n.emitente,
-                n.destinatario,
-                i.unidade,
-                i.quantidade,
-                i.valor_unitario,
-                i.valor_total
+        SELECT
+            n.tipo,
+            n.numero,
+            n.data_emissao,
+            n.emitente,
+            n.destinatario,
+            i.descricao,
+            i.unidade,
+            i.quantidade,
+            i.valor_unitario,
+            i.valor_total
 
-            FROM tblNFeItem i
+        FROM tblNFeItem i
 
-            INNER JOIN tblNFe n
-                ON n.id = i.id_nfe
+        INNER JOIN tblNFe n
+            ON n.id = i.id_nfe
 
-            WHERE (
-                          i.codigo_produto = ?
-                          OR (
-                              ? = '0056'
-                              AND i.codigo_produto = '102326'
-                          )
-                        )
+        WHERE (
+                i.codigo_produto = ?
+                OR (
+                    ? = '0056'
+                    AND i.codigo_produto = '102326'
+                )
+              )
 
-            ORDER BY n.data_emissao DESC
-            """;
+        ORDER BY n.data_emissao DESC
+        """;
 
-        List<ProdutoHistoricoDTO> lista = new ArrayList<>();
+        List<ProdutoHistoricoDTO> lista =
+                new ArrayList<>();
 
         try (
-                Connection conn = DatabaseConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql)
         ) {
 
             ps.setString(1, codigoProduto);
+
             ps.setString(2, codigoProduto);
 
-            try (ResultSet rs = ps.executeQuery()) {
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
+
+                while (rs.next()) {
+
+                    ProdutoHistoricoDTO dto =
+                            new ProdutoHistoricoDTO();
+
+                    dto.setTipo(
+                            rs.getString("tipo")
+                    );
+
+                    dto.setNumeroNfe(
+                            rs.getString("numero")
+                    );
+
+                    String data =
+                            rs.getString("data_emissao");
+
+                    if (data != null
+                            && !data.isBlank()) {
+
+                        if (data.length() == 10) {
+
+                            dto.setDataEmissao(
+                                    LocalDate.parse(data)
+                                            .atStartOfDay()
+                            );
+
+                        } else {
+
+                            dto.setDataEmissao(
+                                    LocalDateTime.parse(data)
+                            );
+                        }
+                    }
+
+                    dto.setEmitente(
+                            rs.getString("emitente")
+                    );
+
+                    dto.setDestinatario(
+                            rs.getString("destinatario")
+                    );
+
+                    // ------------------------------------------------
+                    // DESCRIÇÃO DO PRODUTO
+                    // ------------------------------------------------
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getDouble("valor_unitario")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getDouble("valor_total")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao consultar histórico do produto.",
+                    e
+            );
+        }
+
+        return lista;
+    }
+
+    // ============================================================
+    // PESQUISA POR CÓDIGO OU DESCRIÇÃO — COM PERÍODO
+    // ============================================================
+
+    public List<ProdutoHistoricoDTO> pesquisarHistorico(
+            String pesquisa,
+            LocalDate inicio,
+            LocalDate fim) {
+
+        String sql = """
+        SELECT
+            n.tipo,
+            n.numero,
+            n.serie,
+            n.data_emissao,
+            n.emitente,
+            n.destinatario,
+            i.codigo_produto,
+            i.descricao,
+            i.unidade,
+            i.quantidade,
+            i.valor_unitario
+
+        FROM tblNFeItem i
+
+        INNER JOIN tblNFe n
+            ON n.id = i.id_nfe
+
+        WHERE (
+                i.codigo_produto LIKE ?
+                OR i.descricao LIKE ?
+              )
+
+          AND date(n.data_emissao)
+              BETWEEN date(?) AND date(?)
+
+        ORDER BY n.data_emissao DESC
+        """;
+
+        List<ProdutoHistoricoDTO> lista =
+                new ArrayList<>();
+
+        String filtro =
+                "%" + pesquisa.trim() + "%";
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, filtro);
+            ps.setString(2, filtro);
+            ps.setString(3, inicio.toString());
+            ps.setString(4, fim.toString());
+
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
 
                 while (rs.next()) {
 
@@ -406,12 +562,14 @@ public class NFeItemRepository {
                     String data =
                             rs.getString("data_emissao");
 
-                    if (data != null && !data.isBlank()) {
+                    if (data != null
+                            && !data.isBlank()) {
 
                         if (data.length() == 10) {
 
                             dto.setDataEmissao(
-                                    LocalDate.parse(data).atStartOfDay()
+                                    LocalDate.parse(data)
+                                            .atStartOfDay()
                             );
 
                         } else {
@@ -421,6 +579,152 @@ public class NFeItemRepository {
                             );
                         }
                     }
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setEmitente(
+                            rs.getString("emitente")
+                    );
+
+                    dto.setDestinatario(
+                            rs.getString("destinatario")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getDouble("valor_unitario")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao pesquisar histórico do produto.",
+                    e
+            );
+        }
+
+        return lista;
+    }
+
+    // ============================================================
+// PESQUISA POR CÓDIGO OU DESCRIÇÃO — SEM PERÍODO
+// ============================================================
+
+    public List<ProdutoHistoricoDTO> pesquisarHistorico(
+            String pesquisa) {
+
+        String sql = """
+        SELECT
+            n.tipo,
+            n.numero,
+            n.serie,
+            n.data_emissao,
+            n.emitente,
+            n.destinatario,
+            i.codigo_produto,
+            i.descricao,
+            i.unidade,
+            i.quantidade,
+            i.valor_unitario,
+            i.valor_total
+
+        FROM tblNFeItem i
+
+        INNER JOIN tblNFe n
+            ON n.id = i.id_nfe
+
+        WHERE (
+                i.codigo_produto LIKE ?
+                OR i.descricao LIKE ?
+              )
+
+        ORDER BY n.data_emissao DESC
+        """;
+
+        List<ProdutoHistoricoDTO> lista =
+                new ArrayList<>();
+
+        String filtro =
+                "%" + pesquisa.trim() + "%";
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, filtro);
+            ps.setString(2, filtro);
+
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
+
+                while (rs.next()) {
+
+                    ProdutoHistoricoDTO dto =
+                            new ProdutoHistoricoDTO();
+
+                    dto.setTipo(
+                            rs.getString("tipo")
+                    );
+
+                    dto.setNumeroNfe(
+                            rs.getString("numero")
+                    );
+
+                    dto.setSerie(
+                            rs.getString("serie")
+                    );
+
+                    String data =
+                            rs.getString("data_emissao");
+
+                    if (data != null
+                            && !data.isBlank()) {
+
+                        if (data.length() == 10) {
+
+                            dto.setDataEmissao(
+                                    LocalDate.parse(data)
+                                            .atStartOfDay()
+                            );
+
+                        } else {
+
+                            dto.setDataEmissao(
+                                    LocalDateTime.parse(data)
+                            );
+                        }
+                    }
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
 
                     dto.setEmitente(
                             rs.getString("emitente")
@@ -453,7 +757,304 @@ public class NFeItemRepository {
         } catch (SQLException e) {
 
             throw new RuntimeException(
-                    "Erro ao consultar histórico do produto.",
+                    "Erro ao pesquisar histórico do produto.",
+                    e
+            );
+        }
+
+        return lista;
+    }
+
+    // ============================================================
+// HISTÓRICO POR PESQUISA
+// Pesquisa por código ou descrição
+// ============================================================
+
+    public List<ProdutoHistoricoDTO> listarHistoricoPorPesquisa(
+            String pesquisa) {
+
+        String sql = """
+        SELECT
+            n.tipo,
+            n.numero,
+            n.serie,
+            n.data_emissao,
+            n.emitente,
+            n.destinatario,
+            i.codigo_produto,
+            i.descricao,
+            i.unidade,
+            i.quantidade,
+            i.valor_unitario,
+            i.valor_total
+
+        FROM tblNFeItem i
+
+        INNER JOIN tblNFe n
+            ON n.id = i.id_nfe
+
+        WHERE (
+                i.codigo_produto LIKE ?
+                OR i.descricao LIKE ?
+              )
+
+        ORDER BY n.data_emissao DESC
+        """;
+
+        List<ProdutoHistoricoDTO> lista =
+                new ArrayList<>();
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql)
+        ) {
+
+            String filtro =
+                    "%" + pesquisa + "%";
+
+            ps.setString(1, filtro);
+            ps.setString(2, filtro);
+
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
+
+                while (rs.next()) {
+
+                    ProdutoHistoricoDTO dto =
+                            new ProdutoHistoricoDTO();
+
+                    dto.setTipo(
+                            rs.getString("tipo")
+                    );
+
+                    dto.setNumeroNfe(
+                            rs.getString("numero")
+                    );
+
+                    dto.setSerie(
+                            rs.getString("serie")
+                    );
+
+                    String data =
+                            rs.getString("data_emissao");
+
+                    if (data != null
+                            && !data.isBlank()) {
+
+                        if (data.length() == 10) {
+
+                            dto.setDataEmissao(
+                                    LocalDate.parse(data)
+                                            .atStartOfDay()
+                            );
+
+                        } else {
+
+                            dto.setDataEmissao(
+                                    LocalDateTime.parse(data)
+                            );
+                        }
+                    }
+
+                    dto.setEmitente(
+                            rs.getString("emitente")
+                    );
+
+                    dto.setDestinatario(
+                            rs.getString("destinatario")
+                    );
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getDouble("valor_unitario")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getDouble("valor_total")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao consultar histórico por pesquisa.",
+                    e
+            );
+        }
+
+        return lista;
+    }
+
+
+// ============================================================
+// HISTÓRICO POR PESQUISA + PERÍODO
+// Pesquisa por código ou descrição
+// ============================================================
+
+    public List<ProdutoHistoricoDTO> listarHistoricoPorPesquisa(
+            String pesquisa,
+            LocalDate inicio,
+            LocalDate fim) {
+
+        String sql = """
+        SELECT
+            n.tipo,
+            n.numero,
+            n.serie,
+            n.data_emissao,
+            n.emitente,
+            n.destinatario,
+            i.codigo_produto,
+            i.descricao,
+            i.unidade,
+            i.quantidade,
+            i.valor_unitario,
+            i.valor_total
+
+        FROM tblNFeItem i
+
+        INNER JOIN tblNFe n
+            ON n.id = i.id_nfe
+
+        WHERE (
+                i.codigo_produto LIKE ?
+                OR i.descricao LIKE ?
+              )
+
+          AND date(n.data_emissao)
+              BETWEEN date(?) AND date(?)
+
+        ORDER BY n.data_emissao DESC
+        """;
+
+        List<ProdutoHistoricoDTO> lista =
+                new ArrayList<>();
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql)
+        ) {
+
+            String filtro =
+                    "%" + pesquisa + "%";
+
+            ps.setString(1, filtro);
+
+            ps.setString(2, filtro);
+
+            ps.setString(3, inicio.toString());
+
+            ps.setString(4, fim.toString());
+
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
+
+                while (rs.next()) {
+
+                    ProdutoHistoricoDTO dto =
+                            new ProdutoHistoricoDTO();
+
+                    dto.setTipo(
+                            rs.getString("tipo")
+                    );
+
+                    dto.setNumeroNfe(
+                            rs.getString("numero")
+                    );
+
+                    dto.setSerie(
+                            rs.getString("serie")
+                    );
+
+                    String data =
+                            rs.getString("data_emissao");
+
+                    if (data != null
+                            && !data.isBlank()) {
+
+                        if (data.length() == 10) {
+
+                            dto.setDataEmissao(
+                                    LocalDate.parse(data)
+                                            .atStartOfDay()
+                            );
+
+                        } else {
+
+                            dto.setDataEmissao(
+                                    LocalDateTime.parse(data)
+                            );
+                        }
+                    }
+
+                    dto.setEmitente(
+                            rs.getString("emitente")
+                    );
+
+                    dto.setDestinatario(
+                            rs.getString("destinatario")
+                    );
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getDouble("valor_unitario")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getDouble("valor_total")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao consultar histórico por pesquisa e período.",
                     e
             );
         }

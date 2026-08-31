@@ -2,7 +2,9 @@ package br.com.intelifiscal.service.relatorio;
 
 import br.com.intelifiscal.dto.relatorio.ClienteVendaDTO;
 import br.com.intelifiscal.dto.relatorio.ResumoVendasDTO;
+import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
 import br.com.intelifiscal.repository.relatorio.ResumoVendasRepository;
+import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,4 +65,20 @@ public class ResumoVendasService {
                 dataFim
         );
     }
+
+    //==================================================
+    // VENDAS PARA EXPORTAÇÃO
+    //==================================================
+
+    public List<ResumoVendaDTO> consultarVendasParaExportacao(
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
+
+        return repository.consultarVendasParaExportacao(
+                dataInicio,
+                dataFim
+        );
+    }
+
 }

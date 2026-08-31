@@ -2,47 +2,74 @@ package br.com.intelifiscal.fx.view.relatorio;
 
 import br.com.intelifiscal.dto.relatorio.FornecedorCompraDTO;
 import br.com.intelifiscal.dto.relatorio.ResumoComprasDTO;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
-
-import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.TableCell;
+
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
+
 public class ResumoComprasView extends BorderPane {
 
-    private final Label lblNotas = new Label("0");
-    private final Label lblItens = new Label("0");
-    private final Label lblQuantidade = new Label("0");
-    private final Label lblValorTotal = new Label("R$ 0,00");
-    private final Label lblTicketMedio = new Label("R$ 0,00");
+    //==================================================
+    // COMPONENTES DO RESUMO
+    //==================================================
 
+    private final Label lblNotas =
+            new Label("0");
+
+    private final Label lblItens =
+            new Label("0");
+
+    private final Label lblQuantidade =
+            new Label("0");
+
+    private final Label lblValorTotal =
+            new Label("R$ 0,00");
+
+    private final Label lblTicketMedio =
+            new Label("R$ 0,00");
+
+
+    //==================================================
+    // TABELA DE COMPRAS POR FORNECEDOR
+    //==================================================
 
     private final TableView<FornecedorCompraDTO> tabelaFornecedores =
             new TableView<>();
 
-    private final Button btFechar =
-            new Button("✖ Fechar");
+
+    //==================================================
+    // FILTRO DE PERÍODO
+    //==================================================
 
     private final ComboBox<String> cbPeriodo =
             new ComboBox<>();
+
+    private final Label lblDe =
+            new Label("De:");
+
+    private final Label lblAte =
+            new Label("Até:");
 
     private final DatePicker dtInicio =
             new DatePicker();
@@ -50,12 +77,22 @@ public class ResumoComprasView extends BorderPane {
     private final DatePicker dtFim =
             new DatePicker();
 
-    private final Label lblDe = new Label("De:");
-
-    private final Label lblAte = new Label("Até:");
-
     private final Button btConsultar =
             new Button("🔎 Consultar");
+
+    //==================================================
+    // BOTÕES DO RODAPÉ
+    //==================================================
+
+    private final Button btExcel =
+            new Button("📊 Exportar Excel");
+
+    private final Button btFechar =
+            new Button("✖ Fechar");
+
+    //==================================================
+    // FORMATAÇÃO
+    //==================================================
 
     private final NumberFormat moeda =
             NumberFormat.getCurrencyInstance(
@@ -67,11 +104,18 @@ public class ResumoComprasView extends BorderPane {
                     new Locale("pt", "BR")
             );
 
+
+    //==================================================
+    // CONSTRUTOR
+    //==================================================
+
     public ResumoComprasView() {
 
         configurarView();
 
         criarCabecalho();
+
+        criarFiltroPeriodo();
 
         criarResumo();
 
@@ -123,17 +167,39 @@ public class ResumoComprasView extends BorderPane {
                         "-fx-text-fill: #333333;"
         );
 
-        //==================================================
-        // FILTRO DE PERÍODO
-        //==================================================
+        cabecalho.getChildren().addAll(
+                titulo,
+                subtitulo
+        );
+
+        setTop(cabecalho);
+    }
+
+
+    //==================================================
+    // FILTRO DE PERÍODO
+    //==================================================
+
+    private void criarFiltroPeriodo() {
 
         HBox filtro =
-                new HBox(10);
+                new HBox(8);
 
-        filtro.setAlignment(Pos.CENTER_LEFT);
+        filtro.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        filtro.setPadding(
+                new Insets(10, 0, 0, 0)
+        );
 
         Label lblPeriodo =
                 new Label("Período:");
+
+
+        //==================================================
+        // COMBOBOX
+        //==================================================
 
         cbPeriodo.getItems().addAll(
                 "Últimos 30 dias",
@@ -145,13 +211,55 @@ public class ResumoComprasView extends BorderPane {
                 "Período personalizado"
         );
 
-        cbPeriodo.setValue("Últimos 12 meses");
+        cbPeriodo.setValue(
+                "Últimos 12 meses"
+        );
 
+        cbPeriodo.setPrefWidth(175);
+
+
+        //==================================================
+        // DATAS
+        //==================================================
 
         dtInicio.setPrefWidth(120);
         dtFim.setPrefWidth(120);
 
+        // Inicialmente os campos ficam bloqueados
+        dtInicio.setDisable(true);
+        dtFim.setDisable(true);
+
+
+        //==================================================
+        // DATA PADRÃO
+        //==================================================
+
+        LocalDate hoje =
+                LocalDate.now();
+
+        dtInicio.setValue(
+                hoje.minusMonths(12)
+        );
+
+        dtFim.setValue(
+                hoje
+        );
+
+
+        //==================================================
+        // BOTÃO CONSULTAR
+        //==================================================
+
         btConsultar.setPrefWidth(110);
+
+        // Só aparece no período personalizado
+        btConsultar.setVisible(false);
+        btConsultar.setManaged(false);
+
+
+        //==================================================
+        // MONTAGEM
+        //==================================================
 
         filtro.getChildren().addAll(
                 lblPeriodo,
@@ -164,15 +272,128 @@ public class ResumoComprasView extends BorderPane {
         );
 
 
-        cabecalho.getChildren().addAll(
-                titulo,
-                subtitulo,
+        //==================================================
+        // COLOCA O FILTRO ABAIXO DO CABEÇALHO
+        //==================================================
+
+        VBox topo =
+                new VBox(5);
+
+        topo.getChildren().addAll(
+                getTop(),
                 filtro
         );
 
-        setTop(cabecalho);
+        setTop(topo);
 
-        setTop(cabecalho);
+        atualizarControlesPeriodo();
+    }
+
+
+    //==================================================
+    // ATUALIZAR DATAS CONFORME O PERÍODO
+    //==================================================
+
+    private void atualizarDatasPeriodo() {
+
+        LocalDate hoje =
+                LocalDate.now();
+
+        String periodo =
+                cbPeriodo.getValue();
+
+
+        if (periodo == null) {
+            return;
+        }
+
+
+        switch (periodo) {
+
+            case "Últimos 30 dias":
+
+                dtInicio.setValue(
+                        hoje.minusDays(30)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 3 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(3)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 6 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(6)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 12 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(12)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Últimos 24 meses":
+
+                dtInicio.setValue(
+                        hoje.minusMonths(24)
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Desde o início":
+
+                dtInicio.setValue(
+                        null
+                );
+
+                dtFim.setValue(
+                        hoje
+                );
+
+                break;
+
+
+            case "Período personalizado":
+
+                // Mantém as datas escolhidas pelo usuário.
+
+                break;
+        }
     }
 
 
@@ -182,60 +403,240 @@ public class ResumoComprasView extends BorderPane {
 
     private void criarResumo() {
 
-        GridPane grid =
-                new GridPane();
+        HBox grid =
+                new HBox(15);
 
-        grid.setHgap(20);
-        grid.setVgap(15);
+        grid.setAlignment(
+                Pos.CENTER_LEFT
+        );
 
         grid.setPadding(
                 new Insets(25, 0, 20, 0)
         );
 
-        grid.add(
+
+        grid.getChildren().addAll(
+
                 criarCard(
                         "🧾 Notas fiscais",
                         lblNotas
                 ),
-                0, 0
-        );
 
-        grid.add(
                 criarCard(
                         "📦 Itens",
                         lblItens
                 ),
-                1, 0
-        );
 
-        grid.add(
                 criarCard(
                         "🔢 Quantidade",
                         lblQuantidade
                 ),
-                2, 0
-        );
 
-        grid.add(
                 criarCard(
                         "💰 Valor total",
                         lblValorTotal
                 ),
-                0, 1
-        );
 
-        grid.add(
                 criarCard(
                         "🎯 Ticket médio",
                         lblTicketMedio
-                ),
-                1, 1
+                )
         );
 
-        setCenter(
-                new VBox(grid, criarAreaTabela())
+
+        VBox areaCentral =
+                new VBox(10);
+
+        areaCentral.getChildren().addAll(
+                grid,
+                criarTabelaFornecedores()
         );
 
+        setCenter(areaCentral);
+    }
+
+
+    //==================================================
+    // TABELA DE COMPRAS POR FORNECEDOR
+    //==================================================
+
+    private TableView<FornecedorCompraDTO>
+    criarTabelaFornecedores() {
+
+        //==================================================
+        // FORNECEDOR
+        //==================================================
+
+        TableColumn<FornecedorCompraDTO, String>
+                colunaFornecedor =
+                new TableColumn<>("Fornecedor");
+
+        colunaFornecedor.setCellValueFactory(
+                data ->
+                        new SimpleStringProperty(
+                                data.getValue().getFornecedor()
+                        )
+        );
+
+        colunaFornecedor.setPrefWidth(300);
+
+
+        //==================================================
+        // NOTAS
+        //==================================================
+
+        TableColumn<FornecedorCompraDTO, Integer>
+                colunaNotas =
+                new TableColumn<>("Notas");
+
+        colunaNotas.setCellValueFactory(
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue().getNotas()
+                        )
+        );
+
+        colunaNotas.setPrefWidth(90);
+
+
+        //==================================================
+        //  DATA DA ÚLTIMA COMPRA
+        //==================================================
+        TableColumn<FornecedorCompraDTO, String>
+                colunaDataUltimaCompra =
+                new TableColumn<>("Data da última compra");
+
+        colunaDataUltimaCompra.setCellValueFactory(
+                data ->
+                        new SimpleStringProperty(
+                                formatarData(
+                                        data.getValue()
+                                                .getDataUltimaCompra()
+                                )
+                        )
+        );
+
+        colunaDataUltimaCompra.setPrefWidth(170);
+
+
+
+        //==================================================
+        // QUANTIDADE
+        //==================================================
+
+        TableColumn<FornecedorCompraDTO, Double>
+                colunaQuantidade =
+                new TableColumn<>("Quantidade");
+
+        colunaQuantidade.setCellValueFactory(
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue().getQuantidade()
+                        )
+        );
+
+        colunaQuantidade.setCellFactory(
+                coluna -> new TableCell<>() {
+
+                    @Override
+                    protected void updateItem(
+                            Double quantidade,
+                            boolean empty
+                    ) {
+
+                        super.updateItem(
+                                quantidade,
+                                empty
+                        );
+
+                        if (empty || quantidade == null) {
+
+                            setText(null);
+
+                        } else {
+
+                            setText(
+                                    formatarNumero(
+                                            quantidade
+                                    )
+                            );
+                        }
+                    }
+                }
+        );
+
+        colunaQuantidade.setPrefWidth(130);
+
+
+        //==================================================
+        // VALOR TOTAL
+        //==================================================
+
+        TableColumn<FornecedorCompraDTO, BigDecimal>
+                colunaValorTotal =
+                new TableColumn<>("Valor Total");
+
+        colunaValorTotal.setCellValueFactory(
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue().getValorTotal()
+                        )
+        );
+
+        colunaValorTotal.setCellFactory(
+                coluna -> new TableCell<>() {
+
+                    @Override
+                    protected void updateItem(
+                            BigDecimal valor,
+                            boolean empty
+                    ) {
+
+                        super.updateItem(
+                                valor,
+                                empty
+                        );
+
+                        if (empty || valor == null) {
+
+                            setText(null);
+
+                        } else {
+
+                            setText(
+                                    formatarValorBrasil(
+                                            valor
+                                    )
+                            );
+                        }
+                    }
+                }
+        );
+
+        colunaValorTotal.setPrefWidth(150);
+
+
+        //==================================================
+        // ADICIONA AS COLUNAS
+        //==================================================
+
+        tabelaFornecedores.getColumns().setAll(
+                colunaFornecedor,
+                colunaNotas,
+                colunaDataUltimaCompra,
+                colunaQuantidade,
+                colunaValorTotal
+        );
+
+
+        tabelaFornecedores.setPrefHeight(250);
+
+        tabelaFornecedores.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY
+        );
+
+
+        return tabelaFornecedores;
     }
 
 
@@ -256,11 +657,13 @@ public class ResumoComprasView extends BorderPane {
                         "-fx-text-fill: #444444;"
         );
 
+
         valor.setStyle(
                 "-fx-font-size: 19px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: #123b70;"
         );
+
 
         VBox card =
                 new VBox(8);
@@ -270,6 +673,7 @@ public class ResumoComprasView extends BorderPane {
         );
 
         card.setPrefWidth(210);
+
         card.setPrefHeight(85);
 
         card.setAlignment(
@@ -283,161 +687,14 @@ public class ResumoComprasView extends BorderPane {
                         "-fx-border-radius: 10;"
         );
 
+
         card.getChildren().addAll(
                 lblTitulo,
                 valor
         );
 
+
         return card;
-    }
-
-
-    //==================================================
-    // ÁREA DA TABELA
-    //==================================================
-
-    private VBox criarAreaTabela() {
-
-        VBox area =
-                new VBox(10);
-
-        Label titulo =
-                new Label("Compras por fornecedor");
-
-        titulo.setStyle(
-                "-fx-font-size: 17px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #222222;"
-        );
-
-        Label subtitulo =
-                new Label(
-                        "Fornecedores ordenados pelo maior valor comprado."
-                );
-
-        subtitulo.setStyle(
-                "-fx-font-size: 12px;" +
-                        "-fx-text-fill: #555555;"
-        );
-
-        criarColunas();
-
-        tabelaFornecedores.setPrefHeight(300);
-
-        tabelaFornecedores.setColumnResizePolicy(
-                TableView.CONSTRAINED_RESIZE_POLICY
-        );
-
-        area.getChildren().addAll(
-                titulo,
-                subtitulo,
-                tabelaFornecedores
-        );
-
-        return area;
-    }
-
-
-    //==================================================
-    // COLUNAS
-    //==================================================
-
-    private void criarColunas() {
-
-        TableColumn<FornecedorCompraDTO, String>
-                colFornecedor =
-                new TableColumn<>("Fornecedor");
-
-        colFornecedor.setCellValueFactory(
-                data ->
-                        new SimpleStringProperty(
-                                data.getValue().getFornecedor()
-                        )
-        );
-
-
-        TableColumn<FornecedorCompraDTO, String>
-                colNotas =
-                new TableColumn<>("Notas");
-
-        colNotas.setCellValueFactory(
-                data ->
-                        new SimpleStringProperty(
-                                String.valueOf(
-                                        data.getValue().getNotas()
-                                )
-                        )
-        );
-
-
-        TableColumn<FornecedorCompraDTO, String>
-                colItens =
-                new TableColumn<>("Itens");
-
-        colItens.setCellValueFactory(
-                data ->
-                        new SimpleStringProperty(
-                                String.valueOf(
-                                        data.getValue().getItens()
-                                )
-                        )
-        );
-
-
-        TableColumn<FornecedorCompraDTO, String>
-                colQuantidade =
-                new TableColumn<>("Quantidade");
-
-        colQuantidade.setCellValueFactory(
-                data ->
-                        new SimpleStringProperty(
-                                formatarNumero(
-                                        data.getValue().getQuantidade()
-                                )
-                        )
-        );
-
-
-        TableColumn<FornecedorCompraDTO, BigDecimal>
-                colValor =
-                new TableColumn<>("Valor total");
-
-        colValor.setCellValueFactory(
-                data ->
-                        new SimpleObjectProperty<>(
-                                data.getValue().getValorTotal()
-                        )
-        );
-
-        colValor.setCellFactory(
-                coluna -> new TableCell<>() {
-
-                    @Override
-                    protected void updateItem(
-                            BigDecimal valor,
-                            boolean empty
-                    ) {
-                        super.updateItem(valor, empty);
-
-                        if (empty || valor == null) {
-                            setText(null);
-                        } else {
-                            setText(
-                                    moeda.format(valor)
-                            );
-                        }
-                    }
-                }
-        );
-
-
-        tabelaFornecedores.getColumns().addAll(
-                colFornecedor,
-                colNotas,
-                colItens,
-                colQuantidade,
-                colValor
-        );
     }
 
 
@@ -458,9 +715,14 @@ public class ResumoComprasView extends BorderPane {
                 new Insets(15, 0, 0, 0)
         );
 
+        btExcel.setPrefWidth(140);
+
         btFechar.setPrefWidth(100);
 
-        rodape.getChildren().add(
+        rodape.setSpacing(10);
+
+        rodape.getChildren().addAll(
+                btExcel,
                 btFechar
         );
 
@@ -482,11 +744,13 @@ public class ResumoComprasView extends BorderPane {
                 )
         );
 
+
         lblItens.setText(
                 String.valueOf(
                         dto.getItens()
                 )
         );
+
 
         lblQuantidade.setText(
                 formatarNumero(
@@ -494,11 +758,13 @@ public class ResumoComprasView extends BorderPane {
                 )
         );
 
+
         lblValorTotal.setText(
                 moeda.format(
                         dto.getValorTotal()
                 )
         );
+
 
         lblTicketMedio.setText(
                 moeda.format(
@@ -509,7 +775,7 @@ public class ResumoComprasView extends BorderPane {
 
 
     //==================================================
-    // ATUALIZAR FORNECEDORES
+    // ATUALIZAR TABELA DE FORNECEDORES
     //==================================================
 
     public void atualizarFornecedores(
@@ -521,13 +787,15 @@ public class ResumoComprasView extends BorderPane {
                 .setAll(lista);
     }
 
+
     //==================================================
-// CONTROLE DOS FILTROS CONFORME O PERÍODO
-//==================================================
+    // CONTROLE DOS FILTROS CONFORME O PERÍODO
+    //==================================================
 
     public void atualizarControlesPeriodo() {
 
-        String periodo = cbPeriodo.getValue();
+        String periodo =
+                cbPeriodo.getValue();
 
         if (periodo == null) {
             return;
@@ -539,35 +807,33 @@ public class ResumoComprasView extends BorderPane {
         boolean desdeInicio =
                 "Desde o início".equals(periodo);
 
+
         //==================================================
         // PERÍODO PERSONALIZADO
         //==================================================
 
         if (personalizado) {
 
-            // Mostra datas
             lblDe.setVisible(true);
             lblDe.setManaged(true);
-
-            dtInicio.setVisible(true);
-            dtInicio.setManaged(true);
 
             lblAte.setVisible(true);
             lblAte.setManaged(true);
 
+            dtInicio.setVisible(true);
+            dtInicio.setManaged(true);
+            dtInicio.setDisable(false);
+
             dtFim.setVisible(true);
             dtFim.setManaged(true);
-
-            // Libera os calendários
-            dtInicio.setDisable(false);
             dtFim.setDisable(false);
 
-            // Mostra botão Consultar
             btConsultar.setVisible(true);
             btConsultar.setManaged(true);
 
             return;
         }
+
 
         //==================================================
         // DESDE O INÍCIO
@@ -575,61 +841,53 @@ public class ResumoComprasView extends BorderPane {
 
         if (desdeInicio) {
 
-            // Esconde os campos de data
             lblDe.setVisible(false);
             lblDe.setManaged(false);
-
-            dtInicio.setVisible(false);
-            dtInicio.setManaged(false);
 
             lblAte.setVisible(false);
             lblAte.setManaged(false);
 
+            dtInicio.setVisible(false);
+            dtInicio.setManaged(false);
+            dtInicio.setDisable(true);
+
             dtFim.setVisible(false);
             dtFim.setManaged(false);
+            dtFim.setDisable(true);
 
-            // Esconde botão Consultar
             btConsultar.setVisible(false);
             btConsultar.setManaged(false);
 
             return;
         }
 
+
         //==================================================
         // PERÍODOS AUTOMÁTICOS
         //==================================================
 
-        // Mostra datas
         lblDe.setVisible(true);
         lblDe.setManaged(true);
-
-        dtInicio.setVisible(true);
-        dtInicio.setManaged(true);
 
         lblAte.setVisible(true);
         lblAte.setManaged(true);
 
+        dtInicio.setVisible(true);
+        dtInicio.setManaged(true);
+        dtInicio.setDisable(true);
+
         dtFim.setVisible(true);
         dtFim.setManaged(true);
-
-        // Bloqueia os calendários
-        dtInicio.setDisable(true);
         dtFim.setDisable(true);
 
-        // Esconde botão Consultar
         btConsultar.setVisible(false);
         btConsultar.setManaged(false);
     }
 
 
     //==================================================
-    // GETTERS
+    // GETTERS - FILTRO
     //==================================================
-
-    public Button getBtFechar() {
-
-        return btFechar;
-    }
 
     public ComboBox<String> getCbPeriodo() {
 
@@ -655,6 +913,20 @@ public class ResumoComprasView extends BorderPane {
     }
 
 
+    //==================================================
+    // GETTER - FECHAR
+    //==================================================
+
+    public Button getBtFechar() {
+
+        return btFechar;
+    }
+
+
+    //==================================================
+    // GETTER - TABELA
+    //==================================================
+
     public TableView<FornecedorCompraDTO>
     getTabelaFornecedores() {
 
@@ -672,4 +944,59 @@ public class ResumoComprasView extends BorderPane {
 
         return numero.format(valor);
     }
+
+
+    private String formatarValorBrasil(
+            BigDecimal valor
+    ) {
+
+        NumberFormat formato =
+                NumberFormat.getNumberInstance(
+                        new Locale("pt", "BR")
+                );
+
+        formato.setMinimumFractionDigits(2);
+
+        formato.setMaximumFractionDigits(2);
+
+        return formato.format(valor);
+    }
+
+    //==================================================
+    // FORMATAÇÃO DA DATA
+    //==================================================
+
+    private String formatarData(
+            String data
+    ) {
+
+        if (data == null || data.isBlank()) {
+            return "";
+        }
+
+        try {
+
+            LocalDate dataLocal =
+                    LocalDate.parse(data);
+
+            return dataLocal.format(
+                    java.time.format.DateTimeFormatter
+                            .ofPattern("dd/MM/yyyy")
+            );
+
+        } catch (Exception e) {
+
+            return data;
+        }
+    }
+
+    //==================================================
+    // GETTER - EXPORTAR EXCEL
+    //==================================================
+
+    public Button getBtExcel() {
+
+        return btExcel;
+    }
+
 }

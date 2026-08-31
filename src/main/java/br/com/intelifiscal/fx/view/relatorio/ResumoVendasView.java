@@ -83,6 +83,9 @@ public class ResumoVendasView extends BorderPane {
     private final Button btConsultar =
             new Button("🔎 Consultar");
 
+    private final Button btExcel =
+            new Button("📊 Exportar Excel");
+
 
     //==================================================
     // BOTÃO FECHAR
@@ -705,7 +708,7 @@ public class ResumoVendasView extends BorderPane {
     private void criarRodape() {
 
         HBox rodape =
-                new HBox();
+                new HBox(10);
 
         rodape.setAlignment(
                 Pos.CENTER_RIGHT
@@ -715,11 +718,30 @@ public class ResumoVendasView extends BorderPane {
                 new Insets(15, 0, 0, 0)
         );
 
+
+        //==================================================
+        // BOTÃO EXCEL
+        //==================================================
+
+        btExcel.setPrefWidth(150);
+
+
+        //==================================================
+        // BOTÃO FECHAR
+        //==================================================
+
         btFechar.setPrefWidth(100);
 
-        rodape.getChildren().add(
+
+        //==================================================
+        // ADICIONAR BOTÕES
+        //==================================================
+
+        rodape.getChildren().addAll(
+                btExcel,
                 btFechar
         );
+
 
         setBottom(rodape);
     }
@@ -902,6 +924,15 @@ public class ResumoVendasView extends BorderPane {
 
         btConsultar.setVisible(false);
         btConsultar.setManaged(false);
+    }
+
+    //==================================================
+    // GETTER - EXCEL
+    //==================================================
+
+    public Button getBtExcel() {
+
+        return btExcel;
     }
 
 

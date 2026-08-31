@@ -6,7 +6,7 @@ import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import br.com.intelifiscal.fx.view.produto.ProdutoView;
 import br.com.intelifiscal.service.produto.ProdutoService;
-
+import br.com.intelifiscal.fx.view.produto.HistoricoProdutoView;
 import br.com.intelifiscal.fx.controller.produto.CompararCompraVendaController;
 import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
 
@@ -265,7 +265,7 @@ public class ProdutoController {
 
         view.getBtConsultarHistorico()
                 .setOnAction(
-                        event -> consultarHistorico()
+                        event -> abrirHistoricoProduto()
                 );
 
         view.getBtCompararCompraVenda()
@@ -284,6 +284,89 @@ public class ProdutoController {
 
         NavigationManager.show(
                 viewComparacao
+        );
+    }
+
+    //==================================================
+    // ABRE HISTÓRICO DO PRODUTO
+    //==================================================
+
+    private void abrirHistoricoProduto() {
+
+        if (produtoSelecionado == null) {
+
+            Alert alerta =
+                    new Alert(
+                            Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle(
+                    "Histórico do Produto"
+            );
+
+            alerta.setHeaderText(
+                    "Nenhum produto selecionado"
+            );
+
+            alerta.setContentText(
+                    "Selecione um produto para consultar o histórico."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+
+        HistoricoProdutoView viewHistorico =
+                new HistoricoProdutoView();
+
+
+        new HistoricoProdutoController(
+                viewHistorico
+        );
+
+
+        // --------------------------------------------------
+        // ENVIA O PRODUTO SELECIONADO PARA A TELA
+        // --------------------------------------------------
+
+        viewHistorico.getTxtCodigoProduto()
+                .setText(
+                        produtoSelecionado.getCodigoProduto()
+                );
+
+
+        viewHistorico.getTxtDescricao()
+                .setText(
+                        produtoSelecionado.getDescricao()
+                );
+
+
+        // --------------------------------------------------
+        // PERÍODO PADRÃO: ÚLTIMOS 12 MESES
+        // --------------------------------------------------
+
+        LocalDate hoje =
+                LocalDate.now();
+
+        viewHistorico.getDtInicio()
+                .setValue(
+                        hoje.minusMonths(12)
+                );
+
+        viewHistorico.getDtFim()
+                .setValue(
+                        hoje
+                );
+
+
+        // --------------------------------------------------
+        // ABRE A TELA
+        // --------------------------------------------------
+
+        NavigationManager.show(
+                viewHistorico
         );
     }
 
