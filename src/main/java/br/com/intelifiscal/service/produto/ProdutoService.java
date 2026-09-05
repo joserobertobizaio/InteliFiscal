@@ -1,11 +1,15 @@
 package br.com.intelifiscal.service.produto;
 
 import br.com.intelifiscal.dto.produto.ProdutoDTO;
+import br.com.intelifiscal.repository.produto.ProdutoVinculoRepository;
 import br.com.intelifiscal.dto.produto.ProdutoHistoricoDTO;
 import br.com.intelifiscal.repository.nfeitem.NFeItemRepository;
 import br.com.intelifiscal.repository.produto.ProdutoRepository;
 import java.time.LocalDate;
 import java.util.List;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 public class ProdutoService {
 
@@ -14,6 +18,9 @@ public class ProdutoService {
 
     private final NFeItemRepository nfeItemRepository =
             new NFeItemRepository();
+
+    private final ProdutoVinculoRepository vinculoRepository =
+            new ProdutoVinculoRepository();
 
     public void salvar(ProdutoDTO produto) {
 
@@ -182,4 +189,52 @@ public class ProdutoService {
                 codigoProduto
         );
     }
+
+    //==================================================
+    // VINCULAR PRODUTO DE COMPRA COM PRODUTO DE VENDA
+    //==================================================
+
+    public void vincularProdutos(
+            String codigoCompra,
+            String codigoVenda) {
+
+        if (codigoCompra == null
+                || codigoCompra.isBlank()
+                || codigoVenda == null
+                || codigoVenda.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Os códigos dos produtos são obrigatórios."
+            );
+        }
+
+        vinculoRepository.vincular(
+                codigoCompra.trim(),
+                codigoVenda.trim()
+        );
+    }
+
+
+    //==================================================
+    // VERIFICA SE DOIS PRODUTOS ESTÃO VINCULADOS
+    //==================================================
+
+    public boolean existeVinculo(
+            String codigoCompra,
+            String codigoVenda) {
+
+        if (codigoCompra == null
+                || codigoCompra.isBlank()
+                || codigoVenda == null
+                || codigoVenda.isBlank()) {
+
+            return false;
+        }
+
+        return vinculoRepository.existeVinculo(
+                codigoCompra.trim(),
+                codigoVenda.trim()
+        );
+    }
+
 }

@@ -24,9 +24,13 @@ public class NFe {
 
     private String emitente;
 
+    private String municipioEmitente;
+
     private String cnpjDestinatario;
 
     private String destinatario;
+
+    private String municipioDestinatario;
 
     private BigDecimal valorTotal;
 
@@ -109,6 +113,14 @@ public class NFe {
         this.emitente = emitente;
     }
 
+    public String getMunicipioEmitente() {
+        return municipioEmitente;
+    }
+
+    public void setMunicipioEmitente(String municipioEmitente) {
+        this.municipioEmitente = municipioEmitente;
+    }
+
     public String getCnpjDestinatario() {
         return cnpjDestinatario;
     }
@@ -123,6 +135,14 @@ public class NFe {
 
     public void setDestinatario(String destinatario) {
         this.destinatario = destinatario;
+    }
+
+    public String getMunicipioDestinatario() {
+        return municipioDestinatario;
+    }
+
+    public void setMunicipioDestinatario(String municipioDestinatario) {
+        this.municipioDestinatario = municipioDestinatario;
     }
 
     public BigDecimal getValorTotal() {

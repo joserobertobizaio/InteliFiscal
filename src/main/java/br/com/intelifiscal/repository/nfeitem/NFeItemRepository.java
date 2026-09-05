@@ -1062,4 +1062,168 @@ public class NFeItemRepository {
         return lista;
     }
 
+    // ============================================================
+    // LISTA TODOS OS ITENS DE UMA NF-e
+    // Usado para geração do PDF completo da NF-e
+    // ============================================================
+
+    public List<NFeItemDTO> listarPorIdNfe(Integer idNfe) {
+
+        String sql = """
+        SELECT
+            id,
+            id_nfe,
+            numero_item,
+            codigo_produto,
+            codigo_barras,
+            descricao,
+            ncm,
+            cest,
+            cfop,
+            unidade,
+            quantidade,
+            valor_unitario,
+            valor_total,
+            desconto,
+            frete,
+            seguro,
+            outras_despesas,
+            valor_icms,
+            valor_ipi,
+            valor_pis,
+            valor_cofins,
+            data_importacao
+
+        FROM tblNFeItem
+
+        WHERE id_nfe = ?
+
+        ORDER BY numero_item
+        """;
+
+        List<NFeItemDTO> lista = new ArrayList<>();
+
+        try (
+                Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, idNfe);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+
+                    NFeItemDTO item = new NFeItemDTO();
+
+                    item.setId(
+                            rs.getInt("id")
+                    );
+
+                    item.setIdNfe(
+                            rs.getInt("id_nfe")
+                    );
+
+                    item.setNumeroItem(
+                            rs.getInt("numero_item")
+                    );
+
+                    item.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    item.setCodigoBarras(
+                            rs.getString("codigo_barras")
+                    );
+
+                    item.setDescricao(
+                            rs.getString("descricao")
+                    );
+
+                    item.setNcm(
+                            rs.getString("ncm")
+                    );
+
+                    item.setCest(
+                            rs.getString("cest")
+                    );
+
+                    item.setCfop(
+                            rs.getString("cfop")
+                    );
+
+                    item.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    item.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    item.setValorUnitario(
+                            rs.getDouble("valor_unitario")
+                    );
+
+                    item.setValorTotal(
+                            rs.getDouble("valor_total")
+                    );
+
+                    item.setDesconto(
+                            rs.getDouble("desconto")
+                    );
+
+                    item.setFrete(
+                            rs.getDouble("frete")
+                    );
+
+                    item.setSeguro(
+                            rs.getDouble("seguro")
+                    );
+
+                    item.setOutrasDespesas(
+                            rs.getDouble("outras_despesas")
+                    );
+
+                    item.setValorIcms(
+                            rs.getDouble("valor_icms")
+                    );
+
+                    item.setValorIpi(
+                            rs.getDouble("valor_ipi")
+                    );
+
+                    item.setValorPis(
+                            rs.getDouble("valor_pis")
+                    );
+
+                    item.setValorCofins(
+                            rs.getDouble("valor_cofins")
+                    );
+
+                    String dataImportacao =
+                            rs.getString("data_importacao");
+
+                    if (dataImportacao != null
+                            && !dataImportacao.isBlank()) {
+
+                        item.setDataImportacao(
+                                LocalDateTime.parse(dataImportacao)
+                        );
+                    }
+
+                    lista.add(item);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao listar itens da NF-e.",
+                    e
+            );
+        }
+
+        return lista;
+    }
+
 }

@@ -31,13 +31,17 @@ public final class TblNFeSchema {
                 data_emissao TEXT NOT NULL,
 
                 cnpj_emitente TEXT NOT NULL,
-
+            
                 emitente TEXT NOT NULL,
-
+            
+                municipio_emitente TEXT,
+            
                 cnpj_destinatario TEXT NOT NULL,
-
+            
                 destinatario TEXT NOT NULL,
-
+            
+                municipio_destinatario TEXT,
+            
                 valor_total NUMERIC NOT NULL,
 
                 situacao TEXT NOT NULL,

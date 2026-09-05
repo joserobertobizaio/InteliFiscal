@@ -2,8 +2,14 @@ package br.com.intelifiscal.fx.controller.produto;
 
 import br.com.intelifiscal.dto.produto.ProdutoDTO;
 import br.com.intelifiscal.dto.produto.ProdutoHistoricoDTO;
+import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
 import br.com.intelifiscal.service.produto.ProdutoService;
+import br.com.intelifiscal.service.produto.ConversaoUnidadeService;
+
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -17,11 +23,15 @@ public class CompararCompraVendaController {
     private final ProdutoService service =
             new ProdutoService();
 
+    private final ConversaoUnidadeService conversaoUnidadeService =
+            new ConversaoUnidadeService();
+
+    //  aqui faremos uma correção futura
     private final DecimalFormat formatoQuantidade =
             new DecimalFormat(
-                    "#,##0.##",
+                    "#,##0.####",
                     DecimalFormatSymbols.getInstance(
-                            new Locale("pt", "BR")
+                            Locale.forLanguageTag("pt-BR")
                     )
             );
 
@@ -50,6 +60,11 @@ public class CompararCompraVendaController {
         view.getBtPesquisar()
                 .setOnAction(
                         e -> compararProdutos()
+                );
+
+        view.getBtVincular()
+                .setOnAction(
+                        e -> vincularProdutos()
                 );
 
         view.getBtFechar()
@@ -222,6 +237,33 @@ public class CompararCompraVendaController {
                     );
         }
 
+        // ==================================================
+        // DATAS
+        // ==================================================
+
+        java.time.format.DateTimeFormatter formatoData =
+                java.time.format.DateTimeFormatter.ofPattern(
+                        "dd/MM/yyyy"
+                );
+
+        if (resumoCompra.ultimaData != null) {
+
+            view.getLblCompraData()
+                    .setText(
+                            resumoCompra.ultimaData
+                                    .format(formatoData)
+                    );
+        }
+
+        if (resumoVenda.ultimaData != null) {
+
+            view.getLblVendaData()
+                    .setText(
+                            resumoVenda.ultimaData
+                                    .format(formatoData)
+                    );
+        }
+
         //==================================================
         // RESULTADO
         //==================================================
@@ -281,7 +323,7 @@ public class CompararCompraVendaController {
     }
 
     //==================================================
-    // CRIA RESUMO
+    // CRIA RESUMO DO ÚLTIMO MOVIMENTO
     //==================================================
 
     private Resumo criarResumo(
@@ -293,6 +335,8 @@ public class CompararCompraVendaController {
         double somaPrecos = 0.0;
 
         int quantidadePrecos = 0;
+
+        LocalDateTime ultimaData = null;
 
         for (ProdutoHistoricoDTO item : historico) {
 
@@ -319,6 +363,21 @@ public class CompararCompraVendaController {
 
                 quantidadePrecos++;
             }
+
+            // ======================================================
+            // ÚLTIMA DATA DO MOVIMENTO
+            // ======================================================
+
+            if (item.getDataEmissao() != null) {
+
+                if (ultimaData == null
+                        || item.getDataEmissao()
+                        .isAfter(ultimaData)) {
+
+                    ultimaData =
+                            item.getDataEmissao();
+                }
+            }
         }
 
         double precoMedio = 0.0;
@@ -333,7 +392,8 @@ public class CompararCompraVendaController {
         return new Resumo(
                 quantidade,
                 precoMedio,
-                quantidadePrecos > 0
+                quantidadePrecos > 0,
+                ultimaData
         );
     }
 
@@ -406,7 +466,7 @@ public class CompararCompraVendaController {
         //==================================================
 
         double precoCompraConvertido =
-                converterPreco(
+                conversaoUnidadeService.converterValorUnitario(
                         precoCompra,
                         produtoCompra.getUnidade(),
                         produtoVenda.getUnidade()
@@ -419,10 +479,10 @@ public class CompararCompraVendaController {
         double margem =
                 0.0;
 
-        if (precoVenda != 0) {
+        if (precoCompraConvertido != 0) {
 
             margem =
-                    (diferenca / precoVenda)
+                    (diferenca / precoCompraConvertido)
                             * 100.0;
         }
 
@@ -457,7 +517,7 @@ public class CompararCompraVendaController {
                         diferenca
                 )
                         + "\n"
-                        + "Margem sobre a venda: "
+                        + "Margem sobre a custo: "
                         + formatoValor.format(
                         margem
                 )
@@ -584,13 +644,241 @@ public class CompararCompraVendaController {
 
     private void fechar() {
 
-        view.setVisible(false);
+        NavigationManager.show(
+                br.com.intelifiscal.fx.navigation.ScreenType.DASHBOARD
+        );
+    }
+
+    //==================================================
+    // VINCULAR PRODUTOS
+    //==================================================
+
+    private void vincularProdutos() {
+
+        String codigoCompra =
+                view.getTxtCodigoCompra()
+                        .getText()
+                        .trim();
+
+        String codigoVenda =
+                view.getTxtCodigoVenda()
+                        .getText()
+                        .trim();
+
+
+        //==================================================
+        // VALIDA CÓDIGOS
+        //==================================================
+
+        if (codigoCompra.isBlank()
+                || codigoVenda.isBlank()) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle(
+                    "Vincular produtos"
+            );
+
+            alerta.setHeaderText(
+                    "Códigos não informados"
+            );
+
+            alerta.setContentText(
+                    "Informe o código do produto de compra " +
+                            "e o código do produto de venda."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+
+        //==================================================
+        // BUSCA PRODUTO DE COMPRA
+        //==================================================
+
+        ProdutoDTO produtoCompra =
+                service.buscarPorCodigoProduto(
+                        codigoCompra
+                );
+
+
+        if (produtoCompra == null) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle(
+                    "Vincular produtos"
+            );
+
+            alerta.setHeaderText(
+                    "Produto de compra não encontrado"
+            );
+
+            alerta.setContentText(
+                    "O código "
+                            + codigoCompra
+                            + " não está cadastrado."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+
+        //==================================================
+        // BUSCA PRODUTO DE VENDA
+        //==================================================
+
+        ProdutoDTO produtoVenda =
+                service.buscarPorCodigoProduto(
+                        codigoVenda
+                );
+
+
+        if (produtoVenda == null) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle(
+                    "Vincular produtos"
+            );
+
+            alerta.setHeaderText(
+                    "Produto de venda não encontrado"
+            );
+
+            alerta.setContentText(
+                    "O código "
+                            + codigoVenda
+                            + " não está cadastrado."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+
+        //==================================================
+        // VERIFICA SE JÁ EXISTE
+        //==================================================
+
+        if (service.existeVinculo(
+                codigoCompra,
+                codigoVenda
+        )) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.INFORMATION
+                    );
+
+            alerta.setTitle(
+                    "Vincular produtos"
+            );
+
+            alerta.setHeaderText(
+                    "Produtos já estão vinculados"
+            );
+
+            alerta.setContentText(
+                    "O produto de compra "
+                            + codigoCompra
+                            + " já está vinculado ao produto de venda "
+                            + codigoVenda
+                            + "."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+
+        //==================================================
+        // GRAVA VÍNCULO
+        //==================================================
+
+        try {
+
+            service.vincularProdutos(
+                    codigoCompra,
+                    codigoVenda
+            );
+
+
+            //==================================================
+            // CONFIRMAÇÃO
+            //==================================================
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.INFORMATION
+                    );
+
+            alerta.setTitle(
+                    "Vincular produtos"
+            );
+
+            alerta.setHeaderText(
+                    "Produtos vinculados com sucesso!"
+            );
+
+            alerta.setContentText(
+                    "Compra: "
+                            + produtoCompra.getCodigoProduto()
+                            + " - "
+                            + produtoCompra.getDescricao()
+                            + "\n\n"
+                            + "Venda: "
+                            + produtoVenda.getCodigoProduto()
+                            + " - "
+                            + produtoVenda.getDescricao()
+            );
+
+            alerta.showAndWait();
+
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.ERROR
+                    );
+
+            alerta.setTitle(
+                    "Erro"
+            );
+
+            alerta.setHeaderText(
+                    "Não foi possível vincular os produtos."
+            );
+
+            alerta.setContentText(
+                    e.getMessage()
+            );
+
+            alerta.showAndWait();
+        }
     }
 
     //==================================================
     // CLASSE RESUMO
     //==================================================
-
     private static class Resumo {
 
         private final double quantidade;
@@ -599,16 +887,21 @@ public class CompararCompraVendaController {
 
         private final boolean temMovimento;
 
+        private final LocalDateTime ultimaData;
+
         private Resumo(
                 double quantidade,
                 double precoMedio,
-                boolean temMovimento) {
+                boolean temMovimento,
+                LocalDateTime ultimaData) {
 
             this.quantidade = quantidade;
 
             this.precoMedio = precoMedio;
 
             this.temMovimento = temMovimento;
+
+            this.ultimaData = ultimaData;
         }
     }
 }

@@ -552,12 +552,20 @@ public class ImportacaoXMLController {
                                 dto.getRazaoSocialEmitente()
                         );
 
+                        nfe.setMunicipioEmitente(
+                                dto.getMunicipioEmitente()
+                        );
+
                         nfe.setCnpjDestinatario(
                                 dto.getCnpjDestinatario()
                         );
 
                         nfe.setDestinatario(
                                 dto.getRazaoSocialDestinatario()
+                        );
+
+                        nfe.setMunicipioDestinatario(
+                                dto.getMunicipioDestinatario()
                         );
 
                         nfe.setValorTotal(

@@ -26,6 +26,9 @@ public class CompararCompraVendaView extends BorderPane {
     private final Button btPesquisar =
             new Button("🔎 Pesquisar");
 
+    private final Button btVincular =
+            new Button("🔗 Vincular");
+
     private final Button btFechar =
             new Button("✖ Fechar");
 
@@ -46,6 +49,12 @@ public class CompararCompraVendaView extends BorderPane {
             new Label("-");
 
     private final Label lblCompraPreco =
+            new Label("-");
+
+    private final Label lblCompraData =
+            new Label("-");
+
+    private final Label lblVendaData =
             new Label("-");
 
     // ============================================================
@@ -181,6 +190,12 @@ public class CompararCompraVendaView extends BorderPane {
                 1
         );
 
+        pesquisa.add(
+                btVincular,
+                3,
+                1
+        );
+
         // --------------------------------------------------------
         // PAINEL DE COMPARAÇÃO
         // --------------------------------------------------------
@@ -231,6 +246,8 @@ public class CompararCompraVendaView extends BorderPane {
                 new Insets(20, 0, 20, 0)
         );
 
+        resultado.setPrefHeight(160);
+
         // --------------------------------------------------------
         // BOTÃO FECHAR
         // --------------------------------------------------------
@@ -275,6 +292,9 @@ public class CompararCompraVendaView extends BorderPane {
 
         btPesquisar.setPrefWidth(130);
         btPesquisar.setPrefHeight(32);
+
+        btVincular.setPrefWidth(110);
+        btVincular.setPrefHeight(32);
 
         btFechar.setPrefWidth(100);
         btFechar.setPrefHeight(32);
@@ -349,6 +369,14 @@ public class CompararCompraVendaView extends BorderPane {
                 4
         );
 
+        adicionarLinha(
+                dados,
+                "Última compra:",
+                lblCompraData,
+                5
+        );
+
+
         VBox painel =
                 new VBox(
                         15,
@@ -420,6 +448,13 @@ public class CompararCompraVendaView extends BorderPane {
                 4
         );
 
+        adicionarLinha(
+                dados,
+                "Última venda:",
+                lblVendaData,
+                5
+        );
+
         VBox painel =
                 new VBox(
                         15,
@@ -482,6 +517,8 @@ public class CompararCompraVendaView extends BorderPane {
         return btPesquisar;
     }
 
+    public Button getBtVincular() { return btVincular; }
+
     public Button getBtFechar() {
         return btFechar;
     }
@@ -528,5 +565,13 @@ public class CompararCompraVendaView extends BorderPane {
 
     public Label getLblResultado() {
         return lblResultado;
+    }
+
+    public Label getLblCompraData() {
+        return lblCompraData;
+    }
+
+    public Label getLblVendaData() {
+        return lblVendaData;
     }
 }

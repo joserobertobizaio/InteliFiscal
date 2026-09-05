@@ -214,4 +214,5 @@ public class NFeItemDTO {
     public void setDataImportacao(LocalDateTime dataImportacao) {
         this.dataImportacao = dataImportacao;
     }
+
 }

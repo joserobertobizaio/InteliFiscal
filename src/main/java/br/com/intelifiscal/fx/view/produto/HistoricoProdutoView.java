@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.input.MouseButton;
 
 import java.time.format.DateTimeFormatter;
 import java.util.IdentityHashMap;
@@ -37,7 +38,7 @@ public class HistoricoProdutoView extends BorderPane {
 
     private final DecimalFormat formatoValor =
             new DecimalFormat(
-                    "#,##0.00",
+                    "#,##0.0000",
                     DecimalFormatSymbols.getInstance(
                             Locale.forLanguageTag("pt-BR")
                     )
@@ -76,6 +77,8 @@ public class HistoricoProdutoView extends BorderPane {
     private final TextField txtPesquisa =
             new TextField();
 
+    private HBox periodoPersonalizado;
+
 
     // ============================================================
     // BOTÕES
@@ -99,7 +102,6 @@ public class HistoricoProdutoView extends BorderPane {
     private final Button btFechar =
             new Button("✖ Fechar");
 
-
     // ============================================================
     // TABELA
     // ============================================================
@@ -109,6 +111,47 @@ public class HistoricoProdutoView extends BorderPane {
 
     private final ObservableList<ProdutoHistoricoDTO> dados =
             FXCollections.observableArrayList();
+
+    // ============================================================
+    // MENU DE CONTEXTO - BOTÃO DIREITO
+    // ============================================================
+
+    private final ContextMenu menuContexto =
+            new ContextMenu();
+
+    private final MenuItem menuSelecionar =
+            new MenuItem("☑ Selecionar / desmarcar registro");
+
+    private final MenuItem menuComparar =
+            new MenuItem("⇄ Comparar selecionados");
+
+    private final MenuItem menuVincular =
+            new MenuItem("🔗 Vincular selecionados");
+
+    private final MenuItem menuDesvincular =
+            new MenuItem("🔓 Desvincular selecionados");
+
+    private final SeparatorMenuItem menuSeparador =
+            new SeparatorMenuItem();
+
+    private final MenuItem menuCopiarCodigo =
+            new MenuItem("📋 Copiar código");
+
+    private final MenuItem menuCopiarDescricao =
+            new MenuItem("📋 Copiar descrição");
+
+    private final MenuItem menuCopiarNfe =
+            new MenuItem("📋 Copiar NF-e");
+
+    private final MenuItem menuGerarPdfNfe =
+            new MenuItem("📄 Gerar NF-e inteira em PDF");
+
+    // ============================================================
+    // CONTADOR DE REGISTROS
+    // ============================================================
+
+    private final Label lblContador =
+            new Label("0 registros encontrados");
 
 
     // ============================================================
@@ -124,9 +167,14 @@ public class HistoricoProdutoView extends BorderPane {
 
     public HistoricoProdutoView() {
 
+        btComparar.setVisible(false);
+        btComparar.setManaged(false);
+
         criarLayout();
 
         configurarTabela();
+
+        configurarMenuContexto();
     }
 
 
@@ -232,6 +280,40 @@ public class HistoricoProdutoView extends BorderPane {
                 Pos.CENTER_LEFT
         );
 
+        // ========================================================
+        // PERÍODO PERSONALIZADO
+        // ========================================================
+
+        Label lblDataInicio =
+                new Label("Data inicial:");
+
+        Label lblDataFim =
+                new Label("Até:");
+
+        dtInicio.setPromptText("Data inicial");
+        dtFim.setPromptText("Data final");
+
+        dtInicio.setPrefWidth(140);
+        dtFim.setPrefWidth(140);
+
+
+        periodoPersonalizado =
+                new HBox(
+                        10,
+                        lblDataInicio,
+                        dtInicio,
+                        lblDataFim,
+                        dtFim
+                );
+
+        periodoPersonalizado.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        // Inicialmente oculto
+        periodoPersonalizado.setVisible(false);
+        periodoPersonalizado.setManaged(false);
+
 
         // ========================================================
         // PESQUISA
@@ -272,6 +354,7 @@ public class HistoricoProdutoView extends BorderPane {
                         12,
                         tipos,
                         periodo,
+                        periodoPersonalizado,
                         pesquisa
                 );
 
@@ -284,11 +367,22 @@ public class HistoricoProdutoView extends BorderPane {
         // TABELA
         // ========================================================
 
+        lblContador.setStyle(
+                "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #17365D;"
+        );
+
         VBox centro =
                 new VBox(
                         filtros,
+                        lblContador,
                         tabela
                 );
+
+        VBox.setMargin(
+                lblContador,
+                new Insets(0, 0, 8, 0)
+        );
 
         VBox.setVgrow(
                 tabela,
@@ -532,8 +626,6 @@ public class HistoricoProdutoView extends BorderPane {
         colCodigoProduto.setPrefWidth(90);
         colCodigoProduto.setMinWidth(75);
 
-
-
         // ========================================================
         // DESCRIÇÃO
         // ========================================================
@@ -762,6 +854,87 @@ public class HistoricoProdutoView extends BorderPane {
         );
     }
 
+    // ============================================================
+    // MENU DE CONTEXTO - BOTÃO DIREITO
+    // ============================================================
+
+    private void configurarMenuContexto() {
+
+        menuContexto.getItems().addAll(
+                menuSelecionar,
+                menuComparar,
+                menuVincular,
+                menuDesvincular,
+                menuSeparador,
+                menuCopiarCodigo,
+                menuCopiarDescricao,
+                menuCopiarNfe,
+                menuGerarPdfNfe
+        );
+
+
+        tabela.setRowFactory(
+                tv -> {
+
+                    TableRow<ProdutoHistoricoDTO> linha =
+                            new TableRow<>();
+
+
+                    linha.setOnContextMenuRequested(
+                            event -> {
+
+                                if (linha.isEmpty()) {
+
+                                    menuContexto.hide();
+
+                                    return;
+                                }
+
+
+                                // --------------------------------------------
+                                // Seleciona a linha clicada com botão direito
+                                // --------------------------------------------
+
+                                tabela.getSelectionModel()
+                                        .select(linha.getIndex());
+
+
+                                // --------------------------------------------
+                                // Mostra o menu
+                                // --------------------------------------------
+
+                                menuContexto.show(
+                                        linha,
+                                        event.getScreenX(),
+                                        event.getScreenY()
+                                );
+
+
+                                event.consume();
+                            }
+                    );
+
+
+                    return linha;
+                }
+        );
+
+
+        // ------------------------------------------------------------
+        // Fecha o menu quando clicarmos fora dele
+        // ------------------------------------------------------------
+
+        tabela.setOnMouseClicked(
+                event -> {
+
+                    if (event.getButton()
+                            == MouseButton.PRIMARY) {
+
+                        menuContexto.hide();
+                    }
+                }
+        );
+    }
 
     // ============================================================
     // VALOR SEGURO
@@ -774,7 +947,6 @@ public class HistoricoProdutoView extends BorderPane {
                 ? ""
                 : valor;
     }
-
 
     // ============================================================
     // GETTERS ANTIGOS
@@ -817,6 +989,14 @@ public class HistoricoProdutoView extends BorderPane {
         return txtPesquisa;
     }
 
+    public Label getLblContador() {
+        return lblContador;
+    }
+
+    public HBox getPeriodoPersonalizado() {
+        return periodoPersonalizado;
+    }
+
 
     // ============================================================
     // BOTÕES
@@ -846,6 +1026,41 @@ public class HistoricoProdutoView extends BorderPane {
         return btFechar;
     }
 
+    // ============================================================
+    // MENU DE CONTEXTO
+    // ============================================================
+
+    public MenuItem getMenuSelecionar() {
+        return menuSelecionar;
+    }
+
+    public MenuItem getMenuComparar() {
+        return menuComparar;
+    }
+
+    public MenuItem getMenuVincular() {
+        return menuVincular;
+    }
+
+    public MenuItem getMenuDesvincular() {
+        return menuDesvincular;
+    }
+
+    public MenuItem getMenuCopiarCodigo() {
+        return menuCopiarCodigo;
+    }
+
+    public MenuItem getMenuCopiarDescricao() {
+        return menuCopiarDescricao;
+    }
+
+    public MenuItem getMenuCopiarNfe() {
+        return menuCopiarNfe;
+    }
+
+    public MenuItem getMenuGerarPdfNfe() {
+        return menuGerarPdfNfe;
+    }
 
     // ============================================================
     // TABELA
