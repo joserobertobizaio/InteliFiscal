@@ -150,6 +150,45 @@ public class HistoricoProdutoController {
                 );
 
         // --------------------------------------------------------
+        // MENU CONTEXTO
+        // --------------------------------------------------------
+
+        view.getMenuSelecionar()
+                .setOnAction(
+                        event -> view.alternarSelecao()
+                );
+
+        view.getMenuComparar()
+                .setOnAction(
+                        event -> compararSelecionados()
+                );
+
+        view.getMenuVincular()
+                .setOnAction(
+                        event -> vincular()
+                );
+
+        view.getMenuDesvincular()
+                .setOnAction(
+                        event -> desvincular()
+                );
+
+        view.getMenuCopiarCodigo()
+                .setOnAction(
+                        event -> copiarCodigo()
+                );
+
+        view.getMenuCopiarDescricao()
+                .setOnAction(
+                        event -> copiarDescricao()
+                );
+
+        view.getMenuCopiarNfe()
+                .setOnAction(
+                        event -> copiarNfe()
+                );
+
+        // --------------------------------------------------------
         // GERAR NF-e INTEIRA EM PDF
         // --------------------------------------------------------
 
@@ -1880,20 +1919,22 @@ public class HistoricoProdutoController {
 
     private void copiarCodigo() {
 
-        List<ProdutoHistoricoDTO> selecionados =
-                view.getProdutosSelecionados();
+        ProdutoHistoricoDTO registro =
+                view.getTabela()
+                        .getSelectionModel()
+                        .getSelectedItem();
 
-        if (selecionados.size() != 1) {
+        if (registro == null) {
 
             mostrarAviso(
-                    "Selecione exatamente um registro."
+                    "Selecione um registro."
             );
 
             return;
         }
 
         String codigo =
-                selecionados.get(0).getCodigoProduto();
+                registro.getCodigoProduto();
 
         copiarParaAreaTransferencia(codigo);
     }
@@ -1905,20 +1946,22 @@ public class HistoricoProdutoController {
 
     private void copiarDescricao() {
 
-        List<ProdutoHistoricoDTO> selecionados =
-                view.getProdutosSelecionados();
+        ProdutoHistoricoDTO registro =
+                view.getTabela()
+                        .getSelectionModel()
+                        .getSelectedItem();
 
-        if (selecionados.size() != 1) {
+        if (registro == null) {
 
             mostrarAviso(
-                    "Selecione exatamente um registro."
+                    "Selecione um registro."
             );
 
             return;
         }
 
         String descricao =
-                selecionados.get(0).getDescricao();
+                registro.getDescricao();
 
         copiarParaAreaTransferencia(descricao);
     }
@@ -1930,20 +1973,22 @@ public class HistoricoProdutoController {
 
     private void copiarNfe() {
 
-        List<ProdutoHistoricoDTO> selecionados =
-                view.getProdutosSelecionados();
+        ProdutoHistoricoDTO registro =
+                view.getTabela()
+                        .getSelectionModel()
+                        .getSelectedItem();
 
-        if (selecionados.size() != 1) {
+        if (registro == null) {
 
             mostrarAviso(
-                    "Selecione exatamente um registro."
+                    "Selecione um registro."
             );
 
             return;
         }
 
         String numero =
-                selecionados.get(0).getNumeroNfe();
+                registro.getNumeroNfe();
 
         copiarParaAreaTransferencia(numero);
     }

@@ -123,6 +123,7 @@ public class HistoricoProdutoView extends BorderPane {
     private final MenuItem menuSelecionar =
             new MenuItem("☑ Selecionar / desmarcar registro");
 
+    // este menu contexto será implantado na próxima versão
     private final MenuItem menuComparar =
             new MenuItem("⇄ Comparar selecionados");
 
@@ -142,7 +143,7 @@ public class HistoricoProdutoView extends BorderPane {
             new MenuItem("📋 Copiar descrição");
 
     private final MenuItem menuCopiarNfe =
-            new MenuItem("📋 Copiar NF-e");
+            new MenuItem("📋 Copiar Nº NF-e");
 
     private final MenuItem menuGerarPdfNfe =
             new MenuItem("📄 Gerar NF-e inteira em PDF");
@@ -1046,6 +1047,28 @@ public class HistoricoProdutoView extends BorderPane {
 
     public MenuItem getMenuSelecionar() {
         return menuSelecionar;
+    }
+
+    public void alternarSelecao() {
+
+        ProdutoHistoricoDTO registro =
+                tabela.getSelectionModel()
+                        .getSelectedItem();
+
+        if (registro == null) {
+            return;
+        }
+
+        SimpleBooleanProperty selecionado =
+                selecionados.get(registro);
+
+        if (selecionado == null) {
+            return;
+        }
+
+        selecionado.set(
+                !selecionado.get()
+        );
     }
 
     public MenuItem getMenuComparar() {
