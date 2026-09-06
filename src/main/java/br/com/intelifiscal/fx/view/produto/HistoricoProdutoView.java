@@ -3,6 +3,7 @@ package br.com.intelifiscal.fx.view.produto;
 import br.com.intelifiscal.dto.produto.ProdutoHistoricoDTO;
 
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,7 +14,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.input.MouseButton;
-
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -323,7 +324,7 @@ public class HistoricoProdutoView extends BorderPane {
                 new Label("Pesquisar:");
 
         txtPesquisa.setPromptText(
-                "Descrição, código, CNPJ ou fornecedor/emitente"
+                "Descrição, código, nº da NF, CNPJ ou fornecedor/emitente"
         );
 
         HBox.setHgrow(
@@ -646,31 +647,44 @@ public class HistoricoProdutoView extends BorderPane {
         colDescricao.setMinWidth(180);
 
         // ========================================================
-        // DATA
+        // DATA EMISSÃO
         // ========================================================
 
-        TableColumn<ProdutoHistoricoDTO, String> colData =
-                new TableColumn<>("Data");
+        TableColumn<ProdutoHistoricoDTO, LocalDateTime> colData =
+                new TableColumn<>("Emissão");
 
         colData.setCellValueFactory(
-                data -> {
+                data ->
+                        new SimpleObjectProperty<>(
+                                data.getValue().getDataEmissao()
+                        )
+        );
 
-                    if (data.getValue().getDataEmissao()
-                            == null) {
+        colData.setCellFactory(
+                coluna ->
+                        new TableCell<ProdutoHistoricoDTO, LocalDateTime>() {
 
-                        return new SimpleStringProperty("");
-                    }
+                            private final DateTimeFormatter formatter =
+                                    DateTimeFormatter.ofPattern(
+                                            "dd/MM/yyyy"
+                                    );
 
-                    return new SimpleStringProperty(
-                            data.getValue()
-                                    .getDataEmissao()
-                                    .format(
-                                            DateTimeFormatter.ofPattern(
-                                                    "dd/MM/yyyy"
-                                            )
-                                    )
-                    );
-                }
+                            @Override
+                            protected void updateItem(
+                                    LocalDateTime item,
+                                    boolean empty) {
+
+                                super.updateItem(item, empty);
+
+                                if (empty || item == null) {
+                                    setText(null);
+                                } else {
+                                    setText(
+                                            item.format(formatter)
+                                    );
+                                }
+                            }
+                        }
         );
 
         colData.setPrefWidth(85);

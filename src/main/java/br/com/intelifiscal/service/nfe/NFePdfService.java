@@ -1004,26 +1004,29 @@ public class NFePdfService {
 
 
     // ============================================================
-    // NÚMERO
+    // NÚMERO - PADRÃO BRASILEIRO
     // ============================================================
 
     private String numero(
             Double valor) {
 
         if (valor == null) {
-            return "0";
+            return "0,000";
         }
 
         return String.format(
-                Locale.US,
-                "%.3f",
-                valor
-        );
+                        Locale.US,
+                        "%,.3f",
+                        valor
+                )
+                .replace(",", "#")
+                .replace(".", ",")
+                .replace("#", ".");
     }
 
     // ============================================================
-// VALOR UNITÁRIO - 4 CASAS DECIMAIS
-// ============================================================
+    // VALOR UNITÁRIO - 4 CASAS DECIMAIS
+    // ============================================================
 
     private String valorUnitario(
             Double valor) {

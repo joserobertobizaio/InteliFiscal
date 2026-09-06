@@ -653,6 +653,7 @@ public class NFeItemRepository {
         WHERE (
                 i.codigo_produto LIKE ?
                 OR i.descricao LIKE ?
+                OR n.numero LIKE ?
               )
 
         ORDER BY n.data_emissao DESC
@@ -674,6 +675,7 @@ public class NFeItemRepository {
 
             ps.setString(1, filtro);
             ps.setString(2, filtro);
+            ps.setString(3, filtro);
 
             try (
                     ResultSet rs =
@@ -766,9 +768,9 @@ public class NFeItemRepository {
     }
 
     // ============================================================
-// HISTÓRICO POR PESQUISA
-// Pesquisa por código ou descrição
-// ============================================================
+    // HISTÓRICO POR PESQUISA
+    // Pesquisa por código ou descrição
+    // ============================================================
 
     public List<ProdutoHistoricoDTO> listarHistoricoPorPesquisa(
             String pesquisa) {
@@ -796,6 +798,7 @@ public class NFeItemRepository {
         WHERE (
                 i.codigo_produto LIKE ?
                 OR i.descricao LIKE ?
+                OR n.numero LIKE ?
               )
 
         ORDER BY n.data_emissao DESC
@@ -817,6 +820,7 @@ public class NFeItemRepository {
 
             ps.setString(1, filtro);
             ps.setString(2, filtro);
+            ps.setString(3, filtro);
 
             try (
                     ResultSet rs =
@@ -942,6 +946,7 @@ public class NFeItemRepository {
         WHERE (
                 i.codigo_produto LIKE ?
                 OR i.descricao LIKE ?
+                OR n.numero LIKE ?
               )
 
           AND date(n.data_emissao)
@@ -965,12 +970,10 @@ public class NFeItemRepository {
                     "%" + pesquisa + "%";
 
             ps.setString(1, filtro);
-
             ps.setString(2, filtro);
-
-            ps.setString(3, inicio.toString());
-
-            ps.setString(4, fim.toString());
+            ps.setString(3, filtro);
+            ps.setString(4, inicio.toString());
+            ps.setString(5, fim.toString());
 
             try (
                     ResultSet rs =
