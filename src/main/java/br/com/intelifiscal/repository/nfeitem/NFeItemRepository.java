@@ -133,8 +133,9 @@ public class NFeItemRepository {
             i.descricao,
             i.unidade,
             i.quantidade,
-            i.valor_unitario
-            
+            i.valor_unitario,
+            i.valor_total
+        
         FROM tblNFeItem i
 
         INNER JOIN tblNFe n
@@ -355,6 +356,7 @@ public class NFeItemRepository {
             n.numero,
             n.data_emissao,
             n.emitente,
+            i.codigo_produto,
             n.destinatario,
             i.descricao,
             i.unidade,

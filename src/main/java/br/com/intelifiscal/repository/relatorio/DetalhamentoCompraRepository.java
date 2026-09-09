@@ -26,10 +26,13 @@ public class DetalhamentoCompraRepository {
                 SELECT
                     n.cnpj_emitente,
                     n.emitente,
+                    n.municipio_emitente,
+                    n.uf_emitente,
                     n.numero,
                     n.data_emissao,
                     n.valor_total AS valor_total_nf,
 
+                    i.numero_item,
                     i.descricao,
                     i.codigo_produto,
                     i.cfop,
@@ -92,6 +95,14 @@ public class DetalhamentoCompraRepository {
                             rs.getString("emitente")
                     );
 
+                    dto.setMunicipioFornecedor(
+                            rs.getString("municipio_emitente")
+                    );
+
+                    dto.setUfFornecedor(
+                            rs.getString("uf_emitente")
+                    );
+
                     dto.setNumeroNota(
                             rs.getString("numero")
                     );
@@ -119,6 +130,14 @@ public class DetalhamentoCompraRepository {
 
                     dto.setCodigoProduto(
                             rs.getString("codigo_produto")
+                    );
+
+                    dto.setNumeroItem(
+                            rs.getInt("numero_item")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
                     );
 
                     dto.setCfop(
@@ -151,4 +170,198 @@ public class DetalhamentoCompraRepository {
             );
         }
     }
+
+    /**
+     * Lista o detalhamento das compras de um fornecedor dentro de um período.
+     */
+    public List<DetalhamentoCompraDTO> listarPorFornecedor(
+            LocalDate dataInicial,
+            LocalDate dataFinal,
+            String cnpjFornecedor) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                n.cnpj_emitente,
+                n.id,
+                n.emitente,
+                n.municipio_emitente,
+                n.uf_emitente,
+                n.numero,
+                n.data_emissao,
+                n.valor_total AS valor_total_nf,
+
+                i.numero_item,
+                i.descricao,
+                i.codigo_produto,
+                i.cfop,
+                i.quantidade,
+                i.unidade,
+                i.valor_unitario,
+                i.valor_total
+
+            FROM tblNFe n
+
+            INNER JOIN tblNFeItem i
+                ON i.id_nfe = n.id
+
+            WHERE n.tipo = 'Compra'
+
+              AND n.cnpj_emitente = ?
+            """);
+
+        if (dataInicial != null) {
+
+            sql.append("""
+                
+              AND date(n.data_emissao)
+                  BETWEEN date(?) AND date(?)
+                """);
+
+        } else {
+
+            sql.append("""
+                
+              AND date(n.data_emissao)
+                  <= date(?)
+                """);
+        }
+
+        sql.append("""
+            
+            ORDER BY
+                date(n.data_emissao) DESC,
+                n.numero DESC,
+                i.numero_item
+            """);
+
+        List<DetalhamentoCompraDTO> lista =
+                new ArrayList<>();
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql.toString())
+        ) {
+
+            ps.setString(
+                    1,
+                    cnpjFornecedor
+            );
+
+            if (dataInicial != null) {
+
+                ps.setString(
+                        2,
+                        dataInicial.toString()
+                );
+
+                ps.setString(
+                        3,
+                        dataFinal.toString()
+                );
+
+            } else {
+
+                ps.setString(
+                        2,
+                        dataFinal.toString()
+                );
+            }
+
+            try (
+                    ResultSet rs =
+                            ps.executeQuery()
+            ) {
+
+                while (rs.next()) {
+
+                    DetalhamentoCompraDTO dto =
+                            new DetalhamentoCompraDTO();
+
+                    dto.setCnpj(
+                            rs.getString("cnpj_emitente")
+                    );
+
+                    dto.setIdNfe(rs.getLong("id"));
+
+                    dto.setFornecedor(
+                            rs.getString("emitente")
+                    );
+
+                    dto.setMunicipioFornecedor(
+                            rs.getString("municipio_emitente")
+                    );
+
+                    dto.setUfFornecedor(
+                            rs.getString("uf_emitente")
+                    );
+
+                    dto.setNumeroNota(
+                            rs.getString("numero")
+                    );
+
+                    String data =
+                            rs.getString("data_emissao");
+
+                    if (data != null &&
+                            !data.isBlank()) {
+
+                        dto.setDataCompra(
+                                LocalDate.parse(data)
+                        );
+                    }
+
+                    dto.setValorTotalNF(
+                            rs.getBigDecimal("valor_total_nf")
+                    );
+
+                    dto.setProduto(
+                            rs.getString("descricao")
+                    );
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setNumeroItem(
+                            rs.getInt("numero_item")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setCfop(
+                            rs.getString("cfop")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getDouble("quantidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getBigDecimal("valor_unitario")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getBigDecimal("valor_total")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+            return lista;
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao listar detalhamento das compras do fornecedor.",
+                    e
+            );
+        }
+    }
+
 }

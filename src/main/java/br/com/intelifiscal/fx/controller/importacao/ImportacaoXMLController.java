@@ -6,6 +6,8 @@ import br.com.intelifiscal.dto.nfeitem.NFeItemDTO;
 import br.com.intelifiscal.fx.view.importacao.ImportacaoXMLView;
 import br.com.intelifiscal.util.XmlUtil;
 import javafx.concurrent.Task;
+import br.com.intelifiscal.entity.NFeDuplicata;
+import br.com.intelifiscal.repository.NFeDuplicataRepository;
 
 import br.com.intelifiscal.dto.produto.ProdutoDTO;
 import br.com.intelifiscal.service.produto.ProdutoService;
@@ -51,6 +53,9 @@ public class ImportacaoXMLController {
 
     private final NFeItemService nfeItemService =
             new NFeItemService();
+
+    private final NFeDuplicataRepository nfeDuplicataRepository =
+            new NFeDuplicataRepository();
 
     private final ProdutoService produtoService =
             new ProdutoService();
@@ -515,13 +520,97 @@ public class ImportacaoXMLController {
 
                         if (nfeService.existe(dto.getChave())) {
 
-                            ignoradas[0]++;
+                            Long idNFeExistente =
+                                    nfeService.buscarIdPorChave(
+                                            dto.getChave()
+                                    );
 
-                            updateMessage(
-                                    "NF "
-                                            + dto.getNumero()
-                                            + " já existe.\n"
-                            );
+                            if (idNFeExistente == null) {
+
+                                ignoradas[0]++;
+
+                                updateMessage(
+                                        "NF "
+                                                + dto.getNumero()
+                                                + " já existe, mas o ID não foi localizado.\n"
+                                );
+
+                                continue;
+                            }
+
+                            int duplicatasInseridas = 0;
+
+                            // ==============================
+                            // VERIFICA DUPLICATAS DO XML
+                            // ==============================
+
+                            if (dto.getDuplicatas() != null) {
+
+                                for (var dtoDuplicata : dto.getDuplicatas()) {
+
+                                    String numeroDuplicata =
+                                            dtoDuplicata.getNumeroDuplicata();
+
+                                    if (nfeDuplicataRepository.existe(
+                                            idNFeExistente,
+                                            numeroDuplicata
+                                    )) {
+
+                                        continue;
+                                    }
+
+                                    NFeDuplicata duplicata =
+                                            new NFeDuplicata();
+
+                                    duplicata.setIdNfe(
+                                            idNFeExistente
+                                    );
+
+                                    duplicata.setNumeroDuplicata(
+                                            numeroDuplicata
+                                    );
+
+                                    duplicata.setDataVencimento(
+                                            dtoDuplicata.getDataVencimento()
+                                    );
+
+                                    duplicata.setValor(
+                                            dtoDuplicata.getValor()
+                                    );
+
+                                    nfeDuplicataRepository.salvar(
+                                            duplicata
+                                    );
+
+                                    duplicatasInseridas++;
+                                }
+                            }
+
+                            // ==============================
+                            // LOG
+                            // ==============================
+
+                            if (duplicatasInseridas > 0) {
+
+                                updateMessage(
+                                        "NF "
+                                                + dto.getNumero()
+                                                + " já existia. "
+                                                + duplicatasInseridas
+                                                + " duplicata(s) adicionada(s).\n"
+                                );
+
+                            } else {
+
+                                updateMessage(
+                                        "NF "
+                                                + dto.getNumero()
+                                                + " já existe. "
+                                                + "Nenhuma nova duplicata encontrada.\n"
+                                );
+                            }
+
+                            ignoradas[0]++;
 
                             continue;
                         }
@@ -556,6 +645,10 @@ public class ImportacaoXMLController {
                                 dto.getMunicipioEmitente()
                         );
 
+                        nfe.setUfEmitente(
+                                dto.getUfEmitente()
+                        );
+
                         nfe.setCnpjDestinatario(
                                 dto.getCnpjDestinatario()
                         );
@@ -566,6 +659,10 @@ public class ImportacaoXMLController {
 
                         nfe.setMunicipioDestinatario(
                                 dto.getMunicipioDestinatario()
+                        );
+
+                        nfe.setUfDestinatario(
+                                dto.getUfDestinatario()
                         );
 
                         nfe.setValorTotal(
@@ -619,6 +716,39 @@ public class ImportacaoXMLController {
 
                         Integer idNFe =
                                 nfeService.salvar(nfe);
+
+                        // ==============================
+                        // SALVA AS DUPLICATAS DA NF-e
+                        // ==============================
+
+                        if (dto.getDuplicatas() != null) {
+
+                            for (var dtoDuplicata : dto.getDuplicatas()) {
+
+                                NFeDuplicata duplicata =
+                                        new NFeDuplicata();
+
+                                duplicata.setIdNfe(
+                                        idNFe.longValue()
+                                );
+
+                                duplicata.setNumeroDuplicata(
+                                        dtoDuplicata.getNumeroDuplicata()
+                                );
+
+                                duplicata.setDataVencimento(
+                                        dtoDuplicata.getDataVencimento()
+                                );
+
+                                duplicata.setValor(
+                                        dtoDuplicata.getValor()
+                                );
+
+                                nfeDuplicataRepository.salvar(
+                                        duplicata
+                                );
+                            }
+                        }
 
                         // ==============================
                         // LÊ OS ITENS DO XML

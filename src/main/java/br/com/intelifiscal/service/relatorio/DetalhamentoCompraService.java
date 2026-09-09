@@ -42,4 +42,38 @@ public class DetalhamentoCompraService {
                 fim
         );
     }
+
+    public List<DetalhamentoCompraDTO> listarPorFornecedor(
+            LocalDate inicio,
+            LocalDate fim,
+            String cnpjFornecedor) {
+
+        if (fim == null) {
+            throw new IllegalArgumentException(
+                    "A data final deve ser informada."
+            );
+        }
+
+        if (inicio != null &&
+                inicio.isAfter(fim)) {
+
+            throw new IllegalArgumentException(
+                    "A data inicial não pode ser maior que a data final."
+            );
+        }
+
+        if (cnpjFornecedor == null ||
+                cnpjFornecedor.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "O CNPJ do fornecedor deve ser informado."
+            );
+        }
+
+        return repository.listarPorFornecedor(
+                inicio,
+                fim,
+                cnpjFornecedor
+        );
+    }
 }

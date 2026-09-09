@@ -92,9 +92,6 @@ public class ProdutoView extends BaseView {
     private final DatePicker dtFim =
             new DatePicker();
 
-    private final Button btConsultarHistorico =
-            new Button("Consultar");
-
     //==================================================
     // RESUMO DO PRODUTO
     //==================================================
@@ -360,8 +357,6 @@ public class ProdutoView extends BaseView {
 
         dtFim.setPrefWidth(120);
 
-        btConsultarHistorico.setPrefWidth(100);
-
 
         HBox filtro =
                 new HBox(
@@ -371,8 +366,7 @@ public class ProdutoView extends BaseView {
                         lblDe,
                         dtInicio,
                         lblAte,
-                        dtFim,
-                        btConsultarHistorico
+                        dtFim
                 );
 
 
@@ -1212,10 +1206,6 @@ public class ProdutoView extends BaseView {
         return dtFim;
     }
 
-    public Button getBtConsultarHistorico() {
-        return btConsultarHistorico;
-    }
-
     public TableView<ProdutoDTO> getTabelaProdutos() {
         return tabelaProdutos;
     }
@@ -1234,8 +1224,8 @@ public class ProdutoView extends BaseView {
 
 
     //==================================================
-// GETTERS - RESUMO DO PRODUTO
-//==================================================
+    // GETTERS - RESUMO DO PRODUTO
+    //==================================================
 
     public Label getLblQtdCompras() {
         return lblQtdCompras;

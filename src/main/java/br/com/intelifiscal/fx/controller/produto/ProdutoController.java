@@ -258,14 +258,41 @@ public class ProdutoController {
                         event -> alterarPeriodo()
                 );
 
-
         //---------------------------------------------
-        // CONSULTAR HISTÓRICO
+        // DATAS DO PERÍODO PERSONALIZADO
         //---------------------------------------------
 
-        view.getBtConsultarHistorico()
-                .setOnAction(
-                        event -> abrirHistoricoProduto()
+        view.getDtInicio()
+                .valueProperty()
+                .addListener(
+                        (obs, antigo, novo) -> {
+
+                            if ("Período personalizado".equals(
+                                    view.getCmbPeriodo().getValue()
+                            )
+                                    && novo != null
+                                    && view.getDtFim().getValue() != null) {
+
+                                consultarHistorico();
+                            }
+                        }
+                );
+
+
+        view.getDtFim()
+                .valueProperty()
+                .addListener(
+                        (obs, antigo, novo) -> {
+
+                            if ("Período personalizado".equals(
+                                    view.getCmbPeriodo().getValue()
+                            )
+                                    && novo != null
+                                    && view.getDtInicio().getValue() != null) {
+
+                                consultarHistorico();
+                            }
+                        }
                 );
 
         view.getBtCompararCompraVenda()
@@ -517,9 +544,8 @@ public class ProdutoController {
             return;
         }
 
-
         //---------------------------------------------
-        // PERÍODO PERSONALIZADO
+        // DATAS DO PERÍODO
         //---------------------------------------------
 
         LocalDate inicio =

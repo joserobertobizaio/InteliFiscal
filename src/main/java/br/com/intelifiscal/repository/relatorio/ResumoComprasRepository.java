@@ -45,12 +45,15 @@ public class ResumoComprasRepository {
                     2
                 ) AS valor_total,
 
-                ROUND(
-                    COALESCE(SUM(i.valor_total), 0)
-                    /
-                    NULLIF(COUNT(DISTINCT n.id), 0),
-                    2
-                ) AS ticket_medio
+                COALESCE(
+                        ROUND(
+                            COALESCE(SUM(i.valor_total), 0)
+                            /
+                            NULLIF(COUNT(DISTINCT n.id), 0),
+                            2
+                        ),
+                        0
+                    ) AS ticket_medio
 
             FROM tblNFe n
 
@@ -234,6 +237,10 @@ public class ResumoComprasRepository {
 
                     FornecedorCompraDTO dto =
                             new FornecedorCompraDTO();
+
+                    dto.setCnpj(
+                            rs.getString("cnpj")
+                    );
 
                     dto.setFornecedor(
                             rs.getString("fornecedor")

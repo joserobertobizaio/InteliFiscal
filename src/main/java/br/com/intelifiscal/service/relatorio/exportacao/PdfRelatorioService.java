@@ -2,6 +2,9 @@ package br.com.intelifiscal.service.relatorio.exportacao;
 
 import br.com.intelifiscal.dto.periodo.ResumoMensalDTO;
 import br.com.intelifiscal.dto.periodo.ResumoPeriodoDTO;
+import br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO;
+import br.com.intelifiscal.entity.NFeDuplicata;
+import br.com.intelifiscal.repository.NFeDuplicataRepository;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -20,6 +23,12 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 public class PdfRelatorioService {
+
+    private final NFeDuplicataRepository nfeDuplicataRepository;
+
+    public PdfRelatorioService() {
+        this.nfeDuplicataRepository = new NFeDuplicataRepository();
+    }
 
     //==================================================
     // GERAR RELATÓRIO
@@ -1322,4 +1331,1132 @@ public class PdfRelatorioService {
                 valor
         );
     }
+
+    //==================================================
+    // RELATÓRIO ANALÍTICO DE COMPRAS POR FORNECEDOR
+    //==================================================
+
+    public void gerarRelatorioAnalitico(
+            List<DetalhamentoCompraDTO> dados,
+            Path caminhoArquivo,
+            String periodoRelatorio
+    ) {
+
+        if (dados == null) {
+            throw new IllegalArgumentException(
+                    "Os dados do relatório não podem ser nulos."
+            );
+        }
+
+        if (caminhoArquivo == null) {
+            throw new IllegalArgumentException(
+                    "O caminho do arquivo não pode ser nulo."
+            );
+        }
+
+        if (dados.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Não existem compras para gerar o relatório."
+            );
+        }
+
+        try (PDDocument documento = new PDDocument()) {
+
+            float margem = 30;
+
+            //==================================================
+            // AGRUPAR ITENS POR NF
+            //==================================================
+
+            Map<Long, List<DetalhamentoCompraDTO>> notas =
+                    new LinkedHashMap<>();
+
+            for (DetalhamentoCompraDTO dto : dados) {
+
+                if (dto == null || dto.getIdNfe() == null) {
+                    continue;
+                }
+
+                notas.computeIfAbsent(
+                        dto.getIdNfe(),
+                        chave -> new java.util.ArrayList<>()
+                ).add(dto);
+            }
+
+            if (notas.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Não foi possível identificar as Notas Fiscais."
+                );
+            }
+
+            //==================================================
+            // TOTAL DO PERÍODO
+            //==================================================
+
+            BigDecimal totalPeriodo =
+                    BigDecimal.ZERO;
+
+            for (List<DetalhamentoCompraDTO> itensNF : notas.values()) {
+
+                if (!itensNF.isEmpty()) {
+
+                    BigDecimal valorNF =
+                            itensNF.get(0).getValorTotalNF();
+
+                    if (valorNF != null) {
+                        totalPeriodo =
+                                totalPeriodo.add(valorNF);
+                    }
+                }
+            }
+
+            //==================================================
+            // PRIMEIRA PÁGINA
+            //==================================================
+
+            PDPage pagina =
+                    new PDPage(PDRectangle.A4);
+
+            documento.addPage(pagina);
+
+            float largura =
+                    pagina.getMediaBox().getWidth();
+
+            float altura =
+                    pagina.getMediaBox().getHeight();
+
+            float y =
+                    altura - 40;
+
+            PDPageContentStream stream =
+                    new PDPageContentStream(
+                            documento,
+                            pagina
+                    );
+
+            try {
+
+                //==================================================
+                // CABEÇALHO
+                //==================================================
+
+                escreverTexto(
+                        stream,
+                        "INTELIFISCAL",
+                        margem,
+                        y,
+                        18,
+                        true
+                );
+
+                escreverTexto(
+                        stream,
+                        "Data de emissão: "
+                                + java.time.LocalDate.now()
+                                .format(
+                                        java.time.format.DateTimeFormatter.ofPattern(
+                                                "dd/MM/yyyy"
+                                        )
+                                ),
+                        largura - 170,
+                        y,
+                        8,
+                        false
+                );
+
+                y -= 22;
+
+                //==================================================
+                // TÍTULO
+                //==================================================
+
+                String titulo =
+                        "RELATÓRIO ANALÍTICO DE COMPRAS";
+
+                if (periodoRelatorio != null &&
+                        !periodoRelatorio.isBlank()) {
+
+                    titulo +=
+                            " - " + periodoRelatorio;
+                }
+
+                escreverTexto(
+                        stream,
+                        titulo,
+                        margem,
+                        y,
+                        13,
+                        true
+                );
+
+                y -= 32;
+
+                //==================================================
+                // FORNECEDOR
+                //==================================================
+
+                DetalhamentoCompraDTO primeiro =
+                        dados.get(0);
+
+                escreverTexto(
+                        stream,
+                        "Fornecedor: "
+                                + valorTexto(
+                                primeiro.getFornecedor()
+                        ),
+                        margem,
+                        y,
+                        9,
+                        true
+                );
+
+                y -= 16;
+
+                escreverTexto(
+                        stream,
+                        "CNPJ: "
+                                + valorTexto(
+                                primeiro.getCnpj()
+                        ),
+                        margem,
+                        y,
+                        9,
+                        false
+                );
+
+                escreverTexto(
+                        stream,
+                        "Município: "
+                                + valorTexto(
+                                primeiro.getMunicipioFornecedor()
+                        ),
+                        280,
+                        y,
+                        9,
+                        false
+                );
+
+                escreverTexto(
+                        stream,
+                        "UF: "
+                                + valorTexto(
+                                primeiro.getUfFornecedor()
+                        ),
+                        470,
+                        y,
+                        9,
+                        false
+                );
+
+                y -= 18;
+
+                //==================================================
+                // TOTAL DO PERÍODO
+                //==================================================
+
+                escreverTexto(
+                        stream,
+                        "Total de compras no período: "
+                                + formatarMoeda(totalPeriodo),
+                        margem,
+                        y,
+                        10,
+                        true
+                );
+
+                y -= 28;
+
+                //==================================================
+                // NOTAS FISCAIS
+                //==================================================
+
+                for (List<DetalhamentoCompraDTO> itensNF
+                        : notas.values()) {
+
+                    //==================================================
+                    // NOVA PÁGINA
+                    //==================================================
+
+                    if (y < 130) {
+
+                        stream.close();
+
+                        pagina =
+                                new PDPage(PDRectangle.A4);
+
+                        documento.addPage(pagina);
+
+                        largura =
+                                pagina.getMediaBox().getWidth();
+
+                        altura =
+                                pagina.getMediaBox().getHeight();
+
+                        y =
+                                altura - 40;
+
+                        stream =
+                                new PDPageContentStream(
+                                        documento,
+                                        pagina
+                                );
+                    }
+
+                    DetalhamentoCompraDTO nf =
+                            itensNF.get(0);
+
+                    //==================================================
+                    // CABEÇALHO DA NF
+                    //==================================================
+
+                    escreverTexto(
+                            stream,
+                            "Nº NF: "
+                                    + valorTexto(
+                                    nf.getNumeroNota()
+                            ),
+                            margem,
+                            y,
+                            9,
+                            true
+                    );
+
+                    String dataNF = "";
+
+                    if (nf.getDataCompra() != null) {
+
+                        dataNF =
+                                nf.getDataCompra()
+                                        .format(
+                                                java.time.format.DateTimeFormatter.ofPattern(
+                                                        "dd/MM/yyyy"
+                                                )
+                                        );
+                    }
+
+                    escreverTexto(
+                            stream,
+                            "Data Emissão: " + dataNF,
+                            160,
+                            y,
+                            9,
+                            false
+                    );
+
+                    escreverTexto(
+                            stream,
+                            "Valor Total NF: "
+                                    + formatarMoeda(
+                                    nf.getValorTotalNF()
+                            ),
+                            310,
+                            y,
+                            9,
+                            false
+                    );
+
+                    //==================================================
+                    // DUPLICATAS
+                    //==================================================
+
+                    List<NFeDuplicata> duplicatas =
+                            nfeDuplicataRepository.listarPorNfe(
+                                    nf.getIdNfe()
+                            );
+
+                    String parcelas =
+                            duplicatas.isEmpty()
+                                    ? "Não informado"
+                                    : String.format(
+                                    "%02d",
+                                    duplicatas.size()
+                            );
+
+                    escreverTexto(
+                            stream,
+                            "Nº Parcelas: " + parcelas,
+                            470,
+                            y,
+                            9,
+                            false
+                    );
+
+                    y -= 18;
+
+                    if (!duplicatas.isEmpty()) {
+
+                        escreverTexto(
+                                stream,
+                                "Duplicatas:",
+                                margem,
+                                y,
+                                8,
+                                true
+                        );
+
+                        y -= 15;
+
+                        for (
+                                NFeDuplicata duplicata
+                                : duplicatas
+                        ) {
+
+                            String vencimento = "";
+
+                            if (duplicata.getDataVencimento() != null) {
+
+                                vencimento =
+                                        duplicata.getDataVencimento()
+                                                .format(
+                                                        java.time.format.DateTimeFormatter.ofPattern(
+                                                                "dd/MM/yyyy"
+                                                        )
+                                                );
+                            }
+
+                            escreverTexto(
+                                    stream,
+                                    valorTexto(
+                                            duplicata.getNumeroDuplicata()
+                                    )
+                                            + " - "
+                                            + formatarMoeda(
+                                            duplicata.getValor()
+                                    )
+                                            + " - "
+                                            + vencimento,
+                                    margem + 10,
+                                    y,
+                                    8,
+                                    false
+                            );
+
+                            y -= 14;
+                        }
+                    }
+
+                    //==================================================
+                    // CABEÇALHO DOS ITENS
+                    //==================================================
+
+                    y -= 6;
+
+                    escreverTexto(
+                            stream,
+                            "Nº Item",
+                            margem,
+                            y,
+                            8,
+                            true
+                    );
+
+                    escreverTexto(
+                            stream,
+                            "Descrição do item",
+                            75,
+                            y,
+                            8,
+                            true
+                    );
+
+                    escreverTexto(
+                            stream,
+                            "Qtde.",
+                            300,
+                            y,
+                            8,
+                            true
+                    );
+
+                    escreverTexto(
+                            stream,
+                            "UN.",
+                            345,
+                            y,
+                            8,
+                            true
+                    );
+
+                    escreverTexto(
+                            stream,
+                            "Valor Unit.",
+                            390,
+                            y,
+                            8,
+                            true
+                    );
+
+                    escreverTexto(
+                            stream,
+                            "Total Item",
+                            490,
+                            y,
+                            8,
+                            true
+                    );
+
+                    y -= 14;
+
+                    //==================================================
+                    // ITENS
+                    //==================================================
+
+                    for (DetalhamentoCompraDTO item : itensNF) {
+
+                        if (y < 80) {
+
+                            stream.close();
+
+                            pagina =
+                                    new PDPage(PDRectangle.A4);
+
+                            documento.addPage(pagina);
+
+                            largura =
+                                    pagina.getMediaBox().getWidth();
+
+                            altura =
+                                    pagina.getMediaBox().getHeight();
+
+                            y =
+                                    altura - 40;
+
+                            stream =
+                                    new PDPageContentStream(
+                                            documento,
+                                            pagina
+                                    );
+                        }
+
+                        String numeroItem =
+                                item.getNumeroItem() == null
+                                        ? ""
+                                        : String.valueOf(
+                                        item.getNumeroItem()
+                                );
+
+                        escreverTexto(
+                                stream,
+                                numeroItem,
+                                margem,
+                                y,
+                                7,
+                                false
+                        );
+
+                        escreverTexto(
+                                stream,
+                                limitarTexto(
+                                        valorTexto(
+                                                item.getProduto()
+                                        ),
+                                        34
+                                ),
+                                75,
+                                y,
+                                7,
+                                false
+                        );
+
+                        escreverTexto(
+                                stream,
+                                String.format(
+                                        Locale.US,
+                                        "%.3f",
+                                        item.getQuantidade()
+                                ).replace(
+                                        ".",
+                                        ","
+                                ),
+                                300,
+                                y,
+                                7,
+                                false
+                        );
+
+                        escreverTexto(
+                                stream,
+                                limitarTexto(
+                                        valorTexto(
+                                                item.getUnidade()
+                                        ),
+                                        5
+                                ),
+                                345,
+                                y,
+                                7,
+                                false
+                        );
+
+                        escreverTexto(
+                                stream,
+                                formatarMoeda(
+                                        item.getValorUnitario()
+                                ),
+                                390,
+                                y,
+                                7,
+                                false
+                        );
+
+                        escreverTexto(
+                                stream,
+                                formatarMoeda(
+                                        item.getValorTotal()
+                                ),
+                                490,
+                                y,
+                                7,
+                                false
+                        );
+
+                        y -= 13;
+                    }
+
+                    //==================================================
+                    // SEPARADOR DA NOTA FISCAL
+                    //==================================================
+
+                    y -= 8;
+
+                    stream.moveTo(
+                            margem,
+                            y
+                    );
+
+                    stream.lineTo(
+                            largura - margem,
+                            y
+                    );
+
+                    stream.stroke();
+
+                    y -= 18;
+                }
+
+                //==================================================
+                // FECHAR STREAM ATUAL
+                //==================================================
+
+                stream.close();
+
+                stream = null;
+
+            } finally {
+
+                if (stream != null) {
+                    stream.close();
+                }
+            }
+
+            //==================================================
+            // RODAPÉ EM TODAS AS PÁGINAS
+            //==================================================
+
+            int totalPaginas =
+                    documento.getNumberOfPages();
+
+            for (int i = 0; i < totalPaginas; i++) {
+
+                PDPage paginaRodape =
+                        documento.getPage(i);
+
+                try (
+                        PDPageContentStream rodape =
+                                new PDPageContentStream(
+                                        documento,
+                                        paginaRodape,
+                                        PDPageContentStream.AppendMode.APPEND,
+                                        true,
+                                        true
+                                )
+                ) {
+
+                    escreverRodapeAnalitico(
+                            rodape,
+                            paginaRodape.getMediaBox().getWidth(),
+                            i + 1,
+                            totalPaginas
+                    );
+                }
+            }
+
+            documento.save(
+                    caminhoArquivo.toFile()
+            );
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Erro ao gerar o relatório analítico em PDF.",
+                    e
+            );
+        }
+    }
+
+    //==================================================
+    // RELATÓRIO SINTÉTICO DE COMPRAS POR FORNECEDOR
+    //==================================================
+
+    public void gerarRelatorioSintetico(
+            List<br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO> dados,
+            Path caminhoArquivo,
+            String periodoRelatorio
+    ) {
+
+        if (dados == null) {
+            throw new IllegalArgumentException(
+                    "Os dados do relatório não podem ser nulos."
+            );
+        }
+
+        if (caminhoArquivo == null) {
+            throw new IllegalArgumentException(
+                    "O caminho do arquivo não pode ser nulo."
+            );
+        }
+
+        if (dados.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Não existem compras para gerar o relatório."
+            );
+        }
+
+        try (
+                PDDocument documento =
+                        new PDDocument()
+        ) {
+
+            //==================================================
+            // PÁGINA A4 - RETRATO
+            //==================================================
+
+            PDPage pagina =
+                    new PDPage(
+                            PDRectangle.A4
+                    );
+
+            documento.addPage(pagina);
+
+            try (
+                    PDPageContentStream stream =
+                            new PDPageContentStream(
+                                    documento,
+                                    pagina
+                            )
+            ) {
+
+                float largura =
+                        pagina.getMediaBox().getWidth();
+
+                float altura =
+                        pagina.getMediaBox().getHeight();
+
+                float margem = 40;
+
+                //==================================================
+                // CABEÇALHO
+                //==================================================
+
+                escreverTexto(
+                        stream,
+                        "INTELIFISCAL",
+                        margem,
+                        altura - 40,
+                        18,
+                        true
+                );
+
+                //==================================================
+                // TÍTULO DO RELATÓRIO + PERÍODO
+                //==================================================
+
+                String tituloRelatorio =
+                        "RELATÓRIO SINTÉTICO DE COMPRAS";
+
+                if (periodoRelatorio != null &&
+                        !periodoRelatorio.isBlank()) {
+
+                    tituloRelatorio +=
+                            " - "
+                                    + periodoRelatorio;
+                }
+
+                escreverTexto(
+                        stream,
+                        tituloRelatorio,
+                        margem,
+                        altura - 62,
+                        13,
+                        true
+                );
+
+                // Data de emissão do relatório
+                String dataEmissao =
+                        java.time.LocalDate.now()
+                                .format(
+                                        java.time.format.DateTimeFormatter.ofPattern(
+                                                "dd/MM/yyyy"
+                                        )
+                                );
+
+                escreverTexto(
+                        stream,
+                        "Data de emissão: " + dataEmissao,
+                        largura - 170,
+                        altura - 40,
+                        8,
+                        false
+                );
+
+                //==================================================
+                // DADOS DO FORNECEDOR
+                //==================================================
+
+                escreverTexto(
+                        stream,
+                        "Fornecedor: "
+                                + valorTexto(
+                                dados.get(0).getFornecedor()
+                        ),
+                        margem,
+                        altura - 95,
+                        9,
+                        true
+                );
+
+                escreverTexto(
+                        stream,
+                        "CNPJ: "
+                                + valorTexto(
+                                dados.get(0).getCnpj()
+                        ),
+                        margem,
+                        altura - 112,
+                        9,
+                        false
+                );
+
+                escreverTexto(
+                        stream,
+                        "Município: "
+                                + valorTexto(
+                                dados.get(0).getMunicipioFornecedor()
+                        ),
+                        margem,
+                        altura - 129,
+                        9,
+                        false
+                );
+
+                escreverTexto(
+                        stream,
+                        "UF: "
+                                + valorTexto(
+                                dados.get(0).getUfFornecedor()
+                        ),
+                        300,
+                        altura - 129,
+                        9,
+                        false
+                );
+
+                //==================================================
+                // TÍTULO DA TABELA
+                //==================================================
+
+                float yCabecalho =
+                        altura - 165;
+
+                escreverTexto(
+                        stream,
+                        "NF",
+                        margem,
+                        yCabecalho,
+                        8,
+                        true
+                );
+
+                escreverTexto(
+                        stream,
+                        "DATA",
+                        120,
+                        yCabecalho,
+                        8,
+                        true
+                );
+
+                escreverTexto(
+                        stream,
+                        "VALOR DA NOTA",
+                        250,
+                        yCabecalho,
+                        8,
+                        true
+                );
+
+                // Linha separadora
+                stream.moveTo(
+                        margem,
+                        yCabecalho - 6
+                );
+
+                stream.lineTo(
+                        largura - margem,
+                        yCabecalho - 6
+                );
+
+                stream.stroke();
+
+                //==================================================
+                // AGRUPAR NOTAS
+                //==================================================
+
+                float linhaY =
+                        yCabecalho - 22;
+
+                Map<String, br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO>
+                        notas =
+                        new LinkedHashMap<>();
+
+                for (
+                        br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO dto
+                        : dados
+                ) {
+
+                    if (dto == null) {
+                        continue;
+                    }
+
+                    String numeroNota =
+                            dto.getNumeroNota();
+
+                    if (
+                            numeroNota == null
+                                    || numeroNota.isBlank()
+                    ) {
+                        continue;
+                    }
+
+                    notas.putIfAbsent(
+                            numeroNota,
+                            dto
+                    );
+                }
+
+                //==================================================
+                // ESCREVER NOTAS
+                //==================================================
+
+                BigDecimal total =
+                        BigDecimal.ZERO;
+
+                for (
+                        br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO dto
+                        : notas.values()
+                ) {
+
+                    BigDecimal valor =
+                            valorDecimal(
+                                    dto.getValorTotalNF()
+                            );
+
+                    total =
+                            total.add(valor);
+
+                    escreverTexto(
+                            stream,
+                            valorTexto(
+                                    dto.getNumeroNota()
+                            ),
+                            margem,
+                            linhaY,
+                            8,
+                            false
+                    );
+
+                    // Data no formato brasileiro
+                    String dataNota = "";
+
+                    if (dto.getDataCompra() != null) {
+
+                        dataNota =
+                                dto.getDataCompra()
+                                        .format(
+                                                java.time.format.DateTimeFormatter.ofPattern(
+                                                        "dd/MM/yyyy"
+                                                )
+                                        );
+                    }
+
+                    escreverTexto(
+                            stream,
+                            dataNota,
+                            120,
+                            linhaY,
+                            8,
+                            false
+                    );
+
+                    escreverTexto(
+                            stream,
+                            formatarMoeda(valor),
+                            250,
+                            linhaY,
+                            8,
+                            false
+                    );
+
+                    linhaY -= 17;
+
+                    // Evitar escrever sobre o rodapé
+                    if (linhaY < 100) {
+                        break;
+                    }
+                }
+
+                //==================================================
+                // RESUMO
+                //==================================================
+
+                linhaY -= 12;
+
+                escreverTexto(
+                        stream,
+                        "Quantidade de NFs: "
+                                + notas.size(),
+                        margem,
+                        linhaY,
+                        9,
+                        true
+                );
+
+                escreverTexto(
+                        stream,
+                        "Total das compras: "
+                                + formatarMoeda(total),
+                        margem,
+                        linhaY - 20,
+                        9,
+                        true
+                );
+
+                BigDecimal ticketMedio =
+                        BigDecimal.ZERO;
+
+                if (!notas.isEmpty()) {
+
+                    ticketMedio =
+                            total.divide(
+                                    BigDecimal.valueOf(
+                                            notas.size()
+                                    ),
+                                    2,
+                                    java.math.RoundingMode.HALF_UP
+                            );
+                }
+
+                escreverTexto(
+                        stream,
+                        "Ticket médio: "
+                                + formatarMoeda(ticketMedio),
+                        margem,
+                        linhaY - 40,
+                        9,
+                        true
+                );
+
+                //==================================================
+                // RODAPÉ
+                //==================================================
+
+                escreverTexto(
+                        stream,
+                        "InteliFiscal — Relatório gerado pelo sistema",
+                        margem,
+                        25,
+                        8,
+                        false
+                );
+
+                escreverTexto(
+                        stream,
+                        "Página 1 de 1",
+                        largura - 85,
+                        25,
+                        8,
+                        false
+                );
+            }
+
+            documento.save(
+                    caminhoArquivo.toFile()
+            );
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Erro ao gerar o relatório sintético em PDF.",
+                    e
+            );
+        }
+    }
+
+        //==================================================
+        // RODAPÉ DO RELATÓRIO ANALÍTICO
+        //==================================================
+
+    private void escreverRodapeAnalitico(
+            PDPageContentStream stream,
+            float largura,
+            int numeroPagina,
+            int totalPaginas
+    ) throws IOException {
+
+        escreverTexto(
+                stream,
+                "InteliFiscal — Relatório gerado pelo sistema",
+                30,
+                25,
+                8,
+                false
+        );
+
+        escreverTexto(
+                stream,
+                "Página "
+                        + numeroPagina
+                        + " de "
+                        + totalPaginas,
+                largura - 85,
+                25,
+                8,
+                false
+        );
+    }
+
+
+            //==================================================
+            // LIMITAR TEXTO
+            //==================================================
+
+    private String limitarTexto(
+            String texto,
+            int tamanhoMaximo
+    ) {
+
+        if (texto == null) {
+            return "";
+        }
+
+        if (texto.length() <= tamanhoMaximo) {
+            return texto;
+        }
+
+        return texto.substring(
+                0,
+                tamanhoMaximo - 3
+        ) + "...";
+    }
+
 }

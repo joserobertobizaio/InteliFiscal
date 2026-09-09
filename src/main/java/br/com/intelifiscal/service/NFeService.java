@@ -20,4 +20,9 @@ public class NFeService {
 
     }
 
+    public Long buscarIdPorChave(String chave) {
+
+        return repository.buscarIdPorChave(chave);
+    }
+
 }

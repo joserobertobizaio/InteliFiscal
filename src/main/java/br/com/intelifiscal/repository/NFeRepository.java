@@ -23,16 +23,18 @@ public class NFeRepository {
             cnpj_emitente,
             emitente,
             municipio_emitente,
+            uf_emitente,
             cnpj_destinatario,
             destinatario,
             municipio_destinatario,
+            uf_destinatario,
             valor_total,
             situacao,
             data_importacao
         )
         VALUES
         (
-            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
         )
         """;
 
@@ -49,15 +51,20 @@ public class NFeRepository {
 
         ) {
 
-            ps.setString(1, nfe.getChave());
+            ps.setString(
+                    1, nfe.getChave());
 
-            ps.setString(2, nfe.getModelo());
+            ps.setString(
+                    2, nfe.getModelo());
 
-            ps.setString(3, nfe.getNumero());
+            ps.setString(
+                    3, nfe.getNumero());
 
-            ps.setString(4, nfe.getSerie());
+            ps.setString(
+                    4, nfe.getSerie());
 
-            ps.setString(5, nfe.getTipo());
+            ps.setString(
+                    5, nfe.getTipo());
 
 
             ps.setString(
@@ -67,24 +74,54 @@ public class NFeRepository {
                             : nfe.getDataEmissao().toString()
             );
 
-            ps.setString(7, nfe.getCnpjEmitente());
-
-            ps.setString(8, nfe.getEmitente());
-
-            ps.setString(9, nfe.getMunicipioEmitente());
-
-            ps.setString(10, nfe.getCnpjDestinatario());
-
-            ps.setString(11, nfe.getDestinatario());
-
-            ps.setString(12, nfe.getMunicipioDestinatario());
-
-            ps.setBigDecimal(13, nfe.getValorTotal());
-
-            ps.setString(14, nfe.getSituacao());
+            ps.setString(
+                    7, nfe.getCnpjEmitente());
 
             ps.setString(
+                    8, nfe.getEmitente());
+
+            ps.setString(
+                    9,
+                    nfe.getMunicipioEmitente()
+            );
+
+            ps.setString(
+                    10,
+                    nfe.getUfEmitente()
+            );
+
+            ps.setString(
+                    11,
+                    nfe.getCnpjDestinatario()
+            );
+
+            ps.setString(
+                    12,
+                    nfe.getDestinatario()
+            );
+
+            ps.setString(
+                    13,
+                    nfe.getMunicipioDestinatario()
+            );
+
+            ps.setString(
+                    14,
+                    nfe.getUfDestinatario()
+            );
+
+            ps.setBigDecimal(
                     15,
+                    nfe.getValorTotal()
+            );
+
+            ps.setString(
+                    16,
+                    nfe.getSituacao()
+            );
+
+            ps.setString(
+                    17,
                     nfe.getDataImportacao() == null
                             ? null
                             : nfe.getDataImportacao().toString()
@@ -150,6 +187,47 @@ public class NFeRepository {
     }
 
     // ============================================================
+    // BUSCAR ID DA NF-e PELA CHAVE
+    // ============================================================
+
+    public Long buscarIdPorChave(String chave) {
+
+        String sql = """
+        SELECT id
+        FROM tblNFe
+        WHERE chave = ?
+        LIMIT 1
+        """;
+
+        try (
+                Connection connection =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(sql)
+        ) {
+
+            ps.setString(1, chave);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getLong("id");
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao buscar ID da NF-e pela chave.",
+                    e
+            );
+        }
+
+        return null;
+    }
+
+    // ============================================================
     // BUSCAR NF-e PARA GERAÇÃO DO PDF
     // ============================================================
 
@@ -170,9 +248,11 @@ public class NFeRepository {
                 cnpj_emitente,
                 emitente,
                 municipio_emitente,
+                uf_emitente,
                 cnpj_destinatario,
                 destinatario,
                 municipio_destinatario,
+                uf_destinatario,
                 valor_total,
                 situacao,
                 data_importacao
@@ -260,6 +340,10 @@ public class NFeRepository {
                             rs.getString("municipio_emitente")
                     );
 
+                    nfe.setUfEmitente(
+                            rs.getString("uf_emitente")
+                    );
+
                     nfe.setCnpjDestinatario(
                             rs.getString("cnpj_destinatario")
                     );
@@ -270,6 +354,10 @@ public class NFeRepository {
 
                     nfe.setMunicipioDestinatario(
                             rs.getString("municipio_destinatario")
+                    );
+
+                    nfe.setUfDestinatario(
+                            rs.getString("uf_destinatario")
                     );
 
                     nfe.setValorTotal(

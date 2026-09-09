@@ -6,6 +6,10 @@ import br.com.intelifiscal.dto.relatorio.ResumoComprasDTO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableRow;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -56,6 +60,19 @@ public class ResumoComprasView extends BorderPane {
 
     private final TableView<FornecedorCompraDTO> tabelaFornecedores =
             new TableView<>();
+
+    //==================================================
+    // MENU DE CONTEXTO
+    //==================================================
+
+    private final ContextMenu menuContexto =
+            new ContextMenu();
+
+    private final MenuItem miRelatorioSintetico =
+            new MenuItem("Relatório Sintético");
+
+    private final MenuItem miRelatorioAnalitico =
+            new MenuItem("Relatório Analítico");
 
 
     //==================================================
@@ -120,6 +137,8 @@ public class ResumoComprasView extends BorderPane {
         criarResumo();
 
         criarRodape();
+
+        criarMenuContexto();
 
         atualizarControlesPeriodo();
     }
@@ -639,6 +658,66 @@ public class ResumoComprasView extends BorderPane {
         return tabelaFornecedores;
     }
 
+    //==================================================
+    // MENU DE CONTEXTO DA TABELA
+    //==================================================
+
+    private void criarMenuContexto() {
+
+        menuContexto.getItems().setAll(
+                miRelatorioSintetico,
+                miRelatorioAnalitico
+        );
+
+        tabelaFornecedores.setRowFactory(
+                tabela -> {
+
+                    TableRow<FornecedorCompraDTO> linha =
+                            new TableRow<>();
+
+                    //==================================================
+                    // BOTÃO DIREITO SOBRE A LINHA
+                    //==================================================
+
+                    linha.setOnContextMenuRequested(
+                            event -> {
+
+                                if (!linha.isEmpty()) {
+
+                                    tabelaFornecedores
+                                            .getSelectionModel()
+                                            .select(linha.getIndex());
+
+                                    menuContexto.show(
+                                            linha,
+                                            event.getScreenX(),
+                                            event.getScreenY()
+                                    );
+                                }
+
+                                event.consume();
+                            }
+                    );
+
+                    //==================================================
+                    // FECHA O MENU AO CLICAR FORA
+                    //==================================================
+
+                    linha.setOnMousePressed(
+                            event -> {
+
+                                if (event.isPrimaryButtonDown()) {
+
+                                    menuContexto.hide();
+                                }
+                            }
+                    );
+
+                    return linha;
+                }
+        );
+    }
+
 
     //==================================================
     // CARD
@@ -931,6 +1010,21 @@ public class ResumoComprasView extends BorderPane {
     getTabelaFornecedores() {
 
         return tabelaFornecedores;
+    }
+
+    //==================================================
+    // GETTERS - MENU DE CONTEXTO
+    //==================================================
+
+    public MenuItem getMiRelatorioSintetico() {
+
+        return miRelatorioSintetico;
+    }
+
+
+    public MenuItem getMiRelatorioAnalitico() {
+
+        return miRelatorioAnalitico;
     }
 
 

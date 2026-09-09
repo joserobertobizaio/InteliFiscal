@@ -9,6 +9,7 @@ import br.com.intelifiscal.service.relatorio.ResumoComprasService;
 import br.com.intelifiscal.dto.relatorio.DetalhamentoCompraDTO;
 import br.com.intelifiscal.service.relatorio.DetalhamentoCompraService;
 import br.com.intelifiscal.service.relatorio.exportacao.ExcelRelatorioService;
+import br.com.intelifiscal.service.relatorio.exportacao.PdfRelatorioService;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -26,6 +27,8 @@ public class ResumoComprasController {
     private final ExcelRelatorioService excelService =
             new ExcelRelatorioService();
 
+    private final PdfRelatorioService pdfService =
+            new PdfRelatorioService();
 
     public ResumoComprasController(
             ResumoComprasView view
@@ -131,6 +134,22 @@ public class ResumoComprasController {
 
         view.getBtExcel().setOnAction(
                 e -> exportarExcel()
+        );
+
+
+        //==================================================
+        // MENU DE CONTEXTO
+        //==================================================
+
+        view.getMiRelatorioSintetico().setOnAction(
+                e -> {
+
+                    gerarRelatorioSintetico();
+                }
+        );
+
+        view.getMiRelatorioAnalitico().setOnAction(
+                e -> gerarRelatorioAnalitico()
         );
     }
 
@@ -400,5 +419,312 @@ public class ResumoComprasController {
         );
 
         alerta.showAndWait();
+    }
+
+    //==================================================
+    // RELATÓRIO SINTÉTICO
+    //==================================================
+
+    private void gerarRelatorioSintetico() {
+
+        FornecedorCompraDTO fornecedor =
+                view.getTabelaFornecedores()
+                        .getSelectionModel()
+                        .getSelectedItem();
+
+        if (fornecedor == null) {
+            return;
+        }
+
+        LocalDate dataInicio =
+                view.getDtInicio().getValue();
+
+        LocalDate dataFim =
+                view.getDtFim().getValue();
+
+        if (dataFim == null) {
+            return;
+        }
+
+        List<DetalhamentoCompraDTO> detalhes =
+                detalhamentoService.listarPorFornecedor(
+                        dataInicio,
+                        dataFim,
+                        fornecedor.getCnpj()
+                );
+
+        if (detalhes.isEmpty()) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle("Relatório Sintético");
+            alerta.setHeaderText(null);
+            alerta.setContentText(
+                    "Nenhuma compra foi encontrada para o fornecedor selecionado."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+        FileChooser chooser =
+                new FileChooser();
+
+        chooser.setTitle(
+                "Salvar Relatório Sintético"
+        );
+
+        chooser.setInitialFileName(
+                "Relatorio_Sintetico_"
+                        + fornecedor.getFornecedor()
+                        + ".pdf"
+        );
+
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Arquivo PDF (*.pdf)",
+                        "*.pdf"
+                )
+        );
+
+        Window window =
+                view.getScene().getWindow();
+
+        File arquivo =
+                chooser.showSaveDialog(window);
+
+        if (arquivo == null) {
+            return;
+        }
+
+        //==================================================
+        // PERÍODO DO RELATÓRIO
+        //==================================================
+
+        String periodoRelatorio =
+                obterPeriodoRelatorio(
+                        dataInicio,
+                        dataFim
+                );
+
+        pdfService.gerarRelatorioSintetico(
+                detalhes,
+                arquivo.toPath(),
+                periodoRelatorio
+        );
+
+        javafx.scene.control.Alert alerta =
+                new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.INFORMATION
+                );
+
+        alerta.setTitle(
+                "Relatório gerado"
+        );
+
+        alerta.setHeaderText(null);
+
+        alerta.setContentText(
+                "O Relatório Sintético foi gerado com sucesso!"
+        );
+
+        alerta.showAndWait();
+    }
+
+
+    //==================================================
+    // RELATÓRIO ANALÍTICO
+    //==================================================
+
+    private void gerarRelatorioAnalitico() {
+
+        FornecedorCompraDTO fornecedor =
+                view.getTabelaFornecedores()
+                        .getSelectionModel()
+                        .getSelectedItem();
+
+        if (fornecedor == null) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle("Relatório Analítico");
+            alerta.setHeaderText(null);
+            alerta.setContentText(
+                    "Nenhum fornecedor está selecionado."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+        LocalDate dataInicio =
+                view.getDtInicio().getValue();
+
+        LocalDate dataFim =
+                view.getDtFim().getValue();
+
+        if (dataFim == null) {
+            return;
+        }
+
+        //==================================================
+        // BUSCAR DETALHAMENTO
+        //==================================================
+
+        List<DetalhamentoCompraDTO> detalhes =
+                detalhamentoService.listarPorFornecedor(
+                        dataInicio,
+                        dataFim,
+                        fornecedor.getCnpj()
+                );
+
+        if (detalhes.isEmpty()) {
+
+            javafx.scene.control.Alert alerta =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.WARNING
+                    );
+
+            alerta.setTitle("Relatório Analítico");
+            alerta.setHeaderText(null);
+            alerta.setContentText(
+                    "Nenhuma compra foi encontrada para o fornecedor selecionado."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
+
+        //==================================================
+        // ESCOLHER LOCAL DO ARQUIVO
+        //==================================================
+
+        FileChooser chooser =
+                new FileChooser();
+
+        chooser.setTitle(
+                "Salvar Relatório Analítico"
+        );
+
+        chooser.setInitialFileName(
+                "Relatorio_Analitico_"
+                        + fornecedor.getFornecedor()
+                        + ".pdf"
+        );
+
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Arquivo PDF (*.pdf)",
+                        "*.pdf"
+                )
+        );
+
+        Window window =
+                view.getScene().getWindow();
+
+        File arquivo =
+                chooser.showSaveDialog(window);
+
+        if (arquivo == null) {
+            return;
+        }
+
+        //==================================================
+        // PERÍODO DO RELATÓRIO
+        //==================================================
+
+        String periodoRelatorio =
+                obterPeriodoRelatorio(
+                        dataInicio,
+                        dataFim
+                );
+
+        //==================================================
+        // GERAR PDF
+        //==================================================
+
+        pdfService.gerarRelatorioAnalitico(
+                detalhes,
+                arquivo.toPath(),
+                periodoRelatorio
+        );
+
+        //==================================================
+        // MENSAGEM DE SUCESSO
+        //==================================================
+
+        javafx.scene.control.Alert alerta =
+                new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.INFORMATION
+                );
+
+        alerta.setTitle(
+                "Relatório gerado"
+        );
+
+        alerta.setHeaderText(null);
+
+        alerta.setContentText(
+                "O Relatório Analítico foi gerado com sucesso!"
+        );
+
+        alerta.showAndWait();
+    }
+
+    //==================================================
+    // PERÍODO DO RELATÓRIO
+    //==================================================
+
+    private String obterPeriodoRelatorio(
+            LocalDate dataInicio,
+            LocalDate dataFim
+    ) {
+
+        String periodo =
+                view.getCbPeriodo().getValue();
+
+        //==================================================
+        // DESDE O INÍCIO
+        //==================================================
+
+        if ("Desde o início".equals(periodo)) {
+
+            return "DESDE O INÍCIO";
+        }
+
+
+        //==================================================
+        // PERÍODO COM DATAS
+        //==================================================
+
+        if (dataInicio != null &&
+                dataFim != null) {
+
+            java.time.format.DateTimeFormatter formato =
+                    java.time.format.DateTimeFormatter.ofPattern(
+                            "dd/MM/yyyy"
+                    );
+
+            return "DE "
+                    + dataInicio.format(formato)
+                    + " ATÉ "
+                    + dataFim.format(formato);
+        }
+
+
+        //==================================================
+        // SEGURANÇA
+        //==================================================
+
+        return "";
     }
 }

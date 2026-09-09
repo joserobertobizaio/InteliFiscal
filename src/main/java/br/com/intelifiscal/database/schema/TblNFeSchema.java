@@ -36,11 +36,15 @@ public final class TblNFeSchema {
             
                 municipio_emitente TEXT,
             
+                uf_emitente TEXT,
+            
                 cnpj_destinatario TEXT NOT NULL,
             
                 destinatario TEXT NOT NULL,
             
                 municipio_destinatario TEXT,
+            
+                uf_destinatario TEXT,
             
                 valor_total NUMERIC NOT NULL,
 

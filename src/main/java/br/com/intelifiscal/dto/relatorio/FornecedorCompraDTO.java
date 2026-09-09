@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public class FornecedorCompraDTO {
 
+    private String cnpj;
     private String fornecedor;
     private int notas;
     private int itens;
@@ -16,6 +17,18 @@ public class FornecedorCompraDTO {
     //==================================================
 
     public FornecedorCompraDTO() {
+    }
+
+    //==================================================
+    // GETTER E SETTER - CNPJ
+    //==================================================
+
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
     }
 
     //==================================================
