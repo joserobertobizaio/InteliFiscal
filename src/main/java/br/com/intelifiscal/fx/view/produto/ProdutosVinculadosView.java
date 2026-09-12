@@ -44,6 +44,8 @@ public class ProdutosVinculadosView extends BorderPane {
     private final MenuItem miDesvincular =
             new MenuItem("🔓 Desvincular produtos");
 
+    private final MenuItem menuDetalharVinculo =
+            new MenuItem("🔎 Detalhar vínculo");
 
     // ============================================================
     // CONTADOR
@@ -74,7 +76,6 @@ public class ProdutosVinculadosView extends BorderPane {
 
         configurarTabela();
     }
-
 
     // ============================================================
     // LAYOUT
@@ -383,16 +384,51 @@ public class ProdutosVinculadosView extends BorderPane {
                 )
         );
 
+        // ========================================================
+        // MENU DE CONTEXTO
+        // ========================================================
+
         menuContexto.getItems().setAll(
+                menuDetalharVinculo,
                 miDesvincular
+        );
+
+        tabela.setRowFactory(
+                tv -> {
+
+                    TableRow<ProdutoVinculoDTO> row =
+                            new TableRow<>();
+
+                    row.setOnContextMenuRequested(
+                            event -> {
+
+                                if (!row.isEmpty()) {
+
+                                    tabela.getSelectionModel()
+                                            .select(row.getItem());
+
+                                    menuContexto.show(
+                                            row,
+                                            event.getScreenX(),
+                                            event.getScreenY()
+                                    );
+
+                                } else {
+
+                                    menuContexto.hide();
+
+                                }
+                            }
+                    );
+
+                    return row;
+                }
         );
 
         tabela.setContextMenu(
                 menuContexto
         );
-
     }
-
 
     // ============================================================
     // VALOR SEGURO
@@ -440,12 +476,19 @@ public class ProdutosVinculadosView extends BorderPane {
         return dados;
     }
 
+    public MenuItem getMenuDetalharVinculo() {
+
+        return menuDetalharVinculo;
+    }
+
     public Label getLblContador() {
 
         return lblContador;
     }
 
     public MenuItem getMiDesvincular() {
+
         return miDesvincular;
     }
+
 }

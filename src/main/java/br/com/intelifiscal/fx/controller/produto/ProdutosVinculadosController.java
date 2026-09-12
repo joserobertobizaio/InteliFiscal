@@ -7,6 +7,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.util.List;
 
@@ -55,6 +57,10 @@ public class ProdutosVinculadosController {
 
         view.getMiDesvincular().setOnAction(
                 event -> desvincular()
+        );
+
+        view.getMenuDetalharVinculo().setOnAction(
+                event -> detalharVinculo()
         );
 
         view.getBtFechar().setOnAction(
@@ -182,6 +188,107 @@ public class ProdutosVinculadosController {
         );
 
         atualizarContador();
+    }
+
+    // ============================================================
+    // DETALHAR VÍNCULO
+    // ============================================================
+
+    private void detalharVinculo() {
+
+        ProdutoVinculoDTO vinculo =
+                view.getTabela()
+                        .getSelectionModel()
+                        .getSelectedItem();
+
+        if (vinculo == null) {
+
+            mostrarAviso(
+                    "Selecione um vínculo na tabela para detalhar."
+            );
+
+            return;
+        }
+
+
+        // --------------------------------------------------------
+        // CRIA A TELA DE COMPARAÇÃO
+        // --------------------------------------------------------
+
+        br.com.intelifiscal.fx.view.produto.CompararCompraVendaView compararView =
+                new br.com.intelifiscal.fx.view.produto.CompararCompraVendaView();
+
+
+        // --------------------------------------------------------
+        // CRIA A JANELA
+        // --------------------------------------------------------
+
+        Stage janela =
+                new Stage();
+
+        janela.setTitle(
+                "InteliFiscal - Comparar Compra × Venda"
+        );
+
+        janela.initOwner(
+                view.getScene().getWindow()
+        );
+
+
+        // --------------------------------------------------------
+        // CONFIGURA O CONTROLLER
+        // --------------------------------------------------------
+
+        new CompararCompraVendaController(
+                compararView
+        );
+
+
+        // --------------------------------------------------------
+        // PREENCHE OS CÓDIGOS DO VÍNCULO
+        // --------------------------------------------------------
+
+        compararView.getTxtCodigoCompra().setText(
+                vinculo.getCodigoCompra()
+        );
+
+        compararView.getTxtCodigoVenda().setText(
+                vinculo.getCodigoVenda()
+        );
+
+
+        // --------------------------------------------------------
+        // EXECUTA A PESQUISA AUTOMATICAMENTE
+        // --------------------------------------------------------
+
+        compararView.getBtPesquisar().fire();
+
+
+        // --------------------------------------------------------
+        // FECHAR A JANELA POP-UP
+        // --------------------------------------------------------
+
+        compararView.getBtFechar().setOnAction(
+                event -> janela.close()
+        );
+
+
+        // --------------------------------------------------------
+        // MOSTRA A JANELA
+        // --------------------------------------------------------
+
+        janela.setScene(
+                new Scene(
+                        compararView,
+                        1100,
+                        700
+                )
+        );
+
+        janela.setMinWidth(950);
+        janela.setMinHeight(600);
+
+        janela.show();
     }
 
 

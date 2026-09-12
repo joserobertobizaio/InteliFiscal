@@ -59,7 +59,7 @@ public class SideBar extends VBox {
 
         getChildren().add(createItem(
                 ScreenType.COMPARAR_COMPRA_VENDA,
-                "Comparar \nCompra × Venda"
+                "Comparar/Vincular \nCompra × Venda"
         ));
 
 

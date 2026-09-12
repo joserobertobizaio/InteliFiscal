@@ -384,14 +384,17 @@ public class DashboardView extends BaseView {
     }
 
     public MetricCard getClientesCard() {
+
         return clientesCard;
     }
 
     public MetricCard getComprasCard() {
+
         return comprasCard;
     }
 
     public MetricCard getVendasCard() {
+
         return vendasCard;
     }
 
