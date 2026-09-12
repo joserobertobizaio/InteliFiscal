@@ -261,7 +261,8 @@ public class ProdutoView extends BaseView {
 
                 tabelaHistorico,
 
-                resumoProduto,
+                //resumoProduto, aqui está os cards comparativos, eles já estão funcionando
+                // vamos adicioná-los na proxima versao
 
                 crudButtonBar
         );
@@ -983,8 +984,8 @@ public class ProdutoView extends BaseView {
     }
 
     //==================================================
-// RESUMO DO PRODUTO
-//==================================================
+    // RESUMO DO PRODUTO
+    //==================================================
 
     private HBox criarResumoProduto() {
 
@@ -1024,8 +1025,8 @@ public class ProdutoView extends BaseView {
     }
 
     //==================================================
-// CARD DO RESUMO
-//==================================================
+    // CARD DO RESUMO
+    //==================================================
 
     private VBox criarCardResumo(
             String titulo,
