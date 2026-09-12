@@ -1,11 +1,16 @@
 package br.com.intelifiscal.service.produto;
 
 import br.com.intelifiscal.repository.produto.ProdutoVinculoRepository;
+import br.com.intelifiscal.dto.produto.ProdutoVinculoDTO;
 
 public class ProdutoVinculoService {
 
     private final ProdutoVinculoRepository repository =
             new ProdutoVinculoRepository();
+
+    public java.util.List<ProdutoVinculoDTO> listarTodos() {
+        return repository.listarTodos();
+    }
 
 
     // ============================================================

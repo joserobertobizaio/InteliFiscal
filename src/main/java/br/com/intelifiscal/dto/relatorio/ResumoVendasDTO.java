@@ -18,38 +18,47 @@ public class ResumoVendasDTO {
     }
 
     public void setNotas(int notas) {
+
         this.notas = notas;
     }
 
     public int getItens() {
+
         return itens;
     }
 
     public void setItens(int itens) {
+
         this.itens = itens;
     }
 
     public double getQuantidade() {
+
         return quantidade;
     }
 
     public void setQuantidade(double quantidade) {
+
         this.quantidade = quantidade;
     }
 
     public BigDecimal getValorTotal() {
+
         return valorTotal;
     }
 
     public void setValorTotal(BigDecimal valorTotal) {
+
         this.valorTotal = valorTotal;
     }
 
     public BigDecimal getTicketMedio() {
+
         return ticketMedio;
     }
 
     public void setTicketMedio(BigDecimal ticketMedio) {
+
         this.ticketMedio = ticketMedio;
     }
 }

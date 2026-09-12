@@ -7,6 +7,12 @@ import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
 import br.com.intelifiscal.service.produto.ProdutoService;
 import br.com.intelifiscal.service.produto.ConversaoUnidadeService;
 
+import br.com.intelifiscal.fx.view.produto.ProdutosVinculadosView;
+
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -65,6 +71,11 @@ public class CompararCompraVendaController {
         view.getBtVincular()
                 .setOnAction(
                         e -> vincularProdutos()
+                );
+
+        view.getBtProdutosVinculados()
+                .setOnAction(
+                        e -> abrirProdutosVinculados()
                 );
 
         view.getBtFechar()
@@ -636,6 +647,48 @@ public class CompararCompraVendaController {
                 .setText(
                         "Informe os códigos para realizar a comparação."
                 );
+    }
+
+    // ============================================================
+// PRODUTOS VINCULADOS
+// ============================================================
+
+    private void abrirProdutosVinculados() {
+
+        ProdutosVinculadosView vinculadosView =
+                new ProdutosVinculadosView();
+
+        new ProdutosVinculadosController(
+                vinculadosView
+        );
+
+        Stage janela =
+                new Stage();
+
+        janela.setTitle(
+                "InteliFiscal - Produtos Vinculados"
+        );
+
+        janela.initOwner(
+                view.getScene().getWindow()
+        );
+
+        janela.initModality(
+                Modality.NONE
+        );
+
+        janela.setScene(
+                new Scene(
+                        vinculadosView,
+                        1050,
+                        650
+                )
+        );
+
+        janela.setMinWidth(900);
+        janela.setMinHeight(550);
+
+        janela.show();
     }
 
     //==================================================

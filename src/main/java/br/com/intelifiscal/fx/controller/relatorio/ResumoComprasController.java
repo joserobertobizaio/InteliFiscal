@@ -479,8 +479,8 @@ public class ResumoComprasController {
         );
 
         chooser.setInitialFileName(
-                "Relatorio_Sintetico_"
-                        + fornecedor.getFornecedor()
+                "Relatorio_Sintetico_Compras_"
+                        + fornecedor.getFornecedor().replace("/", "_")
                         + ".pdf"
         );
 
@@ -616,8 +616,8 @@ public class ResumoComprasController {
         );
 
         chooser.setInitialFileName(
-                "Relatorio_Analitico_"
-                        + fornecedor.getFornecedor()
+                "Relatorio_Analitico_Compras_"
+                        + fornecedor.getFornecedor().replace("/","_")
                         + ".pdf"
         );
 

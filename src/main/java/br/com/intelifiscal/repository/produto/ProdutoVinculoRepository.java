@@ -1,7 +1,7 @@
 package br.com.intelifiscal.repository.produto;
 
 import br.com.intelifiscal.database.connection.DatabaseConnection;
-
+import br.com.intelifiscal.dto.produto.ProdutoVinculoDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -200,5 +200,58 @@ public class ProdutoVinculoRepository {
                     e
             );
         }
+    }
+
+    public java.util.List<ProdutoVinculoDTO> listarTodos() {
+
+        String sql = """
+            SELECT
+                v.id,
+                v.codigo_compra,
+                pc.descricao AS descricao_compra,
+                pc.unidade AS unidade_compra,
+                v.codigo_venda,
+                pv.descricao AS descricao_venda,
+                pv.unidade AS unidade_venda
+            FROM tblProdutoVinculo v
+            LEFT JOIN tblProduto pc
+                ON pc.codigo_produto = v.codigo_compra
+            LEFT JOIN tblProduto pv
+                ON pv.codigo_produto = v.codigo_venda
+            ORDER BY
+                pc.descricao,
+                pv.descricao
+            """;
+
+        java.util.List<ProdutoVinculoDTO> lista = new java.util.ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+
+                ProdutoVinculoDTO dto = new ProdutoVinculoDTO();
+
+                dto.setId(rs.getInt("id"));
+                dto.setCodigoCompra(rs.getString("codigo_compra"));
+                dto.setDescricaoCompra(rs.getString("descricao_compra"));
+                dto.setUnidadeCompra(rs.getString("unidade_compra"));
+
+                dto.setCodigoVenda(rs.getString("codigo_venda"));
+                dto.setDescricaoVenda(rs.getString("descricao_venda"));
+                dto.setUnidadeVenda(rs.getString("unidade_venda"));
+
+                lista.add(dto);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Erro ao listar os produtos vinculados.",
+                    e
+            );
+        }
+
+        return lista;
     }
 }

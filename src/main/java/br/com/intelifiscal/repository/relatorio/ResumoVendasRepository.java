@@ -389,6 +389,7 @@ public class ResumoVendasRepository {
             i.descricao AS descricao_item,
             i.cfop,
             i.quantidade,
+            i.unidade AS unidade,
             i.valor_unitario
 
         FROM tblNFe n
@@ -541,6 +542,11 @@ public class ResumoVendasRepository {
                             )
                     );
 
+                    dto.setUnidade(
+                            rs.getString("unidade"
+                            )
+                    );
+
 
                     dto.setValorUnitario(
                             rs.getBigDecimal(
@@ -562,6 +568,254 @@ public class ResumoVendasRepository {
             );
         }
 
+
+        return lista;
+    }
+
+    //==================================================
+    // DETALHAMENTO DE VENDAS POR CLIENTE
+    //==================================================
+
+    public List<br.com.intelifiscal.dto.relatorio.DetalhamentoVendaDTO>
+    consultarDetalhamentoPorCliente(
+            LocalDate dataInicio,
+            LocalDate dataFim,
+            String cnpjCliente
+    ) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                n.cnpj_destinatario AS cnpj,
+                n.id AS id_nfe,
+                n.destinatario AS cliente,
+                n.numero AS numero_nota,
+                n.data_emissao AS data_venda,
+                n.municipio_destinatario AS municipio_cliente,
+                n.uf_destinatario AS uf_cliente,
+
+                i.numero_item,
+                i.codigo_produto AS codigo_produto,
+                i.descricao AS produto,
+                i.cfop,
+                i.quantidade,
+                i.unidade,
+                i.valor_unitario,
+                i.valor_total,
+
+                n.valor_total AS valor_total_nf
+
+            FROM tblNFe n
+
+            CROSS JOIN tblMinhaEmpresa e
+
+            INNER JOIN tblNFeItem i
+                ON i.id_nfe = n.id
+
+            WHERE n.cnpj_emitente = e.cnpj
+
+              AND n.cnpj_destinatario = ?
+
+              AND i.cfop IN (
+                  '5101',
+                  '5102',
+                  '5401',
+                  '5405',
+                  '6101',
+                  '6102',
+                  '6107',
+                  '6108',
+                  '6401',
+                  '6404'
+              )
+            """);
+
+        //==================================================
+        // FILTRO DE PERÍODO
+        //==================================================
+
+        if (dataInicio != null && dataFim != null) {
+
+            sql.append("""
+                
+                AND date(n.data_emissao)
+                    BETWEEN date(?) AND date(?)
+                """);
+
+        } else if (dataInicio != null) {
+
+            sql.append("""
+                
+                AND date(n.data_emissao) >= date(?)
+                """);
+
+        } else if (dataFim != null) {
+
+            sql.append("""
+                
+                AND date(n.data_emissao) <= date(?)
+                """);
+        }
+
+        //==================================================
+        // ORDENAÇÃO
+        //==================================================
+
+        sql.append("""
+            
+            ORDER BY
+                date(n.data_emissao),
+                CAST(n.numero AS INTEGER),
+                i.numero_item
+            """);
+
+        List<br.com.intelifiscal.dto.relatorio.DetalhamentoVendaDTO> lista =
+                new ArrayList<>();
+
+        //==================================================
+        // EXECUÇÃO
+        //==================================================
+
+        try (
+                Connection conn =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        conn.prepareStatement(sql.toString())
+        ) {
+
+            //==================================================
+            // PARÂMETROS
+            //==================================================
+
+            int parametro = 1;
+
+            ps.setString(parametro++, cnpjCliente);
+
+            if (dataInicio != null && dataFim != null) {
+
+                ps.setString(
+                        parametro++,
+                        dataInicio.toString()
+                );
+
+                ps.setString(
+                        parametro,
+                        dataFim.toString()
+                );
+
+            } else if (dataInicio != null) {
+
+                ps.setString(
+                        parametro,
+                        dataInicio.toString()
+                );
+
+            } else if (dataFim != null) {
+
+                ps.setString(
+                        parametro,
+                        dataFim.toString()
+                );
+            }
+
+            //==================================================
+            // RESULTADO
+            //==================================================
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+
+                    br.com.intelifiscal.dto.relatorio.DetalhamentoVendaDTO dto =
+                            new br.com.intelifiscal.dto.relatorio.DetalhamentoVendaDTO();
+
+                    dto.setCnpj(
+                            rs.getString("cnpj")
+                    );
+
+                    dto.setIdNfe(
+                            rs.getLong("id_nfe")
+                    );
+
+                    dto.setCliente(
+                            rs.getString("cliente")
+                    );
+
+                    dto.setNumeroNota(
+                            rs.getString("numero_nota")
+                    );
+
+                    String dataVenda =
+                            rs.getString("data_venda");
+
+                    if (dataVenda != null
+                            && !dataVenda.isBlank()) {
+
+                        if (dataVenda.length() >= 10) {
+
+                            dto.setDataVenda(
+                                    LocalDate.parse(
+                                            dataVenda.substring(0, 10)
+                                    )
+                            );
+                        }
+                    }
+
+                    dto.setMunicipioCliente(
+                            rs.getString("municipio_cliente")
+                    );
+
+                    dto.setUfCliente(
+                            rs.getString("uf_cliente")
+                    );
+
+                    dto.setNumeroItem(
+                            rs.getInt("numero_item")
+                    );
+
+                    dto.setCodigoProduto(
+                            rs.getString("codigo_produto")
+                    );
+
+                    dto.setProduto(
+                            rs.getString("produto")
+                    );
+
+                    dto.setCfop(
+                            rs.getString("cfop")
+                    );
+
+                    dto.setQuantidade(
+                            rs.getBigDecimal("quantidade")
+                    );
+
+                    dto.setUnidade(
+                            rs.getString("unidade")
+                    );
+
+                    dto.setValorUnitario(
+                            rs.getBigDecimal("valor_unitario")
+                    );
+
+                    dto.setValorTotal(
+                            rs.getBigDecimal("valor_total")
+                    );
+
+                    dto.setValorTotalNF(
+                            rs.getBigDecimal("valor_total_nf")
+                    );
+
+                    lista.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao consultar detalhamento de vendas por cliente.",
+                    e
+            );
+        }
 
         return lista;
     }

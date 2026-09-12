@@ -37,6 +37,7 @@ public class DetalhamentoCompraRepository {
                     i.codigo_produto,
                     i.cfop,
                     i.quantidade,
+                    i.unidade,
                     i.valor_unitario,
                     i.valor_total
 

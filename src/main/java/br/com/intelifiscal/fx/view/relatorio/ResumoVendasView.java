@@ -2,7 +2,8 @@ package br.com.intelifiscal.fx.view.relatorio;
 
 import br.com.intelifiscal.dto.relatorio.ResumoVendasDTO;
 import br.com.intelifiscal.dto.relatorio.ClienteVendaDTO;
-
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -59,6 +60,15 @@ public class ResumoVendasView extends BorderPane {
 
     private final TableView<ClienteVendaDTO> tabelaClientes =
             new TableView<>();
+
+    private final ContextMenu menuContextoCliente =
+            new ContextMenu();
+
+    private final MenuItem miRelatorioSintetico =
+            new MenuItem("📄 Relatório Sintético de Vendas");
+
+    private final MenuItem miRelatorioAnalitico =
+            new MenuItem("📋 Relatório Analítico de Vendas");
 
 
     //==================================================
@@ -443,8 +453,28 @@ public class ResumoVendasView extends BorderPane {
 
         VBox areaCentral = new VBox(10);
 
+        //==================================================
+        // TEXTO INFORMATIVO
+        //==================================================
+
+        Label lblDica =
+                new Label(
+                        "💡 Clique com o botão direito sobre um cliente para acessar os relatórios disponíveis."
+                );
+
+        lblDica.setStyle(
+                "-fx-font-size: 12px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: royalblue;"
+        );
+
+        //==================================================
+        // MONTAGEM DA ÁREA CENTRAL
+        //==================================================
+
         areaCentral.getChildren().addAll(
                 grid,
+                lblDica,
                 criarTabelaClientes()
         );
 
@@ -636,6 +666,19 @@ public class ResumoVendasView extends BorderPane {
 
         tabelaClientes.setColumnResizePolicy(
                 TableView.CONSTRAINED_RESIZE_POLICY
+        );
+
+        //==================================================
+        // MENU DE CONTEXTO
+        //==================================================
+
+        menuContextoCliente.getItems().setAll(
+                miRelatorioSintetico,
+                miRelatorioAnalitico
+        );
+
+        tabelaClientes.setContextMenu(
+                menuContextoCliente
         );
 
 
@@ -970,6 +1013,25 @@ public class ResumoVendasView extends BorderPane {
         formato.setMaximumFractionDigits(2);
 
         return formato.format(valor);
+    }
+
+    //==================================================
+    // GETTERS - MENU DE CONTEXTO
+    //==================================================
+
+    public MenuItem getMiRelatorioSintetico() {
+
+        return miRelatorioSintetico;
+    }
+
+    public MenuItem getMiRelatorioAnalitico() {
+
+        return miRelatorioAnalitico;
+    }
+
+    public TableView<ClienteVendaDTO> getTabelaClientes() {
+
+        return tabelaClientes;
     }
 
 }

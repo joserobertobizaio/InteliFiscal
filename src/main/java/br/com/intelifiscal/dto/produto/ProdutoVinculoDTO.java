@@ -1,22 +1,16 @@
 package br.com.intelifiscal.dto.produto;
 
-import java.time.LocalDateTime;
-
 public class ProdutoVinculoDTO {
 
     private int id;
 
-    private int idProduto;
+    private String codigoCompra;
+    private String descricaoCompra;
+    private String unidadeCompra;
 
-    private String codigoProdutoNfe;
-
-    private String descricaoProdutoNfe;
-
-    private String cnpjEmitente;
-
-    private LocalDateTime dataVinculo;
-
-    private boolean ativo;
+    private String codigoVenda;
+    private String descricaoVenda;
+    private String unidadeVenda;
 
 
     // ============================================================
@@ -33,79 +27,63 @@ public class ProdutoVinculoDTO {
 
 
     // ============================================================
-    // ID PRODUTO
+    // PRODUTO DE COMPRA
     // ============================================================
 
-    public int getIdProduto() {
-        return idProduto;
+    public String getCodigoCompra() {
+        return codigoCompra;
     }
 
-    public void setIdProduto(int idProduto) {
-        this.idProduto = idProduto;
-    }
-
-
-    // ============================================================
-    // CÓDIGO DO PRODUTO NA NF-e
-    // ============================================================
-
-    public String getCodigoProdutoNfe() {
-        return codigoProdutoNfe;
-    }
-
-    public void setCodigoProdutoNfe(String codigoProdutoNfe) {
-        this.codigoProdutoNfe = codigoProdutoNfe;
+    public void setCodigoCompra(String codigoCompra) {
+        this.codigoCompra = codigoCompra;
     }
 
 
-    // ============================================================
-    // DESCRIÇÃO DO PRODUTO NA NF-e
-    // ============================================================
-
-    public String getDescricaoProdutoNfe() {
-        return descricaoProdutoNfe;
+    public String getDescricaoCompra() {
+        return descricaoCompra;
     }
 
-    public void setDescricaoProdutoNfe(String descricaoProdutoNfe) {
-        this.descricaoProdutoNfe = descricaoProdutoNfe;
+    public void setDescricaoCompra(String descricaoCompra) {
+        this.descricaoCompra = descricaoCompra;
+    }
+
+
+    public String getUnidadeCompra() {
+        return unidadeCompra;
+    }
+
+    public void setUnidadeCompra(String unidadeCompra) {
+        this.unidadeCompra = unidadeCompra;
     }
 
 
     // ============================================================
-    // CNPJ DO EMITENTE
+    // PRODUTO DE VENDA
     // ============================================================
 
-    public String getCnpjEmitente() {
-        return cnpjEmitente;
+    public String getCodigoVenda() {
+        return codigoVenda;
     }
 
-    public void setCnpjEmitente(String cnpjEmitente) {
-        this.cnpjEmitente = cnpjEmitente;
-    }
-
-
-    // ============================================================
-    // DATA DO VÍNCULO
-    // ============================================================
-
-    public LocalDateTime getDataVinculo() {
-        return dataVinculo;
-    }
-
-    public void setDataVinculo(LocalDateTime dataVinculo) {
-        this.dataVinculo = dataVinculo;
+    public void setCodigoVenda(String codigoVenda) {
+        this.codigoVenda = codigoVenda;
     }
 
 
-    // ============================================================
-    // ATIVO
-    // ============================================================
-
-    public boolean isAtivo() {
-        return ativo;
+    public String getDescricaoVenda() {
+        return descricaoVenda;
     }
 
-    public void setAtivo(boolean ativo) {
-        this.ativo = ativo;
+    public void setDescricaoVenda(String descricaoVenda) {
+        this.descricaoVenda = descricaoVenda;
+    }
+
+
+    public String getUnidadeVenda() {
+        return unidadeVenda;
+    }
+
+    public void setUnidadeVenda(String unidadeVenda) {
+        this.unidadeVenda = unidadeVenda;
     }
 }

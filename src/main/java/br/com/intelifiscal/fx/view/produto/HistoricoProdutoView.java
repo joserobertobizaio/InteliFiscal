@@ -100,6 +100,9 @@ public class HistoricoProdutoView extends BorderPane {
     private final Button btDesvincular =
             new Button("🔓 Desvincular");
 
+    private final Button btProdutosVinculados =
+            new Button("🔗 Consultar Produtos Vinculados");
+
     private final Button btFechar =
             new Button("✖ Fechar");
 
@@ -406,7 +409,7 @@ public class HistoricoProdutoView extends BorderPane {
         btDesvincular.setPrefWidth(125);
         btLimpar.setPrefWidth(100);
         btFechar.setPrefWidth(100);
-
+        btProdutosVinculados.setPrefWidth(195);
 
         HBox botoes =
                 new HBox(
@@ -414,13 +417,14 @@ public class HistoricoProdutoView extends BorderPane {
                         btComparar,
                         btVincular,
                         btDesvincular,
+                        btProdutosVinculados,
                         new Region(),
                         btLimpar,
                         btFechar
                 );
 
         HBox.setHgrow(
-                botoes.getChildren().get(3),
+                botoes.getChildren().get(4),
                 Priority.ALWAYS
         );
 
@@ -1018,26 +1022,37 @@ public class HistoricoProdutoView extends BorderPane {
     // ============================================================
 
     public Button getBtPesquisar() {
+
         return btPesquisar;
     }
 
     public Button getBtLimpar() {
+
         return btLimpar;
     }
 
     public Button getBtComparar() {
+
         return btComparar;
     }
 
     public Button getBtVincular() {
+
         return btVincular;
     }
 
     public Button getBtDesvincular() {
+
         return btDesvincular;
     }
 
+    public Button getBtProdutosVinculados() {
+
+        return btProdutosVinculados;
+    }
+
     public Button getBtFechar() {
+
         return btFechar;
     }
 

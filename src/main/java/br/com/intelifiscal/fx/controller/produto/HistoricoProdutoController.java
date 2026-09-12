@@ -12,6 +12,10 @@ import br.com.intelifiscal.fx.view.produto.HistoricoProdutoView;
 import br.com.intelifiscal.service.produto.ProdutoVinculoService;
 import br.com.intelifiscal.repository.produto.ProdutoVinculoRepository;
 import br.com.intelifiscal.service.produto.ConversaoUnidadeService;
+import br.com.intelifiscal.fx.view.produto.ProdutosVinculadosView;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.input.Clipboard;
@@ -147,6 +151,15 @@ public class HistoricoProdutoController {
         view.getBtDesvincular()
                 .setOnAction(
                         event -> desvincular()
+                );
+
+        // --------------------------------------------------------
+        // PRODUTOS VINCULADOS
+        // --------------------------------------------------------
+
+        view.getBtProdutosVinculados()
+                .setOnAction(
+                        event -> abrirProdutosVinculados()
                 );
 
         // --------------------------------------------------------
@@ -688,6 +701,47 @@ public class HistoricoProdutoController {
                 .requestFocus();
     }
 
+    // ============================================================
+    // PRODUTOS VINCULADOS
+    // ============================================================
+
+    private void abrirProdutosVinculados() {
+
+        ProdutosVinculadosView vinculadosView =
+                new ProdutosVinculadosView();
+
+        new ProdutosVinculadosController(
+                vinculadosView
+        );
+
+        Stage janela =
+                new Stage();
+
+        janela.setTitle(
+                "InteliFiscal - Produtos Vinculados"
+        );
+
+        janela.initOwner(
+                view.getScene().getWindow()
+        );
+
+        janela.initModality(
+                Modality.NONE
+        );
+
+        janela.setScene(
+                new Scene(
+                        vinculadosView,
+                        1050,
+                        650
+                )
+        );
+
+        janela.setMinWidth(900);
+        janela.setMinHeight(550);
+
+        janela.show();
+    }
 
     // ============================================================
     // FECHAR

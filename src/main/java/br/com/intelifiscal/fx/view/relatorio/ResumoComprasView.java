@@ -69,10 +69,10 @@ public class ResumoComprasView extends BorderPane {
             new ContextMenu();
 
     private final MenuItem miRelatorioSintetico =
-            new MenuItem("Relatório Sintético");
+            new MenuItem("📄 Relatório Sintético de Compras");
 
     private final MenuItem miRelatorioAnalitico =
-            new MenuItem("Relatório Analítico");
+            new MenuItem("📄 Relatório Analítico de Compras");
 
 
     //==================================================
@@ -462,16 +462,37 @@ public class ResumoComprasView extends BorderPane {
                 )
         );
 
-
         VBox areaCentral =
                 new VBox(10);
 
+        //==================================================
+        // TEXTO INFORMATIVO
+        //==================================================
+
+        Label lblDica =
+                new Label(
+                        "💡 Clique com o botão direito sobre um fornecedor para acessar os relatórios disponíveis."
+                );
+
+        lblDica.setStyle(
+                "-fx-font-size: 12px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: royalblue;"
+        );
+
+        //==================================================
+        // MONTAGEM DA ÁREA CENTRAL
+        //==================================================
+
         areaCentral.getChildren().addAll(
                 grid,
+                lblDica,
                 criarTabelaFornecedores()
         );
 
         setCenter(areaCentral);
+
+
     }
 
 
@@ -807,7 +828,6 @@ public class ResumoComprasView extends BorderPane {
 
         setBottom(rodape);
     }
-
 
     //==================================================
     // ATUALIZAR RESUMO

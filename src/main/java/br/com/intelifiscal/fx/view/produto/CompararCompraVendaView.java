@@ -29,6 +29,9 @@ public class CompararCompraVendaView extends BorderPane {
     private final Button btVincular =
             new Button("🔗 Vincular");
 
+    private final Button btProdutosVinculados =
+            new Button("🔗 Consultar produtos vinculados");
+
     private final Button btFechar =
             new Button("✖ Fechar");
 
@@ -196,6 +199,12 @@ public class CompararCompraVendaView extends BorderPane {
                 1
         );
 
+        pesquisa.add(
+                btProdutosVinculados,
+                4,
+                1
+        );
+
         // --------------------------------------------------------
         // PAINEL DE COMPARAÇÃO
         // --------------------------------------------------------
@@ -246,7 +255,7 @@ public class CompararCompraVendaView extends BorderPane {
                 new Insets(20, 0, 20, 0)
         );
 
-        resultado.setPrefHeight(160);
+        resultado.setPrefHeight(190);
 
         // --------------------------------------------------------
         // BOTÃO FECHAR
@@ -295,6 +304,9 @@ public class CompararCompraVendaView extends BorderPane {
 
         btVincular.setPrefWidth(110);
         btVincular.setPrefHeight(32);
+
+        btProdutosVinculados.setPrefWidth(225);
+        btProdutosVinculados.setPrefHeight(32);
 
         btFechar.setPrefWidth(100);
         btFechar.setPrefHeight(32);
@@ -506,72 +518,97 @@ public class CompararCompraVendaView extends BorderPane {
     // ============================================================
 
     public TextField getTxtCodigoCompra() {
+
         return txtCodigoCompra;
     }
 
     public TextField getTxtCodigoVenda() {
+
         return txtCodigoVenda;
     }
 
     public Button getBtPesquisar() {
+
         return btPesquisar;
     }
 
-    public Button getBtVincular() { return btVincular; }
+    public Button getBtVincular() {
+
+        return btVincular;
+    }
+
+    public Button getBtProdutosVinculados() {
+
+        return btProdutosVinculados;
+    }
 
     public Button getBtFechar() {
+
         return btFechar;
     }
 
     public Label getLblCompraCodigo() {
+
         return lblCompraCodigo;
     }
 
     public Label getLblCompraDescricao() {
+
         return lblCompraDescricao;
     }
 
     public Label getLblCompraUnidade() {
+
         return lblCompraUnidade;
     }
 
     public Label getLblCompraQuantidade() {
+
         return lblCompraQuantidade;
     }
 
     public Label getLblCompraPreco() {
+
         return lblCompraPreco;
     }
 
     public Label getLblVendaCodigo() {
+
         return lblVendaCodigo;
     }
 
     public Label getLblVendaDescricao() {
+
         return lblVendaDescricao;
     }
 
     public Label getLblVendaUnidade() {
+
         return lblVendaUnidade;
     }
 
     public Label getLblVendaQuantidade() {
+
         return lblVendaQuantidade;
     }
 
     public Label getLblVendaPreco() {
+
         return lblVendaPreco;
     }
 
     public Label getLblResultado() {
+
         return lblResultado;
     }
 
     public Label getLblCompraData() {
+
         return lblCompraData;
     }
 
     public Label getLblVendaData() {
+
         return lblVendaData;
     }
 }

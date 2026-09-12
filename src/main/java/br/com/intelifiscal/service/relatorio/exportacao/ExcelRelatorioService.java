@@ -29,6 +29,9 @@ import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+
 
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.xddf.usermodel.chart.AxisCrosses;
@@ -795,8 +798,8 @@ public class ExcelRelatorioService {
     }
 
     //==================================================
-// GERAR RESUMO DE COMPRAS
-//==================================================
+    // GERAR RESUMO DE COMPRAS
+    //==================================================
 
     public void gerarResumoCompras(
 
@@ -897,6 +900,13 @@ public class ExcelRelatorioService {
                     workbook.createSheet(
                             "Resumo de Compras"
                     );
+
+            ((XSSFSheet) sheet).setTabColor(
+                    new XSSFColor(
+                            IndexedColors.BLUE,
+                            new DefaultIndexedColorMap()
+                    )
+            );
 
 
             //==================================================
@@ -1460,6 +1470,13 @@ public class ExcelRelatorioService {
                             "Detalhamento de Compras"
                     );
 
+            ((XSSFSheet) detalhe).setTabColor(
+                    new XSSFColor(
+                            IndexedColors.LIGHT_CORNFLOWER_BLUE,
+                            new DefaultIndexedColorMap()
+                    )
+            );
+
 
             //==================================================
             // ESTILOS DO DETALHAMENTO
@@ -1510,6 +1527,7 @@ public class ExcelRelatorioService {
                     "PRODUTO",
                     "CÓDIGO",
                     "QUANTIDADE",
+                    "UN",
                     "VALOR UNITÁRIO",
                     "VALOR TOTAL"
             );
@@ -1643,11 +1661,28 @@ public class ExcelRelatorioService {
                 );
 
                 //==================================================
+                // UNIDADE
+                //==================================================
+
+                Cell cellUnidade =
+                        row.createCell(7);
+
+                cellUnidade.setCellValue(
+                        valorTexto(
+                                dto.getUnidade()
+                        )
+                );
+
+                cellUnidade.setCellStyle(
+                        estiloTexto
+                );
+
+                //==================================================
                 // VALOR UNITÁRIO
                 //==================================================
 
                 Cell cellValorUnitario =
-                        row.createCell(7);
+                        row.createCell(8);
 
                 if (dto.getValorUnitario() != null) {
 
@@ -1667,7 +1702,7 @@ public class ExcelRelatorioService {
                 //==================================================
 
                 Cell cellValorTotal =
-                        row.createCell(8);
+                        row.createCell(9);
 
                 if (dto.getValorTotal() != null) {
 
@@ -1682,7 +1717,6 @@ public class ExcelRelatorioService {
                 );
             }
 
-
             //==================================================
             // FILTRO DETALHAMENTO
             //==================================================
@@ -1694,7 +1728,7 @@ public class ExcelRelatorioService {
                                 0,
                                 linhaDetalhe - 1,
                                 0,
-                                8
+                                9
                         )
                 );
             }
@@ -1751,11 +1785,16 @@ public class ExcelRelatorioService {
 
             detalhe.setColumnWidth(
                     7,
-                    18 * 256
+                    8 * 256
             );
 
             detalhe.setColumnWidth(
                     8,
+                    18 * 256
+            );
+
+            detalhe.setColumnWidth(
+                    9,
                     18 * 256
             );
 
@@ -2760,6 +2799,13 @@ public class ExcelRelatorioService {
                             "Resumo de Vendas"
                     );
 
+            ((XSSFSheet) sheet).setTabColor(
+                    new XSSFColor(
+                            IndexedColors.GREEN,
+                            new DefaultIndexedColorMap()
+                    )
+            );
+
 
             //==================================================
             // ESTILOS
@@ -3567,6 +3613,13 @@ public class ExcelRelatorioService {
                             "Detalhamento de Vendas"
                     );
 
+            ((XSSFSheet) detalhe).setTabColor(
+                    new XSSFColor(
+                            IndexedColors.LIGHT_GREEN,
+                            new DefaultIndexedColorMap()
+                    )
+            );
+
 
             //==================================================
             // ESTILOS DO DETALHAMENTO
@@ -3612,6 +3665,7 @@ public class ExcelRelatorioService {
                     "DESCRIÇÃO ITEM",
                     "CFOP",
                     "QUANTIDADE",
+                    "UN.",
                     "VALOR UNITÁRIO"
             );
 
@@ -3818,13 +3872,29 @@ public class ExcelRelatorioService {
                         estiloQuantidadeDetalhe
                 );
 
+                //==================================================
+                // UNIDADE
+                //==================================================
+
+                Cell cellUnidade =
+                        row.createCell(9);
+
+                cellUnidade.setCellValue(
+                        valorTexto(
+                                dto.getUnidade()
+                        )
+                );
+
+                cellUnidade.setCellStyle(
+                        estiloTexto
+                );
 
                 //==================================================
                 // VALOR UNITÁRIO
                 //==================================================
 
                 Cell cellValorUnitario =
-                        row.createCell(9);
+                        row.createCell(10);
 
 
                 if (dto.getValorUnitario() != null) {
@@ -3853,7 +3923,7 @@ public class ExcelRelatorioService {
                                 0,
                                 linhaDetalhe - 1,
                                 0,
-                                9
+                                10
                         )
                 );
             }
@@ -3923,6 +3993,10 @@ public class ExcelRelatorioService {
                     18 * 256
             );
 
+            detalhe.setColumnWidth(
+                    10,
+                    18 * 256
+            );
 
             //==================================================
             // IMPRESSÃO DETALHAMENTO

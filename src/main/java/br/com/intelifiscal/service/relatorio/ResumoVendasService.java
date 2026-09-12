@@ -5,6 +5,7 @@ import br.com.intelifiscal.dto.relatorio.ResumoVendasDTO;
 import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
 import br.com.intelifiscal.repository.relatorio.ResumoVendasRepository;
 import br.com.intelifiscal.dto.venda.ResumoVendaDTO;
+import br.com.intelifiscal.dto.relatorio.DetalhamentoVendaDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -64,6 +65,17 @@ public class ResumoVendasService {
                 dataInicio,
                 dataFim
         );
+    }
+
+    public List<DetalhamentoVendaDTO> consultarDetalhamentoPorCliente(
+            LocalDate dataInicio,
+            LocalDate dataFim,
+            String cnpjCliente) {
+
+        return repository.consultarDetalhamentoPorCliente(
+                dataInicio,
+                dataFim,
+                cnpjCliente);
     }
 
     //==================================================
