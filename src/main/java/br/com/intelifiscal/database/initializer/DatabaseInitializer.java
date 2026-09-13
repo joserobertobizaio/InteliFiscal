@@ -37,9 +37,12 @@ public final class DatabaseInitializer {
 
             createDatabaseDirectory();
 
-            try (Connection connection = DatabaseConnection.getConnection()) {
+            try (Connection connection =
+                         DatabaseConnection.getConnection()) {
 
-                DatabaseVersionManager.initialize(connection);
+                DatabaseVersionManager.initialize(
+                        connection
+                );
 
             }
 
@@ -55,15 +58,23 @@ public final class DatabaseInitializer {
     }
 
     /**
-     * Garante que a pasta do banco exista.
+     * Garante que a pasta onde o banco de dados
+     * está localizado exista.
      */
-    private static void createDatabaseDirectory() throws IOException {
+    private static void createDatabaseDirectory()
+            throws IOException {
 
-        Path directory = Path.of(DatabaseInfo.DATABASE_DIRECTORY);
+        Path databasePath =
+                DatabaseInfo.DATABASE_PATH;
 
-        if (Files.notExists(directory)) {
+        Path directory =
+                databasePath.getParent();
 
-            Files.createDirectories(directory);
+        if (directory != null) {
+
+            Files.createDirectories(
+                    directory
+            );
 
         }
 

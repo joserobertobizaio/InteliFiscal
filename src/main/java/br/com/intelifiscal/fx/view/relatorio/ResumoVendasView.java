@@ -828,7 +828,9 @@ public class ResumoVendasView extends BorderPane {
 
         lblTicketMedio.setText(
                 moeda.format(
-                        dto.getTicketMedio()
+                        dto.getTicketMedio() == null
+                                ? BigDecimal.ZERO
+                                : dto.getTicketMedio()
                 )
         );
     }

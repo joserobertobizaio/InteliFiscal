@@ -230,9 +230,14 @@ public class CompararCompraVendaController {
 
             view.getLblCompraPreco()
                     .setText(
-                            "R$ "
+                            "Preço médio: R$ "
                                     + formatoValor.format(
                                     resumoCompra.precoMedio
+                            )
+                                    + "\n"
+                                    + "Último preço: R$ "
+                                    + formatoValor.format(
+                                    resumoCompra.ultimoPreco
                             )
                     );
         }
@@ -241,9 +246,14 @@ public class CompararCompraVendaController {
 
             view.getLblVendaPreco()
                     .setText(
-                            "R$ "
+                            "Preço médio: R$ "
                                     + formatoValor.format(
                                     resumoVenda.precoMedio
+                            )
+                                    + "\n"
+                                    + "Último preço: R$ "
+                                    + formatoValor.format(
+                                    resumoVenda.ultimoPreco
                             )
                     );
         }
@@ -349,6 +359,10 @@ public class CompararCompraVendaController {
 
         LocalDateTime ultimaData = null;
 
+        double ultimoPreco = 0.0;
+
+        boolean encontrouUltimoMovimento = false;
+
         for (ProdutoHistoricoDTO item : historico) {
 
             if (item == null) {
@@ -376,18 +390,21 @@ public class CompararCompraVendaController {
             }
 
             // ======================================================
-            // ÚLTIMA DATA DO MOVIMENTO
+            // ÚLTIMO MOVIMENTO
             // ======================================================
 
-            if (item.getDataEmissao() != null) {
+            if (!encontrouUltimoMovimento) {
 
-                if (ultimaData == null
-                        || item.getDataEmissao()
-                        .isAfter(ultimaData)) {
+                if (item.getValorUnitario() != null) {
 
-                    ultimaData =
-                            item.getDataEmissao();
+                    ultimoPreco =
+                            item.getValorUnitario();
                 }
+
+                ultimaData =
+                        item.getDataEmissao();
+
+                encontrouUltimoMovimento = true;
             }
         }
 
@@ -403,6 +420,7 @@ public class CompararCompraVendaController {
         return new Resumo(
                 quantidade,
                 precoMedio,
+                ultimoPreco,
                 quantidadePrecos > 0,
                 ultimaData
         );
@@ -650,8 +668,8 @@ public class CompararCompraVendaController {
     }
 
     // ============================================================
-// PRODUTOS VINCULADOS
-// ============================================================
+    // PRODUTOS VINCULADOS
+    // ============================================================
 
     private void abrirProdutosVinculados() {
 
@@ -932,11 +950,14 @@ public class CompararCompraVendaController {
     //==================================================
     // CLASSE RESUMO
     //==================================================
+
     private static class Resumo {
 
         private final double quantidade;
 
         private final double precoMedio;
+
+        private final double ultimoPreco;
 
         private final boolean temMovimento;
 
@@ -945,12 +966,15 @@ public class CompararCompraVendaController {
         private Resumo(
                 double quantidade,
                 double precoMedio,
+                double ultimoPreco,
                 boolean temMovimento,
                 LocalDateTime ultimaData) {
 
             this.quantidade = quantidade;
 
             this.precoMedio = precoMedio;
+
+            this.ultimoPreco = ultimoPreco;
 
             this.temMovimento = temMovimento;
 

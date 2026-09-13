@@ -225,24 +225,28 @@ public class ProdutoVinculoRepository {
 
         java.util.List<ProdutoVinculoDTO> lista = new java.util.ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DatabaseConnection.getConnection()) {
 
-            while (rs.next()) {
+            criarTabelaSeNecessario(conn);
 
-                ProdutoVinculoDTO dto = new ProdutoVinculoDTO();
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
 
-                dto.setId(rs.getInt("id"));
-                dto.setCodigoCompra(rs.getString("codigo_compra"));
-                dto.setDescricaoCompra(rs.getString("descricao_compra"));
-                dto.setUnidadeCompra(rs.getString("unidade_compra"));
+                while (rs.next()) {
 
-                dto.setCodigoVenda(rs.getString("codigo_venda"));
-                dto.setDescricaoVenda(rs.getString("descricao_venda"));
-                dto.setUnidadeVenda(rs.getString("unidade_venda"));
+                    ProdutoVinculoDTO dto = new ProdutoVinculoDTO();
 
-                lista.add(dto);
+                    dto.setId(rs.getInt("id"));
+                    dto.setCodigoCompra(rs.getString("codigo_compra"));
+                    dto.setDescricaoCompra(rs.getString("descricao_compra"));
+                    dto.setUnidadeCompra(rs.getString("unidade_compra"));
+
+                    dto.setCodigoVenda(rs.getString("codigo_venda"));
+                    dto.setDescricaoVenda(rs.getString("descricao_venda"));
+                    dto.setUnidadeVenda(rs.getString("unidade_venda"));
+
+                    lista.add(dto);
+                }
             }
 
         } catch (SQLException e) {

@@ -4,12 +4,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+
 
 public class CompararCompraVendaView extends BorderPane {
 
@@ -285,7 +287,7 @@ public class CompararCompraVendaView extends BorderPane {
                         new Separator(),
                         pesquisa,
                         comparacao,
-                        resultado,
+                       // resultado,
                         rodape
                 );
 
@@ -340,11 +342,43 @@ public class CompararCompraVendaView extends BorderPane {
                         "-fx-font-weight: bold;"
         );
 
+
         GridPane dados =
                 new GridPane();
 
-        dados.setHgap(10);
-        dados.setVgap(10);
+        dados.setHgap(15);
+        dados.setVgap(12);
+
+
+        // --------------------------------------------------------
+        // LARGURA DAS COLUNAS
+        // --------------------------------------------------------
+
+        javafx.scene.layout.ColumnConstraints colunaLabels =
+                new javafx.scene.layout.ColumnConstraints();
+
+        colunaLabels.setMinWidth(110);
+        colunaLabels.setPrefWidth(110);
+        colunaLabels.setMaxWidth(110);
+
+
+        javafx.scene.layout.ColumnConstraints colunaValores =
+                new javafx.scene.layout.ColumnConstraints();
+
+        colunaValores.setMinWidth(220);
+        colunaValores.setPrefWidth(235);
+        colunaValores.setMaxWidth(235);
+
+
+        dados.getColumnConstraints().addAll(
+                colunaLabels,
+                colunaValores
+        );
+
+
+        // --------------------------------------------------------
+        // CÓDIGO
+        // --------------------------------------------------------
 
         adicionarLinha(
                 dados,
@@ -353,12 +387,29 @@ public class CompararCompraVendaView extends BorderPane {
                 0
         );
 
+
+        // --------------------------------------------------------
+        // DESCRIÇÃO
+        // --------------------------------------------------------
+
         adicionarLinha(
                 dados,
                 "Descrição:",
                 lblCompraDescricao,
                 1
         );
+
+
+        lblCompraDescricao.setMaxWidth(235);
+
+        lblCompraDescricao.setTextOverrun(
+                OverrunStyle.ELLIPSIS
+        );
+
+
+        // --------------------------------------------------------
+        // UNIDADE
+        // --------------------------------------------------------
 
         adicionarLinha(
                 dados,
@@ -367,6 +418,11 @@ public class CompararCompraVendaView extends BorderPane {
                 2
         );
 
+
+        // --------------------------------------------------------
+        // QUANTIDADE
+        // --------------------------------------------------------
+
         adicionarLinha(
                 dados,
                 "Quantidade:",
@@ -374,12 +430,22 @@ public class CompararCompraVendaView extends BorderPane {
                 3
         );
 
+
+        // --------------------------------------------------------
+        // PREÇO UNITÁRIO
+        // --------------------------------------------------------
+
         adicionarLinha(
                 dados,
-                "Preço unitário:",
+                "Preço:",
                 lblCompraPreco,
                 4
         );
+
+
+        // --------------------------------------------------------
+        // ÚLTIMA COMPRA
+        // --------------------------------------------------------
 
         adicionarLinha(
                 dados,
@@ -388,6 +454,10 @@ public class CompararCompraVendaView extends BorderPane {
                 5
         );
 
+
+        // --------------------------------------------------------
+        // PAINEL
+        // --------------------------------------------------------
 
         VBox painel =
                 new VBox(
@@ -419,11 +489,43 @@ public class CompararCompraVendaView extends BorderPane {
                         "-fx-font-weight: bold;"
         );
 
+
         GridPane dados =
                 new GridPane();
 
-        dados.setHgap(10);
-        dados.setVgap(10);
+        dados.setHgap(15);
+        dados.setVgap(12);
+
+
+        // --------------------------------------------------------
+        // LARGURA DAS COLUNAS
+        // --------------------------------------------------------
+
+        javafx.scene.layout.ColumnConstraints colunaLabels =
+                new javafx.scene.layout.ColumnConstraints();
+
+        colunaLabels.setMinWidth(110);
+        colunaLabels.setPrefWidth(110);
+        colunaLabels.setMaxWidth(110);
+
+
+        javafx.scene.layout.ColumnConstraints colunaValores =
+                new javafx.scene.layout.ColumnConstraints();
+
+        colunaValores.setMinWidth(220);
+        colunaValores.setPrefWidth(235);
+        colunaValores.setMaxWidth(235);
+
+
+        dados.getColumnConstraints().addAll(
+                colunaLabels,
+                colunaValores
+        );
+
+
+        // --------------------------------------------------------
+        // CÓDIGO
+        // --------------------------------------------------------
 
         adicionarLinha(
                 dados,
@@ -432,12 +534,29 @@ public class CompararCompraVendaView extends BorderPane {
                 0
         );
 
+
+        // --------------------------------------------------------
+        // DESCRIÇÃO
+        // --------------------------------------------------------
+
         adicionarLinha(
                 dados,
                 "Descrição:",
                 lblVendaDescricao,
                 1
         );
+
+
+        lblVendaDescricao.setMaxWidth(235);
+
+        lblVendaDescricao.setTextOverrun(
+                OverrunStyle.ELLIPSIS
+        );
+
+
+        // --------------------------------------------------------
+        // UNIDADE
+        // --------------------------------------------------------
 
         adicionarLinha(
                 dados,
@@ -446,6 +565,11 @@ public class CompararCompraVendaView extends BorderPane {
                 2
         );
 
+
+        // --------------------------------------------------------
+        // QUANTIDADE
+        // --------------------------------------------------------
+
         adicionarLinha(
                 dados,
                 "Quantidade:",
@@ -453,12 +577,22 @@ public class CompararCompraVendaView extends BorderPane {
                 3
         );
 
+
+        // --------------------------------------------------------
+        // PREÇO UNITÁRIO
+        // --------------------------------------------------------
+
         adicionarLinha(
                 dados,
-                "Preço unitário:",
+                "Preço:",
                 lblVendaPreco,
                 4
         );
+
+
+        // --------------------------------------------------------
+        // ÚLTIMA VENDA
+        // --------------------------------------------------------
 
         adicionarLinha(
                 dados,
@@ -466,6 +600,11 @@ public class CompararCompraVendaView extends BorderPane {
                 lblVendaData,
                 5
         );
+
+
+        // --------------------------------------------------------
+        // PAINEL
+        // --------------------------------------------------------
 
         VBox painel =
                 new VBox(
