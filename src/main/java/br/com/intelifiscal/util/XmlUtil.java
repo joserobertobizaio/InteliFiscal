@@ -16,7 +16,12 @@ public final class XmlUtil {
     /**
      * Retorna o primeiro elemento encontrado.
      */
+
     public static Element getFirstElement(Element parent, String tag) {
+
+        if (parent == null || tag == null || tag.isBlank()) {
+            return null;
+        }
 
         NodeList list = parent.getElementsByTagName(tag);
 

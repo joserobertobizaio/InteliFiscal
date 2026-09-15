@@ -47,6 +47,7 @@ public class DetalhamentoCompraRepository {
                     ON i.id_nfe = n.id
 
                 WHERE n.tipo = 'Compra'
+                AND n.situacao <> 'CANCELADA'
 
                   AND date(n.data_emissao)
                       BETWEEN date(?) AND date(?)
@@ -206,6 +207,7 @@ public class DetalhamentoCompraRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.tipo = 'Compra'
+            AND n.situacao <> 'CANCELADA'
 
               AND n.cnpj_emitente = ?
             """);

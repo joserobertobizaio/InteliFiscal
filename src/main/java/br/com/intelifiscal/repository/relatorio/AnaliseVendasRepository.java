@@ -60,6 +60,7 @@ public class AnaliseVendasRepository {
                                     ON i2.id_nfe = n2.id
 
                                 WHERE n2.tipo = 'Venda'
+                                AND n2.situacao <> 'CANCELADA'
 
                                 AND i2.cfop IN (
                                     '5101',
@@ -131,6 +132,7 @@ public class AnaliseVendasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.tipo = 'Venda'
+            AND n.situacao <> 'CANCELADA'
 
             AND i.cfop IN (
                 '5101',

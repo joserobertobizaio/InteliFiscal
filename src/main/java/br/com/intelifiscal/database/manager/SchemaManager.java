@@ -7,6 +7,7 @@ import br.com.intelifiscal.database.schema.TblNFeSchema;
 import br.com.intelifiscal.database.schema.TblProdutoSchema;
 import br.com.intelifiscal.database.schema.TblNFeItemSchema;
 import br.com.intelifiscal.database.schema.TblNFeDuplicataSchema;
+import br.com.intelifiscal.database.schema.TblNFeEventoSchema;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,8 @@ public final class SchemaManager {
         schemas.add(TblNFeSchema.getSchema());
 
         schemas.add(TblNFeDuplicataSchema.getSchema());
+
+        schemas.add(TblNFeEventoSchema.getSchema());
 
         schemas.add(TblNFeItemSchema.getSchema());
 

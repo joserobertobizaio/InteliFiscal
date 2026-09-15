@@ -61,6 +61,7 @@ public class AnaliseComprasRepository {
                                     ON i2.id_nfe = n2.id
 
                                 WHERE n2.cnpj_emitente <> e2.cnpj
+                                AND n2.situacao <> 'CANCELADA'
             """);
 
 
@@ -119,6 +120,7 @@ public class AnaliseComprasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.cnpj_emitente <> e.cnpj
+            AND n.situacao <> 'CANCELADA'
             """);
 
 

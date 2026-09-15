@@ -49,7 +49,13 @@ public final class TblNFeSchema {
                 valor_total NUMERIC NOT NULL,
 
                 situacao TEXT NOT NULL,
-
+            
+                data_cancelamento TEXT,
+            
+                protocolo_cancelamento TEXT,
+            
+                motivo_cancelamento TEXT,
+            
                 data_importacao TEXT NOT NULL
 
             );

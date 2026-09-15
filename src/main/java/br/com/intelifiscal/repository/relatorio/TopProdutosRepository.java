@@ -37,6 +37,7 @@ public class TopProdutosRepository {
         ON n.id = i.id_nfe
 
     WHERE n.tipo = 'Venda'
+    AND n.situacao <> 'CANCELADA'
 
       AND i.cfop IN (
           '5101',

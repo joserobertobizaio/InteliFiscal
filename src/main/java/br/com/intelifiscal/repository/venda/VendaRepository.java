@@ -54,6 +54,7 @@ public class VendaRepository {
             ON iv.id_nfe = n.id
 
         WHERE n.tipo = 'Venda'
+        AND n.situacao <> 'CANCELADA'
 
         ORDER BY
             n.data_emissao DESC,
@@ -263,6 +264,7 @@ public class VendaRepository {
             ON i.id_nfe = n.id
 
         WHERE n.tipo = 'Venda'
+        AND n.situacao <> 'CANCELADA'
           AND date(n.data_emissao) >= date('now', '-12 months')
 
         GROUP BY

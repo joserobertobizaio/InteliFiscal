@@ -27,7 +27,7 @@ public final class DatabaseInfo {
      * manteremos {@code false}.
      * </p>
      */
-    public static final boolean USAR_DIRETORIO_USUARIO = true;
+    public static final boolean USAR_DIRETORIO_USUARIO = false;
 
     /**
      * Nome da pasta utilizada pelo banco no ambiente

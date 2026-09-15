@@ -63,6 +63,7 @@ public class ResumoComprasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.cnpj_emitente <> e.cnpj
+            AND n.situacao <> 'CANCELADA'
             """);
 
 
@@ -184,6 +185,7 @@ public class ResumoComprasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.cnpj_emitente <> e.cnpj
+            AND n.situacao <> 'CANCELADA'
             """);
 
 

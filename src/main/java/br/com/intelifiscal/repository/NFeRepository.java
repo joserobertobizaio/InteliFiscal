@@ -228,6 +228,78 @@ public class NFeRepository {
     }
 
     // ============================================================
+// REGISTRAR CANCELAMENTO DA NF-e
+// ============================================================
+
+    public void registrarCancelamento(
+            String chave,
+            String dataCancelamento,
+            String protocoloCancelamento,
+            String motivoCancelamento) {
+
+        String sql = """
+        UPDATE tblNFe
+        SET
+            situacao = ?,
+            data_cancelamento = ?,
+            protocolo_cancelamento = ?,
+            motivo_cancelamento = ?
+        WHERE chave = ?
+        """;
+
+        try (
+                Connection connection =
+                        DatabaseConnection.getConnection();
+
+                PreparedStatement ps =
+                        connection.prepareStatement(sql)
+        ) {
+
+            ps.setString(
+                    1,
+                    "CANCELADA"
+            );
+
+            ps.setString(
+                    2,
+                    dataCancelamento
+            );
+
+            ps.setString(
+                    3,
+                    protocoloCancelamento
+            );
+
+            ps.setString(
+                    4,
+                    motivoCancelamento
+            );
+
+            ps.setString(
+                    5,
+                    chave
+            );
+
+            int atualizadas =
+                    ps.executeUpdate();
+
+            if (atualizadas == 0) {
+
+                throw new RuntimeException(
+                        "NF-e não encontrada para registrar o cancelamento."
+                );
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Erro ao registrar cancelamento da NF-e.",
+                    e
+            );
+        }
+    }
+
+    // ============================================================
     // BUSCAR NF-e PARA GERAÇÃO DO PDF
     // ============================================================
 

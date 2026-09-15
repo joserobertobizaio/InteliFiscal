@@ -40,6 +40,7 @@ public final class DatabaseVersionManager {
         // CRIA AS TABELAS E ÍNDICES DOS SCHEMAS
         // ========================================================
 
+
         List<SchemaDefinition> schemas =
                 SchemaManager.getSchemas();
 
@@ -62,8 +63,11 @@ public final class DatabaseVersionManager {
         executarMigracaoVersao2(
                 connection
         );
-    }
 
+        executarMigracaoVersao3(
+                connection
+        );
+    }
 
     // ============================================================
     // MIGRAÇÃO VERSÃO 2
@@ -138,6 +142,129 @@ public final class DatabaseVersionManager {
         );
     }
 
+    // ============================================================
+    // MIGRAÇÃO VERSÃO 3
+    // ============================================================
+    //
+    // Acrescenta:
+    //
+    // data_cancelamento
+    // protocolo_cancelamento
+    // motivo_cancelamento
+    //
+    // Estas informações registram o estado de cancelamento da NF-e.
+    //
+    // A migração verifica primeiro se as colunas já existem.
+    // Portanto pode ser executada várias vezes com segurança.
+    // ============================================================
+
+    private static void executarMigracaoVersao3(
+            Connection connection)
+            throws SQLException {
+
+        // --------------------------------------------------------
+        // CAMPOS DE CANCELAMENTO DA NF-e
+        // --------------------------------------------------------
+
+        if (!colunaExiste(
+                connection,
+                "tblNFe",
+                "data_cancelamento"
+        )) {
+
+            try (PreparedStatement ps =
+                         connection.prepareStatement(
+                                 """
+                                 ALTER TABLE tblNFe
+                                 ADD COLUMN data_cancelamento TEXT
+                                 """
+                         )) {
+
+                ps.executeUpdate();
+            }
+        }
+
+
+        if (!colunaExiste(
+                connection,
+                "tblNFe",
+                "protocolo_cancelamento"
+        )) {
+
+            try (PreparedStatement ps =
+                         connection.prepareStatement(
+                                 """
+                                 ALTER TABLE tblNFe
+                                 ADD COLUMN protocolo_cancelamento TEXT
+                                 """
+                         )) {
+
+                ps.executeUpdate();
+            }
+        }
+
+
+        if (!colunaExiste(
+                connection,
+                "tblNFe",
+                "motivo_cancelamento"
+        )) {
+
+            try (PreparedStatement ps =
+                         connection.prepareStatement(
+                                 """
+                                 ALTER TABLE tblNFe
+                                 ADD COLUMN motivo_cancelamento TEXT
+                                 """
+                         )) {
+
+                ps.executeUpdate();
+            }
+        }
+
+
+        // --------------------------------------------------------
+        // TABELA DE EVENTOS
+        // --------------------------------------------------------
+        //
+        // A versão atual utiliza:
+        //
+        // id_nfe     → pode ser NULL
+        // chave_nfe  → identifica a NF-e
+        //
+        // Isso permite receber um evento antes da NF-e.
+        // --------------------------------------------------------
+
+        if (!colunaExiste(
+                connection,
+                "tblNFeEvento",
+                "chave_nfe"
+        )) {
+
+            try (
+                    PreparedStatement ps =
+                            connection.prepareStatement(
+                                    """
+                                    ALTER TABLE tblNFeEvento
+                                    ADD COLUMN chave_nfe TEXT
+                                    """
+                            )
+            ) {
+
+                ps.executeUpdate();
+            }
+        }
+
+
+        // --------------------------------------------------------
+        // REGISTRA VERSÃO 3
+        // --------------------------------------------------------
+
+        registrarVersao(
+                connection,
+                3
+        );
+    }
 
     // ============================================================
     // VERIFICA SE UMA COLUNA EXISTE

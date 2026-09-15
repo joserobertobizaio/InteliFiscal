@@ -1262,23 +1262,46 @@ public class PdfRelatorioService {
             String mes
     ) {
 
-        if (mes == null) {
+        if (mes == null || mes.isBlank()) {
             return "";
         }
 
-        if (mes.length() == 7) {
+        // Formato: yyyy-MM
+        if (mes.matches("\\d{4}-\\d{2}")) {
 
             String ano =
-                    mes.substring(
-                            0,
-                            4
-                    );
+                    mes.substring(0, 4);
 
             String numeroMes =
-                    mes.substring(
-                            5,
-                            7
-                    );
+                    mes.substring(5, 7);
+
+            return numeroMes
+                    + "/"
+                    + ano;
+        }
+
+        // Formato: yyyy-MM-dd
+        if (mes.matches("\\d{4}-\\d{2}-\\d{2}")) {
+
+            String ano =
+                    mes.substring(0, 4);
+
+            String numeroMes =
+                    mes.substring(5, 7);
+
+            return numeroMes
+                    + "/"
+                    + ano;
+        }
+
+        // Formato: dd/MM/yyyy
+        if (mes.matches("\\d{2}/\\d{2}/\\d{4}")) {
+
+            String numeroMes =
+                    mes.substring(3, 5);
+
+            String ano =
+                    mes.substring(6, 10);
 
             return numeroMes
                     + "/"

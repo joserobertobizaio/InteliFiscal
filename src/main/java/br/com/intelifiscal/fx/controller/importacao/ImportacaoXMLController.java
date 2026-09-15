@@ -27,6 +27,9 @@ import br.com.intelifiscal.fx.navigation.NavigationManager;
 import br.com.intelifiscal.fx.navigation.ScreenType;
 import javafx.scene.control.Alert;
 
+import br.com.intelifiscal.model.NFeEvento;
+import br.com.intelifiscal.service.NFeEventoService;
+
 import br.com.intelifiscal.entity.NFe;
 import br.com.intelifiscal.service.NFeService;
 
@@ -40,7 +43,8 @@ public class ImportacaoXMLController {
 
     private final ImportacaoXMLView view;
 
-    private final XmlNFeReader reader = new XmlNFeReader();
+    private final XmlNFeReader reader =
+            new XmlNFeReader();
 
     private final XmlNFeItemReader itemReader =
             new XmlNFeItemReader();
@@ -50,6 +54,9 @@ public class ImportacaoXMLController {
 
     private final NFeService nfeService =
             new NFeService();
+
+    private final NFeEventoService nfeEventoService =
+            new NFeEventoService();
 
     private final NFeItemService nfeItemService =
             new NFeItemService();
@@ -91,7 +98,6 @@ public class ImportacaoXMLController {
                 .setOnAction(e -> selecionarPasta());
     }
 
-
     private void atualizarEstadoBotoes() {
 
         boolean existemXmls = !xmls.isEmpty();
@@ -119,11 +125,14 @@ public class ImportacaoXMLController {
 
         if (minhaEmpresaService.buscarTodas().isEmpty()) {
 
-            Alert alert = new Alert(Alert.AlertType.WARNING);
+            Alert alert =
+                    new Alert(Alert.AlertType.WARNING);
 
             alert.setTitle("Importação XML");
 
-            alert.setHeaderText("Nenhum estabelecimento cadastrado.");
+            alert.setHeaderText(
+                    "Nenhum estabelecimento cadastrado."
+            );
 
             alert.setContentText(
                     "Acesse -> Estabelecimento, e cadastre pelo menos um estabelecimento antes de importar XMLs."
@@ -134,10 +143,12 @@ public class ImportacaoXMLController {
             return;
         }
 
+        FileChooser chooser =
+                new FileChooser();
 
-        FileChooser chooser = new FileChooser();
-
-        chooser.setTitle("Selecionar Arquivos XML");
+        chooser.setTitle(
+                "Selecionar Arquivos XML"
+        );
 
         chooser.getExtensionFilters().add(
 
@@ -145,10 +156,10 @@ public class ImportacaoXMLController {
                         "Arquivos XML",
                         "*.xml"
                 )
-
         );
 
-        Window window = view.getScene().getWindow();
+        Window window =
+                view.getScene().getWindow();
 
         List<File> arquivos =
                 chooser.showOpenMultipleDialog(window);
@@ -172,47 +183,68 @@ public class ImportacaoXMLController {
 
             try {
 
-                XmlNFeDTO dto = reader.ler(arquivo);
+                XmlNFeDTO dto =
+                        reader.ler(arquivo);
 
                 xmls.add(dto);
 
-                var item = new br.com.intelifiscal.fx.view.importacao.model.ImportacaoXmlItem();
+                var item =
+                        new br.com.intelifiscal.fx.view.importacao.model.ImportacaoXmlItem();
 
-                item.arquivoProperty().set(dto.getArquivo());
+                item.arquivoProperty().set(
+                        dto.getArquivo()
+                );
 
-                item.numeroNotaProperty().set(dto.getNumero());
+                item.numeroNotaProperty().set(
+                        dto.getNumero()
+                );
 
-                item.serieProperty().set(dto.getSerie());
+                item.serieProperty().set(
+                        dto.getSerie()
+                );
 
-                item.emitenteProperty().set(dto.getRazaoSocialEmitente());
+                item.emitenteProperty().set(
+                        dto.getRazaoSocialEmitente()
+                );
 
-                item.destinatarioProperty().set(dto.getRazaoSocialDestinatario());
+                item.destinatarioProperty().set(
+                        dto.getRazaoSocialDestinatario()
+                );
 
                 item.emissaoProperty().set(
-                        XmlUtil.formatarData(dto.getDataEmissao())
+                        XmlUtil.formatarData(
+                                dto.getDataEmissao()
+                        )
                 );
 
                 item.valorProperty().set(
-                        XmlUtil.formatarValor(dto.getValorTotal())
+                        XmlUtil.formatarValor(
+                                dto.getValorTotal()
+                        )
                 );
 
                 String tipo;
 
-                if (minhaEmpresaService.ehMinhaEmpresa(dto.getCnpjEmitente())) {
+                if (minhaEmpresaService.ehMinhaEmpresa(
+                        dto.getCnpjEmitente()
+                )) {
 
                     tipo = "Venda";
 
                 } else {
 
                     tipo = "Compra";
-
                 }
 
                 item.tipoProperty().set(tipo);
 
-                item.situacaoProperty().set("Lido");
+                item.situacaoProperty().set(
+                        "Lido"
+                );
 
-                view.getTabela().getItems().add(item);
+                view.getTabela()
+                        .getItems()
+                        .add(item);
 
             } catch (Exception ex) {
 
@@ -230,9 +262,7 @@ public class ImportacaoXMLController {
                 );
 
                 ex.printStackTrace();
-
             }
-
         }
 
         view.getTxtLog().appendText(
@@ -243,19 +273,26 @@ public class ImportacaoXMLController {
 
         atualizarEstadoBotoes();
 
-        System.out.println("Itens na tabela: " + view.getTabela().getItems().size());
-
+        System.out.println(
+                "Itens na tabela: "
+                        + view.getTabela()
+                        .getItems()
+                        .size()
+        );
     }
 
     private void selecionarPasta() {
 
         if (minhaEmpresaService.buscarTodas().isEmpty()) {
 
-            Alert alert = new Alert(Alert.AlertType.WARNING);
+            Alert alert =
+                    new Alert(Alert.AlertType.WARNING);
 
             alert.setTitle("Importação XML");
 
-            alert.setHeaderText("Nenhum estabelecimento cadastrado.");
+            alert.setHeaderText(
+                    "Nenhum estabelecimento cadastrado."
+            );
 
             alert.setContentText(
                     "Acesse -> Estabelecimento, e cadastre o estabelecimento " +
@@ -267,26 +304,40 @@ public class ImportacaoXMLController {
             return;
         }
 
-        DirectoryChooser chooser = new DirectoryChooser();
+        DirectoryChooser chooser =
+                new DirectoryChooser();
 
-        chooser.setTitle("Selecionar Pasta com XMLs");
+        chooser.setTitle(
+                "Selecionar Pasta com XMLs"
+        );
 
-        Window window = view.getScene().getWindow();
+        Window window =
+                view.getScene().getWindow();
 
-        File pasta = chooser.showDialog(window);
+        File pasta =
+                chooser.showDialog(window);
 
         if (pasta == null) {
             return;
         }
 
-        File[] arquivos = pasta.listFiles((dir, nome) ->
-                nome.toLowerCase().endsWith(".xml"));
+        File[] arquivos =
+                pasta.listFiles(
+                        (dir, nome) ->
+                                nome.toLowerCase()
+                                        .endsWith(".xml")
+                );
 
         if (arquivos == null || arquivos.length == 0) {
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            Alert alert =
+                    new Alert(
+                            Alert.AlertType.INFORMATION
+                    );
 
-            alert.setTitle("Selecionar Pasta");
+            alert.setTitle(
+                    "Selecionar Pasta"
+            );
 
             alert.setHeaderText(null);
 
@@ -299,7 +350,10 @@ public class ImportacaoXMLController {
             return;
         }
 
-        Arrays.sort(arquivos, Comparator.comparing(File::getName));
+        Arrays.sort(
+                arquivos,
+                Comparator.comparing(File::getName)
+        );
 
         view.getTabela().getItems().clear();
 
@@ -313,39 +367,62 @@ public class ImportacaoXMLController {
 
             try {
 
-                XmlNFeDTO dto = reader.ler(arquivo);
+                XmlNFeDTO dto =
+                        reader.ler(arquivo);
 
                 xmls.add(dto);
 
-                var item = new br.com.intelifiscal.fx.view.importacao.model.ImportacaoXmlItem();
+                var item =
+                        new br.com.intelifiscal.fx.view.importacao.model.ImportacaoXmlItem();
 
-                item.arquivoProperty().set(dto.getArquivo());
+                item.arquivoProperty().set(
+                        dto.getArquivo()
+                );
 
-                item.numeroNotaProperty().set(dto.getNumero());
+                item.numeroNotaProperty().set(
+                        dto.getNumero()
+                );
 
-                item.serieProperty().set(dto.getSerie());
+                item.serieProperty().set(
+                        dto.getSerie()
+                );
 
-                item.emitenteProperty().set(dto.getRazaoSocialEmitente());
+                item.emitenteProperty().set(
+                        dto.getRazaoSocialEmitente()
+                );
 
-                item.destinatarioProperty().set(dto.getRazaoSocialDestinatario());
+                item.destinatarioProperty().set(
+                        dto.getRazaoSocialDestinatario()
+                );
 
                 item.emissaoProperty().set(
-                        XmlUtil.formatarData(dto.getDataEmissao())
+                        XmlUtil.formatarData(
+                                dto.getDataEmissao()
+                        )
                 );
 
                 item.valorProperty().set(
-                        XmlUtil.formatarValor(dto.getValorTotal())
+                        XmlUtil.formatarValor(
+                                dto.getValorTotal()
+                        )
                 );
 
-                String tipo = minhaEmpresaService.ehMinhaEmpresa(dto.getCnpjEmitente())
-                        ? "Venda"
-                        : "Compra";
+                String tipo =
+                        minhaEmpresaService.ehMinhaEmpresa(
+                                dto.getCnpjEmitente()
+                        )
+                                ? "Venda"
+                                : "Compra";
 
                 item.tipoProperty().set(tipo);
 
-                item.situacaoProperty().set("Lido");
+                item.situacaoProperty().set(
+                        "Lido"
+                );
 
-                view.getTabela().getItems().add(item);
+                view.getTabela()
+                        .getItems()
+                        .add(item);
 
             } catch (Exception ex) {
 
@@ -373,14 +450,22 @@ public class ImportacaoXMLController {
 
         atualizarEstadoBotoes();
 
-        System.out.println("Itens na tabela: " + view.getTabela().getItems().size());
+        System.out.println(
+                "Itens na tabela: "
+                        + view.getTabela()
+                        .getItems()
+                        .size()
+        );
     }
 
     private void remover() {
 
         if (xmls.isEmpty()) {
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            Alert alert =
+                    new Alert(
+                            Alert.AlertType.INFORMATION
+                    );
 
             alert.setTitle("Remover");
 
@@ -393,25 +478,27 @@ public class ImportacaoXMLController {
             alert.showAndWait();
 
             return;
-
         }
 
-        view.getTabela().getItems().clear();
+        view.getTabela()
+                .getItems()
+                .clear();
 
         xmls.clear();
 
-        view.getTxtLog().clear();
+        view.getTxtLog()
+                .clear();
 
         resetarProgressBar();
 
-        view.getResumo().limpar();
+        view.getResumo()
+                .limpar();
 
         view.getTxtLog().appendText(
                 "Lista de arquivos removida.\n"
         );
 
         atualizarEstadoBotoes();
-
     }
 
     private void importar() {
@@ -445,7 +532,8 @@ public class ImportacaoXMLController {
                 .getBtRemover()
                 .setDisable(true);
 
-        view.getProgressBar().setProgress(0);
+        view.getProgressBar()
+                .setProgress(0);
 
         view.getTxtLog().appendText(
                 "Iniciando importação...\n\n"
@@ -455,488 +543,737 @@ public class ImportacaoXMLController {
         // CONTADORES
         // ==================================================
 
-        final int total = xmls.size();
+        final int total =
+                xmls.size();
 
-        final int[] importadas = {0};
+        final int[] importadas =
+                {0};
 
-        final int[] ignoradas = {0};
+        final int[] ignoradas =
+                {0};
 
         // ==================================================
         // TASK DE IMPORTAÇÃO
         // ==================================================
 
-        Task<Void> task = new Task<>() {
+        Task<Void> task =
+                new Task<>() {
 
-            @Override
-            protected Void call() {
+                    @Override
+                    protected Void call() {
 
-                int processadas = 0;
+                        int processadas =
+                                0;
 
-                for (XmlNFeDTO dto : xmls) {
+                        for (XmlNFeDTO dto : xmls) {
 
-                    try {
+                            try {
 
-                        // ==============================
-                        // VALIDAÇÃO DO XML
-                        // ==============================
+                                // ==============================
+                                // VALIDAÇÃO DO XML
+                                // ==============================
 
-                        if (dto == null) {
+                                if (dto == null) {
 
-                            ignoradas[0]++;
+                                    ignoradas[0]++;
 
-                            updateMessage(
-                                    "XML ignorado: objeto nulo.\n"
-                            );
+                                    updateMessage(
+                                            "XML ignorado: objeto nulo.\n"
+                                    );
 
-                            continue;
-                        }
+                                    continue;
+                                }
 
-                        if (dto.getChave() == null
-                                || dto.getChave().isBlank()) {
+                                if (dto.getChave() == null
+                                        || dto.getChave().isBlank()) {
 
-                            ignoradas[0]++;
+                                    ignoradas[0]++;
 
-                            updateMessage(
-                                    "XML ignorado: chave inexistente.\n"
-                            );
+                                    updateMessage(
+                                            "XML ignorado: chave inexistente.\n"
+                                    );
 
-                            continue;
-                        }
+                                    continue;
+                                }
 
-                        if (dto.getNumero() == null) {
+                                // ==========================================================
+                                // EVENTO DA NF-e
+                                // ==========================================================
 
-                            ignoradas[0]++;
+                                if (dto.getTipoEvento() != null
+                                        && !dto.getTipoEvento().isBlank()) {
 
-                            updateMessage(
-                                    "XML ignorado: número inexistente.\n"
-                            );
+                                    NFeEvento evento =
+                                            new NFeEvento();
 
-                            continue;
-                        }
-
-                        // ==============================
-                        // NF JÁ EXISTE
-                        // ==============================
-
-                        if (nfeService.existe(dto.getChave())) {
-
-                            Long idNFeExistente =
-                                    nfeService.buscarIdPorChave(
+                                    evento.setChaveNfe(
                                             dto.getChave()
                                     );
 
-                            if (idNFeExistente == null) {
+                                    evento.setTipoEvento(
+                                            dto.getTipoEvento()
+                                    );
 
-                                ignoradas[0]++;
+                                    evento.setSequencia(
+                                            dto.getSequenciaEvento()
+                                    );
 
-                                updateMessage(
-                                        "NF "
-                                                + dto.getNumero()
-                                                + " já existe, mas o ID não foi localizado.\n"
-                                );
+                                    evento.setDataEvento(
+                                            dto.getDataEvento()
+                                    );
 
-                                continue;
-                            }
+                                    evento.setProtocolo(
+                                            dto.getProtocoloEvento()
+                                    );
 
-                            int duplicatasInseridas = 0;
+                                    evento.setMotivo(
+                                            dto.getMotivoEvento()
+                                    );
 
-                            // ==============================
-                            // VERIFICA DUPLICATAS DO XML
-                            // ==============================
+                                    evento.setStatus(
+                                            dto.getStatusEvento()
+                                    );
 
-                            if (dto.getDuplicatas() != null) {
+                                    evento.setDescricao(
+                                            dto.getDescricaoEvento()
+                                    );
 
-                                for (var dtoDuplicata : dto.getDuplicatas()) {
+                                    evento.setDataRegistro(
+                                            LocalDateTime.now()
+                                                    .toString()
+                                    );
 
-                                    String numeroDuplicata =
-                                            dtoDuplicata.getNumeroDuplicata();
+                                    // ------------------------------------------------------
+                                    // VERIFICA SE A NF-e JÁ EXISTE
+                                    // ------------------------------------------------------
 
-                                    if (nfeDuplicataRepository.existe(
-                                            idNFeExistente,
-                                            numeroDuplicata
-                                    )) {
+                                    Long idNFeEvento =
+                                            nfeService.buscarIdPorChave(
+                                                    dto.getChave()
+                                            );
+
+                                    if (idNFeEvento != null) {
+
+                                        evento.setIdNfe(
+                                                idNFeEvento
+                                        );
+                                    }
+
+                                    // ------------------------------------------------------
+                                    // SALVA O EVENTO
+                                    // ------------------------------------------------------
+
+                                    Integer idEvento =
+                                            nfeEventoService.salvar(
+                                                    evento
+                                            );
+
+                                    // ------------------------------------------------------
+                                    // EVENTO JÁ EXISTIA
+                                    // ------------------------------------------------------
+
+                                    if (idEvento == null) {
+
+                                        ignoradas[0]++;
+
+                                        updateMessage(
+                                                "Evento "
+                                                        + dto.getTipoEvento()
+                                                        + " já registrado para a NF-e "
+                                                        + dto.getChave()
+                                                        + ".\n"
+                                        );
 
                                         continue;
                                     }
 
-                                    NFeDuplicata duplicata =
-                                            new NFeDuplicata();
+                                    // ------------------------------------------------------
+                                    // CANCELAMENTO
+                                    // ------------------------------------------------------
 
-                                    duplicata.setIdNfe(
-                                            idNFeExistente
-                                    );
+                                    if ("110111".equals(
+                                            dto.getTipoEvento()
+                                    )) {
 
-                                    duplicata.setNumeroDuplicata(
-                                            numeroDuplicata
-                                    );
+                                        if (idNFeEvento != null) {
 
-                                    duplicata.setDataVencimento(
-                                            dtoDuplicata.getDataVencimento()
-                                    );
+                                            nfeService.registrarCancelamento(
+                                                    dto.getChave(),
+                                                    dto.getDataEvento(),
+                                                    dto.getProtocoloEvento(),
+                                                    dto.getMotivoEvento()
+                                            );
 
-                                    duplicata.setValor(
-                                            dtoDuplicata.getValor()
-                                    );
+                                            updateMessage(
+                                                    "Cancelamento registrado para a NF-e "
+                                                            + dto.getChave()
+                                                            + ".\n"
+                                            );
 
-                                    nfeDuplicataRepository.salvar(
-                                            duplicata
-                                    );
+                                        } else {
 
-                                    duplicatasInseridas++;
+                                            updateMessage(
+                                                    "Cancelamento registrado como evento pendente "
+                                                            + "para a NF-e "
+                                                            + dto.getChave()
+                                                            + ".\n"
+                                            );
+                                        }
+
+                                    } else {
+
+                                        updateMessage(
+                                                "Evento "
+                                                        + dto.getTipoEvento()
+                                                        + " registrado para a NF-e "
+                                                        + dto.getChave()
+                                                        + ".\n"
+                                        );
+                                    }
+
+                                    ignoradas[0]++;
+
+                                    continue;
                                 }
-                            }
 
-                            // ==============================
-                            // LOG
-                            // ==============================
+                                // ==========================================================
+                                // VALIDAÇÃO NORMAL DA NF-e
+                                // ==========================================================
 
-                            if (duplicatasInseridas > 0) {
+                                if (dto.getNumero() == null) {
 
-                                updateMessage(
-                                        "NF "
-                                                + dto.getNumero()
-                                                + " já existia. "
-                                                + duplicatasInseridas
-                                                + " duplicata(s) adicionada(s).\n"
-                                );
+                                    ignoradas[0]++;
 
-                            } else {
+                                    updateMessage(
+                                            "XML ignorado: número inexistente.\n"
+                                    );
 
-                                updateMessage(
-                                        "NF "
-                                                + dto.getNumero()
-                                                + " já existe. "
-                                                + "Nenhuma nova duplicata encontrada.\n"
-                                );
-                            }
+                                    continue;
+                                }
 
-                            ignoradas[0]++;
+                                // ==============================
+                                // NF JÁ EXISTE
+                                // ==============================
 
-                            continue;
-                        }
-
-                        // ==============================
-                        // MONTA A NFE
-                        // ==============================
-
-                        NFe nfe = new NFe();
-
-                        nfe.setChave(dto.getChave());
-
-                        nfe.setNumero(dto.getNumero());
-
-                        nfe.setSerie(dto.getSerie());
-
-                        nfe.setModelo("55");
-
-                        nfe.setDataEmissao(
-                                dto.getDataEmissao()
-                        );
-
-                        nfe.setCnpjEmitente(
-                                dto.getCnpjEmitente()
-                        );
-
-                        nfe.setEmitente(
-                                dto.getRazaoSocialEmitente()
-                        );
-
-                        nfe.setMunicipioEmitente(
-                                dto.getMunicipioEmitente()
-                        );
-
-                        nfe.setUfEmitente(
-                                dto.getUfEmitente()
-                        );
-
-                        nfe.setCnpjDestinatario(
-                                dto.getCnpjDestinatario()
-                        );
-
-                        nfe.setDestinatario(
-                                dto.getRazaoSocialDestinatario()
-                        );
-
-                        nfe.setMunicipioDestinatario(
-                                dto.getMunicipioDestinatario()
-                        );
-
-                        nfe.setUfDestinatario(
-                                dto.getUfDestinatario()
-                        );
-
-                        nfe.setValorTotal(
-                                dto.getValorTotal()
-                        );
-
-                        // ==============================
-                        // COMPRA OU VENDA
-                        // ==============================
-
-                        if (minhaEmpresaService
-                                .ehMinhaEmpresa(
-                                        dto.getCnpjEmitente()
+                                if (nfeService.existe(
+                                        dto.getChave()
                                 )) {
 
-                            nfe.setTipo("Venda");
+                                    Long idNFeExistente =
+                                            nfeService.buscarIdPorChave(
+                                                    dto.getChave()
+                                            );
 
-                        } else {
+                                    if (idNFeExistente == null) {
 
-                            nfe.setTipo("Compra");
-                        }
+                                        ignoradas[0]++;
 
-                        nfe.setSituacao("Importado");
+                                        updateMessage(
+                                                "NF "
+                                                        + dto.getNumero()
+                                                        + " já existe, mas o ID não foi localizado.\n"
+                                        );
 
-                        nfe.setDataImportacao(
-                                LocalDateTime.now()
-                        );
+                                        continue;
+                                    }
 
-                        // ==============================
-                        // SALVA A NFE
-                        // ==============================
+                                    int duplicatasInseridas =
+                                            0;
 
-                        System.out.println(
-                                "-----------------------------------"
-                        );
+                                    // ==============================
+                                    // VERIFICA DUPLICATAS DO XML
+                                    // ==============================
 
-                        System.out.println(
-                                "Arquivo : "
-                                        + dto.getArquivo()
-                        );
+                                    if (dto.getDuplicatas() != null) {
 
-                        System.out.println(
-                                "Chave   : "
-                                        + dto.getChave()
-                        );
+                                        for (var dtoDuplicata :
+                                                dto.getDuplicatas()) {
 
-                        System.out.println(
-                                "Número  : "
-                                        + dto.getNumero()
-                        );
+                                            String numeroDuplicata =
+                                                    dtoDuplicata
+                                                            .getNumeroDuplicata();
 
-                        Integer idNFe =
-                                nfeService.salvar(nfe);
+                                            if (nfeDuplicataRepository.existe(
+                                                    idNFeExistente,
+                                                    numeroDuplicata
+                                            )) {
 
-                        // ==============================
-                        // SALVA AS DUPLICATAS DA NF-e
-                        // ==============================
+                                                continue;
+                                            }
 
-                        if (dto.getDuplicatas() != null) {
+                                            NFeDuplicata duplicata =
+                                                    new NFeDuplicata();
 
-                            for (var dtoDuplicata : dto.getDuplicatas()) {
+                                            duplicata.setIdNfe(
+                                                    idNFeExistente
+                                            );
 
-                                NFeDuplicata duplicata =
-                                        new NFeDuplicata();
+                                            duplicata.setNumeroDuplicata(
+                                                    numeroDuplicata
+                                            );
 
-                                duplicata.setIdNfe(
-                                        idNFe.longValue()
+                                            duplicata.setDataVencimento(
+                                                    dtoDuplicata
+                                                            .getDataVencimento()
+                                            );
+
+                                            duplicata.setValor(
+                                                    dtoDuplicata
+                                                            .getValor()
+                                            );
+
+                                            nfeDuplicataRepository.salvar(
+                                                    duplicata
+                                            );
+
+                                            duplicatasInseridas++;
+                                        }
+                                    }
+
+                                    // ==============================
+                                    // LOG
+                                    // ==============================
+
+                                    if (duplicatasInseridas > 0) {
+
+                                        updateMessage(
+                                                "NF "
+                                                        + dto.getNumero()
+                                                        + " já existia. "
+                                                        + duplicatasInseridas
+                                                        + " duplicata(s) adicionada(s).\n"
+                                        );
+
+                                    } else {
+
+                                        updateMessage(
+                                                "NF "
+                                                        + dto.getNumero()
+                                                        + " já existe. "
+                                                        + "Nenhuma nova duplicata encontrada.\n"
+                                        );
+                                    }
+
+                                    ignoradas[0]++;
+
+                                    continue;
+                                }
+
+                                // ==============================
+                                // MONTA A NFE
+                                // ==============================
+
+                                NFe nfe =
+                                        new NFe();
+
+                                nfe.setChave(
+                                        dto.getChave()
                                 );
 
-                                duplicata.setNumeroDuplicata(
-                                        dtoDuplicata.getNumeroDuplicata()
+                                nfe.setNumero(
+                                        dto.getNumero()
                                 );
 
-                                duplicata.setDataVencimento(
-                                        dtoDuplicata.getDataVencimento()
+                                nfe.setSerie(
+                                        dto.getSerie()
                                 );
 
-                                duplicata.setValor(
-                                        dtoDuplicata.getValor()
+                                nfe.setModelo(
+                                        "55"
                                 );
 
-                                nfeDuplicataRepository.salvar(
-                                        duplicata
-                                );
-                            }
-                        }
-
-                        // ==============================
-                        // LÊ OS ITENS DO XML
-                        // ==============================
-
-                        List<NFeItemDTO> itens =
-                                itemReader.ler(
-                                        dto.getArquivoXml()
+                                nfe.setDataEmissao(
+                                        dto.getDataEmissao()
                                 );
 
-                        // ==============================
-                        // SALVA OS ITENS E PRODUTOS
-                        // ==============================
+                                nfe.setCnpjEmitente(
+                                        dto.getCnpjEmitente()
+                                );
 
-                        for (NFeItemDTO item : itens) {
+                                nfe.setEmitente(
+                                        dto.getRazaoSocialEmitente()
+                                );
 
-                            item.setIdNfe(idNFe);
+                                nfe.setMunicipioEmitente(
+                                        dto.getMunicipioEmitente()
+                                );
 
-                            item.setDataImportacao(
-                                    LocalDateTime.now()
-                            );
+                                nfe.setUfEmitente(
+                                        dto.getUfEmitente()
+                                );
 
-                            // --------------------------
-                            // Salva item da NF-e
-                            // --------------------------
+                                nfe.setCnpjDestinatario(
+                                        dto.getCnpjDestinatario()
+                                );
 
-                            nfeItemService.salvar(item);
+                                nfe.setDestinatario(
+                                        dto.getRazaoSocialDestinatario()
+                                );
 
-                            // --------------------------
-                            // Cadastro do produto
-                            // --------------------------
+                                nfe.setMunicipioDestinatario(
+                                        dto.getMunicipioDestinatario()
+                                );
 
-                            ProdutoDTO produto =
-                                    new ProdutoDTO();
+                                nfe.setUfDestinatario(
+                                        dto.getUfDestinatario()
+                                );
 
-                            produto.setCodigoProduto(
-                                    item.getCodigoProduto()
-                            );
+                                nfe.setValorTotal(
+                                        dto.getValorTotal()
+                                );
 
-                            produto.setCodigoBarras(
-                                    item.getCodigoBarras()
-                            );
+                                // ==============================
+                                // COMPRA OU VENDA
+                                // ==============================
 
-                            produto.setDescricao(
-                                    item.getDescricao()
-                            );
+                                if (minhaEmpresaService
+                                        .ehMinhaEmpresa(
+                                                dto.getCnpjEmitente()
+                                        )) {
 
-                            produto.setNcm(
-                                    item.getNcm()
-                            );
-
-                            produto.setCest(
-                                    item.getCest()
-                            );
-
-                            produto.setUnidade(
-                                    item.getUnidade()
-                            );
-
-                            produto.setDataCadastro(
-                                    LocalDateTime.now()
-                            );
-
-                            produto.setAtivo(true);
-
-                            produtoService
-                                    .salvarSeNaoExistir(
-                                            produto
+                                    nfe.setTipo(
+                                            "Venda"
                                     );
+
+                                } else {
+
+                                    nfe.setTipo(
+                                            "Compra"
+                                    );
+                                }
+
+                                nfe.setSituacao(
+                                        "Importado"
+                                );
+
+                                nfe.setDataImportacao(
+                                        LocalDateTime.now()
+                                );
+
+                                // ==============================
+                                // SALVA A NFE
+                                // ==============================
+
+                                System.out.println(
+                                        "-----------------------------------"
+                                );
+
+                                System.out.println(
+                                        "Arquivo : "
+                                                + dto.getArquivo()
+                                );
+
+                                System.out.println(
+                                        "Chave   : "
+                                                + dto.getChave()
+                                );
+
+                                System.out.println(
+                                        "Número  : "
+                                                + dto.getNumero()
+                                );
+
+                                Integer idNFe =
+                                        nfeService.salvar(
+                                                nfe
+                                        );
+
+                                // ==========================================================
+                                // VINCULA EVENTOS PENDENTES
+                                // ==========================================================
+                                //
+                                // Caso um evento tenha sido importado antes da NF-e,
+                                // ele estará gravado com id_nfe = NULL.
+                                //
+                                // Agora que a NF-e foi criada, vinculamos os eventos
+                                // pendentes à NF-e.
+                                //
+                                // Se o evento for cancelamento (110111), também
+                                // atualizamos a situação e os dados de cancelamento
+                                // da NF-e.
+                                //
+                                // ==========================================================
+
+                                List<NFeEvento> eventosPendentes =
+                                        nfeEventoService
+                                                .buscarEventosPendentes(
+                                                        dto.getChave()
+                                                );
+
+                                for (NFeEvento eventoPendente :
+                                        eventosPendentes) {
+
+                                    nfeEventoService.vincularEvento(
+                                            eventoPendente.getId(),
+                                            idNFe.longValue()
+                                    );
+
+                                    // --------------------------------------------------
+                                    // CANCELAMENTO PENDENTE
+                                    // --------------------------------------------------
+
+                                    if ("110111".equals(
+                                            eventoPendente.getTipoEvento()
+                                    )) {
+
+                                        nfeService.registrarCancelamento(
+                                                dto.getChave(),
+                                                eventoPendente.getDataEvento(),
+                                                eventoPendente.getProtocolo(),
+                                                eventoPendente.getMotivo()
+                                        );
+
+                                        updateMessage(
+                                                "Evento de cancelamento pendente vinculado à NF-e "
+                                                        + dto.getNumero()
+                                                        + ". NF-e marcada como CANCELADA.\n"
+                                        );
+
+                                    } else {
+
+                                        updateMessage(
+                                                "Evento "
+                                                        + eventoPendente.getTipoEvento()
+                                                        + " pendente vinculado à NF-e "
+                                                        + dto.getNumero()
+                                                        + ".\n"
+                                        );
+                                    }
+                                }
+
+                                // ==============================
+                                // SALVA AS DUPLICATAS DA NF-e
+                                // ==============================
+
+                                if (dto.getDuplicatas() != null) {
+
+                                    for (var dtoDuplicata :
+                                            dto.getDuplicatas()) {
+
+                                        NFeDuplicata duplicata =
+                                                new NFeDuplicata();
+
+                                        duplicata.setIdNfe(
+                                                idNFe.longValue()
+                                        );
+
+                                        duplicata.setNumeroDuplicata(
+                                                dtoDuplicata
+                                                        .getNumeroDuplicata()
+                                        );
+
+                                        duplicata.setDataVencimento(
+                                                dtoDuplicata
+                                                        .getDataVencimento()
+                                        );
+
+                                        duplicata.setValor(
+                                                dtoDuplicata
+                                                        .getValor()
+                                        );
+
+                                        nfeDuplicataRepository.salvar(
+                                                duplicata
+                                        );
+                                    }
+                                }
+
+                                // ==============================
+                                // LÊ OS ITENS DO XML
+                                // ==============================
+
+                                List<NFeItemDTO> itens =
+                                        itemReader.ler(
+                                                dto.getArquivoXml()
+                                        );
+
+                                // ==============================
+                                // SALVA OS ITENS E PRODUTOS
+                                // ==============================
+
+                                for (NFeItemDTO item :
+                                        itens) {
+
+                                    item.setIdNfe(
+                                            idNFe
+                                    );
+
+                                    item.setDataImportacao(
+                                            LocalDateTime.now()
+                                    );
+
+                                    // --------------------------
+                                    // Salva item da NF-e
+                                    // --------------------------
+
+                                    nfeItemService.salvar(
+                                            item
+                                    );
+
+                                    // --------------------------
+                                    // Cadastro do produto
+                                    // --------------------------
+
+                                    ProdutoDTO produto =
+                                            new ProdutoDTO();
+
+                                    produto.setCodigoProduto(
+                                            item.getCodigoProduto()
+                                    );
+
+                                    produto.setCodigoBarras(
+                                            item.getCodigoBarras()
+                                    );
+
+                                    produto.setDescricao(
+                                            item.getDescricao()
+                                    );
+
+                                    produto.setNcm(
+                                            item.getNcm()
+                                    );
+
+                                    produto.setCest(
+                                            item.getCest()
+                                    );
+
+                                    produto.setUnidade(
+                                            item.getUnidade()
+                                    );
+
+                                    produto.setDataCadastro(
+                                            LocalDateTime.now()
+                                    );
+
+                                    produto.setAtivo(
+                                            true
+                                    );
+
+                                    produtoService
+                                            .salvarSeNaoExistir(
+                                                    produto
+                                            );
+                                }
+
+                                // ==============================
+                                // LOG DO CONSOLE
+                                // ==============================
+
+                                System.out.println();
+
+                                System.out.println(
+                                        "===================================="
+                                );
+
+                                System.out.println(
+                                        "NF "
+                                                + dto.getNumero()
+                                );
+
+                                System.out.println(
+                                        "Quantidade de itens: "
+                                                + itens.size()
+                                );
+
+                                for (NFeItemDTO item :
+                                        itens) {
+
+                                    System.out.println(
+                                            "------------------------------------"
+                                    );
+
+                                    System.out.println(
+                                            "Item.............: "
+                                                    + item.getNumeroItem()
+                                    );
+
+                                    System.out.println(
+                                            "Código...........: "
+                                                    + item.getCodigoProduto()
+                                    );
+
+                                    System.out.println(
+                                            "Descrição........: "
+                                                    + item.getDescricao()
+                                    );
+
+                                    System.out.println(
+                                            "NCM..............: "
+                                                    + item.getNcm()
+                                    );
+
+                                    System.out.println(
+                                            "CFOP.............: "
+                                                    + item.getCfop()
+                                    );
+
+                                    System.out.println(
+                                            "Unidade..........: "
+                                                    + item.getUnidade()
+                                    );
+                                }
+
+                                System.out.println(
+                                        "===================================="
+                                );
+
+                                System.out.println();
+
+                                // ==============================
+                                // IMPORTAÇÃO CONCLUÍDA
+                                // ==============================
+
+                                importadas[0]++;
+
+                                updateMessage(
+                                        "NF "
+                                                + dto.getNumero()
+                                                + " importada.\n"
+                                );
+
+                            } catch (Exception ex) {
+
+                                ignoradas[0]++;
+
+                                String arquivo =
+                                        dto != null
+                                                ? dto.getArquivo()
+                                                : "(XML desconhecido)";
+
+                                updateMessage(
+                                        "Erro ao importar XML: "
+                                                + arquivo
+                                                + "\n"
+                                                + ex.getMessage()
+                                                + "\n"
+                                );
+
+                                ex.printStackTrace();
+                            }
+
+                            // ==============================
+                            // ATUALIZA PROGRESSO
+                            // ==============================
+
+                            processadas++;
+
+                            updateProgress(
+                                    processadas,
+                                    total
+                            );
+
+                            updateMessage(
+                                    "Processando XML "
+                                            + processadas
+                                            + " de "
+                                            + total
+                                            + "...\n"
+                            );
                         }
 
-                        // ==============================
-                        // LOG DO CONSOLE
-                        // ==============================
-
-                        System.out.println();
-
-                        System.out.println(
-                                "===================================="
-                        );
-
-                        System.out.println(
-                                "NF " + dto.getNumero()
-                        );
-
-                        System.out.println(
-                                "Quantidade de itens: "
-                                        + itens.size()
-                        );
-
-                        for (NFeItemDTO item : itens) {
-
-                            System.out.println(
-                                    "------------------------------------"
-                            );
-
-                            System.out.println(
-                                    "Item.............: "
-                                            + item.getNumeroItem()
-                            );
-
-                            System.out.println(
-                                    "Código...........: "
-                                            + item.getCodigoProduto()
-                            );
-
-                            System.out.println(
-                                    "Descrição........: "
-                                            + item.getDescricao()
-                            );
-
-                            System.out.println(
-                                    "NCM..............: "
-                                            + item.getNcm()
-                            );
-
-                            System.out.println(
-                                    "CFOP.............: "
-                                            + item.getCfop()
-                            );
-
-                            System.out.println(
-                                    "Unidade..........: "
-                                            + item.getUnidade()
-                            );
-                        }
-
-                        System.out.println(
-                                "===================================="
-                        );
-
-                        System.out.println();
-
-                        // ==============================
-                        // IMPORTAÇÃO CONCLUÍDA
-                        // ==============================
-
-                        importadas[0]++;
-
-                        updateMessage(
-                                "NF "
-                                        + dto.getNumero()
-                                        + " importada.\n"
-                        );
-
-                    } catch (Exception ex) {
-
-                        ignoradas[0]++;
-
-                        String arquivo =
-                                dto != null
-                                        ? dto.getArquivo()
-                                        : "(XML desconhecido)";
-
-                        updateMessage(
-                                "Erro ao importar XML: "
-                                        + arquivo
-                                        + "\n"
-                                        + ex.getMessage()
-                                        + "\n"
-                        );
-
-                        ex.printStackTrace();
+                        return null;
                     }
-
-                    // ==============================
-                    // ATUALIZA PROGRESSO
-                    // ==============================
-
-                    processadas++;
-
-                    updateProgress(
-                            processadas,
-                            total
-                    );
-
-                    updateMessage(
-                            "Processando XML "
-                                    + processadas
-                                    + " de "
-                                    + total
-                                    + "...\n"
-                    );
-                }
-
-                return null;
-            }
-        };
+                };
 
         // ==================================================
         // LIGA A BARRA DE PROGRESSO À TASK
@@ -948,7 +1285,9 @@ public class ImportacaoXMLController {
 
         view.getProgressBar()
                 .progressProperty()
-                .bind(task.progressProperty());
+                .bind(
+                        task.progressProperty()
+                );
 
         // ==================================================
         // ATUALIZA O LOG NA THREAD DO JAVAFX
@@ -957,7 +1296,8 @@ public class ImportacaoXMLController {
         task.messageProperty().addListener(
                 (obs, antigo, novo) -> {
 
-                    if (novo != null && !novo.isEmpty()) {
+                    if (novo != null
+                            && !novo.isEmpty()) {
 
                         view.getTxtLog().appendText(
                                 novo
@@ -1018,13 +1358,19 @@ public class ImportacaoXMLController {
             // ==================================================
 
             ButtonType btFechar =
-                    new ButtonType("Fechar");
+                    new ButtonType(
+                            "Fechar"
+                    );
 
             ButtonType btNovoLote =
-                    new ButtonType("Novo Lote");
+                    new ButtonType(
+                            "Novo Lote"
+                    );
 
             ButtonType btDashboard =
-                    new ButtonType("Dashboard");
+                    new ButtonType(
+                            "Dashboard"
+                    );
 
             Alert alert =
                     new Alert(
@@ -1082,6 +1428,7 @@ public class ImportacaoXMLController {
                     resetarProgressBar();
 
                     // Estado inicial da tela
+
                     view.getButtonBar()
                             .getBtImportar()
                             .setDisable(true);
@@ -1141,7 +1488,9 @@ public class ImportacaoXMLController {
                             + "\n"
             );
 
-            erro.printStackTrace();
+            if (erro != null) {
+                erro.printStackTrace();
+            }
         });
 
         // ==================================================
@@ -1155,5 +1504,4 @@ public class ImportacaoXMLController {
 
         thread.start();
     }
-
 }

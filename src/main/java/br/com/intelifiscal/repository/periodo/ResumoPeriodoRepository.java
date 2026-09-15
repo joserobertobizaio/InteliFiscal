@@ -54,6 +54,7 @@ public class ResumoPeriodoRepository {
             WHERE
                 n.data_emissao >= p.data_inicial
                 AND n.data_emissao <= p.data_final
+                AND n.situacao <> 'CANCELADA'
         ),
 
         itens_por_nota AS (
@@ -252,6 +253,7 @@ public class ResumoPeriodoRepository {
             WHERE
                 n.data_emissao >= p.data_inicial
                 AND n.data_emissao <= p.data_final
+                AND n.situacao <> 'CANCELADA'
         )
 
         SELECT

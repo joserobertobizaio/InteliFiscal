@@ -25,4 +25,18 @@ public class NFeService {
         return repository.buscarIdPorChave(chave);
     }
 
+    public void registrarCancelamento(
+            String chave,
+            String dataCancelamento,
+            String protocoloCancelamento,
+            String motivoCancelamento) {
+
+        repository.registrarCancelamento(
+                chave,
+                dataCancelamento,
+                protocoloCancelamento,
+                motivoCancelamento
+        );
+    }
+
 }

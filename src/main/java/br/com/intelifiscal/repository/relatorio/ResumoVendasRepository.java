@@ -67,6 +67,7 @@ public class ResumoVendasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.cnpj_emitente = e.cnpj
+            AND n.situacao <> 'CANCELADA'
 
               AND i.cfop IN (
                   '5101',
@@ -224,6 +225,7 @@ public class ResumoVendasRepository {
             ON i.id_nfe = n.id
 
         WHERE n.cnpj_emitente = e.cnpj
+        AND n.situacao <> 'CANCELADA'
 
           AND i.cfop IN (
               '5101',
@@ -400,6 +402,7 @@ public class ResumoVendasRepository {
             ON i.id_nfe = n.id
 
         WHERE n.cnpj_emitente = e.cnpj
+        AND n.situacao <> 'CANCELADA'
 
           AND i.cfop IN (
               '5101',
@@ -612,6 +615,7 @@ public class ResumoVendasRepository {
                 ON i.id_nfe = n.id
 
             WHERE n.cnpj_emitente = e.cnpj
+            AND n.situacao <> 'CANCELADA'
 
               AND n.cnpj_destinatario = ?
 
