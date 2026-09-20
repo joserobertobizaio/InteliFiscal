@@ -11,6 +11,8 @@ public enum IconType {
 
     IMPORTACAO_XML,
 
+    NFE,
+
     COMPRAS,
 
     VENDAS,

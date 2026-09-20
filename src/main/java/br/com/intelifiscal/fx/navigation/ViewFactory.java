@@ -23,7 +23,8 @@ import br.com.intelifiscal.fx.view.relatorio.DetalhamentoCompraView;
 import br.com.intelifiscal.fx.controller.relatorio.DetalhamentoCompraController;
 import br.com.intelifiscal.fx.view.produto.CompararCompraVendaView;
 import br.com.intelifiscal.fx.controller.produto.CompararCompraVendaController;
-
+import br.com.intelifiscal.fx.view.nfe.GerenciarNfeView;
+import br.com.intelifiscal.fx.controller.nfe.GerenciarNfeController;
 import br.com.intelifiscal.fx.view.relatorio.ResumoComprasView;
 import br.com.intelifiscal.fx.controller.relatorio.ResumoComprasController;
 
@@ -85,6 +86,16 @@ public final class ViewFactory {
 
                 yield view;
 
+            }
+
+            case GERENCIAR_NFE -> {
+
+                GerenciarNfeView view =
+                        new GerenciarNfeView();
+
+                new GerenciarNfeController(view);
+
+                yield view;
             }
 
             case PRODUTOS -> {

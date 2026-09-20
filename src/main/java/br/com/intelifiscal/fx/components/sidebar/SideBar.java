@@ -47,31 +47,41 @@ public class SideBar extends VBox {
 
     private void createMenu() {
 
-        getChildren().add(createItem(ScreenType.DASHBOARD, "Dashboard"));
+        getChildren().add(createItem(
+                ScreenType.DASHBOARD, "Dashboard"));
 
-        getChildren().add(createItem(ScreenType.ESTABELECIMENTO, "Estabelecimento"));
+        getChildren().add(createItem(
+                ScreenType.ESTABELECIMENTO, "Estabelecimento"));
 
-        getChildren().add(createItem(ScreenType.IMPORTACAO_XML, "Importação XML"));
+        getChildren().add(createItem(
+                ScreenType.IMPORTACAO_XML, "Importação XML"));
 
-        getChildren().add(createItem(ScreenType.COMPRAS, "Compras"));
+        getChildren().add(createItem(
+                ScreenType.GERENCIAR_NFE, "Gerenciar NF-e"));
 
-        getChildren().add(createItem(ScreenType.VENDAS, "Vendas"));
+        getChildren().add(createItem(
+                ScreenType.COMPRAS, "Compras"));
+
+        getChildren().add(createItem(
+                ScreenType.VENDAS, "Vendas"));
 
         getChildren().add(createItem(
                 ScreenType.COMPARAR_COMPRA_VENDA,
                 "Comparar/Vincular \nCompra × Venda"
         ));
 
+        getChildren().add(createItem(
+                ScreenType.PRODUTOS, "Produtos"));
 
-        getChildren().add(createItem(ScreenType.PRODUTOS, "Produtos"));
-
-        getChildren().add(createItem(ScreenType.RELATORIOS, "Relatórios Gerenciais"));
+        getChildren().add(createItem(
+                ScreenType.RELATORIOS, "Relatórios Gerenciais"));
 
         //getChildren().add(createItem(ScreenType.CONFIGURACOES, "Configurações"));
         // este menu será implementado na próxima versão
     }
 
-    private SidebarItem createItem(ScreenType screenType, String text) {
+    private SidebarItem createItem(
+            ScreenType screenType, String text) {
 
         IconType iconType = switch (screenType) {
 
@@ -80,6 +90,8 @@ public class SideBar extends VBox {
             case ESTABELECIMENTO -> IconType.ESTABELECIMENTO;
 
             case IMPORTACAO_XML -> IconType.IMPORTACAO_XML;
+
+            case GERENCIAR_NFE -> IconType.NFE;
 
             case COMPRAS -> IconType.COMPRAS;
 
@@ -114,6 +126,7 @@ public class SideBar extends VBox {
     }
 
     public void setOnScreenSelected(Consumer<ScreenType> onScreenSelected) {
+
         this.onScreenSelected = onScreenSelected;
     }
 

@@ -28,6 +28,8 @@ public class AppIcon extends FontIcon {
 
             case IMPORTACAO_XML -> FontAwesomeSolid.FILE_IMPORT;
 
+            case NFE -> FontAwesomeSolid.FILE_INVOICE;
+
             case COMPRAS -> FontAwesomeSolid.SHOPPING_CART;
 
             case VENDAS -> FontAwesomeSolid.MONEY_BILL;

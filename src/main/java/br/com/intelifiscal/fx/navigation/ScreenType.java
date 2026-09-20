@@ -11,6 +11,8 @@ public enum ScreenType {
 
     IMPORTACAO_XML,
 
+    GERENCIAR_NFE,
+
     COMPRAS,
 
     VENDAS,

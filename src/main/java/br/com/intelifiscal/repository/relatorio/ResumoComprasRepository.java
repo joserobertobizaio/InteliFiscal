@@ -46,26 +46,50 @@ public class ResumoComprasRepository {
                 ) AS valor_total,
 
                 COALESCE(
-                        ROUND(
-                            COALESCE(SUM(i.valor_total), 0)
-                            /
-                            NULLIF(COUNT(DISTINCT n.id), 0),
-                            2
-                        ),
-                        0
-                    ) AS ticket_medio
+                    ROUND(
+                        COALESCE(SUM(i.valor_total), 0)
+                        /
+                        NULLIF(COUNT(DISTINCT n.id), 0),
+                        2
+                    ),
+                    0
+                ) AS ticket_medio
 
             FROM tblNFe n
-
-            CROSS JOIN tblMinhaEmpresa e
 
             LEFT JOIN tblNFeItem i
                 ON i.id_nfe = n.id
 
-            WHERE n.cnpj_emitente <> e.cnpj
-            AND n.situacao <> 'CANCELADA'
-            """);
+            WHERE n.tipo = 'Compra'
+              AND n.situacao <> 'CANCELADA'
 
+              AND EXISTS (
+                  SELECT 1
+                  FROM tblNFeItem ix
+                  WHERE ix.id_nfe = n.id
+              )
+
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM tblNFeItem ix
+                  WHERE ix.id_nfe = n.id
+                    AND (
+                        ix.cfop IS NULL
+                        OR ix.cfop NOT IN (
+                            '5101',
+                            '5102',
+                            '5401',
+                            '5405',
+                            '6101',
+                            '6102',
+                            '6107',
+                            '6108',
+                            '6401',
+                            '6404'
+                        )
+                    )
+              )
+            """);
 
         if (dataInicio != null && dataFim != null) {
 
@@ -156,84 +180,161 @@ public class ResumoComprasRepository {
     ) {
 
         StringBuilder sql = new StringBuilder("""
+        WITH notas_filtradas AS (
+
             SELECT
-                n.cnpj_emitente AS cnpj,
+                n.id,
+                n.cnpj_emitente,
+                n.emitente,
+                n.data_emissao,
+                n.valor_total
 
-                MAX(n.emitente) AS fornecedor,
+            FROM tblNFe n
 
-                COUNT(DISTINCT n.id) AS notas,
+            CROSS JOIN tblMinhaEmpresa e
+
+            WHERE n.cnpj_emitente <> e.cnpj
+              AND n.tipo = 'Compra'
+              AND n.situacao <> 'CANCELADA'
+
+              AND EXISTS (
+                  SELECT 1
+                  FROM tblNFeItem ix
+                  WHERE ix.id_nfe = n.id
+              )
+
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM tblNFeItem ix
+                  WHERE ix.id_nfe = n.id
+                    AND (
+                        ix.cfop IS NULL
+                        OR ix.cfop NOT IN (
+                            '5101',
+                            '5102',
+                            '5401',
+                            '5405',
+                            '6101',
+                            '6102',
+                            '6107',
+                            '6108',
+                            '6401',
+                            '6404'
+                        )
+                    )
+              )
+        """);
+
+        //==================================================
+        // FILTRO DE DATA
+        //==================================================
+
+        if (dataInicio != null && dataFim != null) {
+
+            sql.append("""
+            
+              AND date(n.data_emissao)
+                  BETWEEN date(?) AND date(?)
+            """);
+        }
+
+        sql.append("""
+        ),
+
+        itens_por_nota AS (
+
+            SELECT
+                i.id_nfe,
 
                 COUNT(i.id) AS itens,
 
                 ROUND(
                     COALESCE(SUM(i.quantidade), 0),
                     3
-                ) AS quantidade,
+                ) AS quantidade
 
-                ROUND(
-                    COALESCE(SUM(i.valor_total), 0),
-                    2
-                ) AS valor_total,
+            FROM tblNFeItem i
 
-                MAX(n.data_emissao) AS data_ultima_compra
+            INNER JOIN notas_filtradas nf
+                ON nf.id = i.id_nfe
 
-            FROM tblNFe n
+            GROUP BY
+                i.id_nfe
+        )
 
-            CROSS JOIN tblMinhaEmpresa e
+        SELECT
 
-            LEFT JOIN tblNFeItem i
-                ON i.id_nfe = n.id
+            nf.cnpj_emitente AS cnpj,
 
-            WHERE n.cnpj_emitente <> e.cnpj
-            AND n.situacao <> 'CANCELADA'
-            """);
+            MAX(nf.emitente) AS fornecedor,
 
+            COUNT(nf.id) AS notas,
 
-        if (dataInicio != null && dataFim != null) {
+            COALESCE(
+                SUM(ipn.itens),
+                0
+            ) AS itens,
 
-            sql.append("""
-                
-                AND date(n.data_emissao)
-                    BETWEEN date(?) AND date(?)
-                """);
-        }
+            ROUND(
+                COALESCE(
+                    SUM(ipn.quantidade),
+                    0
+                ),
+                3
+            ) AS quantidade,
 
+            ROUND(
+                COALESCE(
+                    SUM(nf.valor_total),
+                    0
+                ),
+                2
+            ) AS valor_total,
 
-        sql.append("""
+            MAX(nf.data_emissao) AS data_ultima_compra
 
-            GROUP BY n.cnpj_emitente
+        FROM notas_filtradas nf
 
-            ORDER BY valor_total DESC
-            """);
+        LEFT JOIN itens_por_nota ipn
+            ON ipn.id_nfe = nf.id
 
+        GROUP BY
+            nf.cnpj_emitente
+
+        ORDER BY
+            valor_total DESC
+        """);
 
         List<FornecedorCompraDTO> lista =
                 new ArrayList<>();
-
 
         try (
                 Connection conn =
                         DatabaseConnection.getConnection();
 
                 PreparedStatement ps =
-                        conn.prepareStatement(sql.toString())
+                        conn.prepareStatement(
+                                sql.toString()
+                        )
         ) {
+
+            int parametro = 1;
 
             if (dataInicio != null && dataFim != null) {
 
                 ps.setString(
-                        1,
+                        parametro++,
                         dataInicio.toString()
                 );
 
                 ps.setString(
-                        2,
+                        parametro++,
                         dataFim.toString()
                 );
             }
 
-
-            try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs =
+                         ps.executeQuery()) {
 
                 while (rs.next()) {
 
@@ -280,7 +381,7 @@ public class ResumoComprasRepository {
             );
         }
 
-
         return lista;
     }
+
 }
